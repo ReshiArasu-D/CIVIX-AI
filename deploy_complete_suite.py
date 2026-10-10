@@ -1871,6 +1871,33 @@ TRACK_CSS = BASE_SHELL_CSS + """
   text-align: center;
   position: relative;
 }
+
+/* Connecting track line between stepper stages */
+.civix-stepper-stage-col::after {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  width: calc(100% + 12px);
+  height: 4px;
+  background: #E2E8F0;
+  z-index: 1;
+}
+
+.civix-stepper-stage-col:last-child::after {
+  display: none !important;
+}
+
+.civix-stepper-stage-col.completed::after {
+  background: #16A34A;
+}
+
+@media (max-width: 900px) {
+  .civix-stepper-stage-col::after {
+    display: none;
+  }
+}
+
 .civix-stepper-circle-node {
   width: 38px;
   height: 38px;
@@ -1881,6 +1908,7 @@ TRACK_CSS = BASE_SHELL_CSS + """
   font-weight: 800;
   font-size: 13px;
   margin-bottom: 10px;
+  position: relative;
   z-index: 2;
   transition: all 0.2s;
 }
@@ -1896,9 +1924,9 @@ TRACK_CSS = BASE_SHELL_CSS + """
   animation: pulse-active-step 1.8s infinite;
 }
 .civix-stepper-stage-col.upcoming .civix-stepper-circle-node {
-  background: #F1F5F9;
+  background: #FFFFFF;
   color: #94A3B8;
-  border: 1px solid #CBD5E1;
+  border: 2px solid #CBD5E1;
 }
 
 @keyframes pulse-active-step {
