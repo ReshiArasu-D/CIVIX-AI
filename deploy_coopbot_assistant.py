@@ -711,7 +711,8 @@ if __name__ == "__main__":
         "civix_report_issue_widget",
         "civix_my_cases_widget",
         "civix_landing_widget",
-        "civix_portal_select_widget"
+        "civix_portal_select_widget",
+        "civix_profile_widget"
     ]
 
     for w in widgets:
