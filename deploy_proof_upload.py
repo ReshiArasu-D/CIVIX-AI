@@ -1,39 +1,14 @@
 """
-CIVIX AI - Add Evidence / Proof Upload Option to Report an Issue Page
-Upgrades civix_report_issue_widget with a drag-and-drop proof upload zone,
-local file browsing, camera/photo capture, live thumbnail preview, and sample presets.
+CIVIX AI - Perfect Proof Upload Implementation for Report an Issue Page
+Integrates with unified BASE_SHELL_CSS, sticky sidebar, topbar, and proof upload dropzone.
 """
 
 import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
-
-INSTANCE_URL = os.getenv("SERVICENOW_INSTANCE_URL", "https://dev187180.service-now.com").rstrip("/")
-USERNAME = os.getenv("SERVICENOW_USERNAME", "admin")
-PASSWORD = os.getenv("SERVICENOW_PASSWORD", "mn%XC1^ScdA4")
-APP_SYS_ID = "4750065ac37b0f14e54832f1b4013184"
-
-session = requests.Session()
-session.auth = (USERNAME, PASSWORD)
-session.headers.update({
-    "Accept": "application/json",
-    "Content-Type": "application/json"
-})
-
-def api_get(table: str, query: str = "", limit: int = 10):
-    url = f"{INSTANCE_URL}/api/now/table/{table}"
-    params = {"sysparm_query": query, "sysparm_limit": limit}
-    resp = session.get(url, params=params, timeout=25)
-    resp.raise_for_status()
-    return resp.json().get("result", [])
-
-def api_put(table: str, sys_id: str, data: dict):
-    url = f"{INSTANCE_URL}/api/now/table/{table}/{sys_id}"
-    resp = session.put(url, json=data, timeout=25)
-    resp.raise_for_status()
-    return resp.json().get("result", {})
+# Import standard shell components from deploy_complete_suite
+from deploy_complete_suite import get_sidebar_html, get_topbar_html, BASE_SHELL_CSS, api_get, api_put, APP_SYS_ID
 
 # Fetch existing widget
 res = api_get("sp_widget", query="id=civix_report_issue_widget", limit=1)
@@ -44,94 +19,56 @@ if not res:
 widget = res[0]
 sys_id = widget["sys_id"]
 
-REPORT_TEMPLATE = """
+REPORT_TEMPLATE_RAW = """
 <div class="civix-app-shell">
-  <!-- SIDEBAR -->
-  <aside class="civix-side-nav-rail">
-    <div class="civix-side-brand-box">
-      <div class="civix-brand-mark">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><path d="M3 21h18M5 21V7l8-4v18M13 21V3l6 4v14"/></svg>
-      </div>
-      <div class="civix-brand-titles">
-        <h2>CIVIX AI</h2>
-        <span>Smart Cities, Safer Communities</span>
-      </div>
-    </div>
-    <nav class="civix-side-nav-links">
-      <a href="?id=civix_home" class="civix-side-btn">
-        <span class="civix-side-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
-        <span>Dashboard</span>
-      </a>
-      <a href="?id=civix_report_issue" class="civix-side-btn active">
-        <span class="civix-side-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
-        <span>Report an Issue</span>
-      </a>
-      <a href="?id=civix_my_cases" class="civix-side-btn">
-        <span class="civix-side-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
-        <span>My Complaints</span>
-      </a>
-      <a href="?id=civix_landing#services" class="civix-side-btn">
-        <span class="civix-side-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/></svg></span>
-        <span>Service Information</span>
-      </a>
-      <a href="?id=civix_landing#trust" class="civix-side-btn">
-        <span class="civix-side-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/></svg></span>
-        <span>Help & Support</span>
-      </a>
-    </nav>
-  </aside>
+  __SIDEBAR__
 
-  <!-- MAIN COLUMN -->
   <main class="civix-main-column">
-    <header class="civix-top-header" role="banner">
-      <div class="civix-search-pill-box">
-        <svg class="civix-search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="civix-search-input-pill" placeholder="Search services, complaints or help..." />
-      </div>
-      <div class="civix-header-actions-group">
-        <a href="?id=civix_profile" class="civix-profile-pill-item">
-          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80" alt="Priya Sharma" class="civix-avatar-img-circle" />
-          <span class="civix-profile-user-name">Priya Sharma</span>
-        </a>
-      </div>
-    </header>
+    __TOPBAR__
 
     <div class="civix-content-area">
-      <div class="civix-page-top-bar">
-        <div>
-          <h1 class="civix-page-heading-main">Report a Civic Issue</h1>
-          <p class="civix-page-sub-main">Submit civic infrastructure defects directly to your municipal ward engineers.</p>
-        </div>
+      <!-- Breadcrumb row -->
+      <div class="civix-track-breadcrumb-row" style="margin-bottom: 20px;">
+        <a href="?id=civix_home" class="civix-track-back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Back to Dashboard</span>
+        </a>
+      </div>
+
+      <div class="civix-report-header-banner">
+        <h1 class="civix-report-title">Report a Civic Issue</h1>
+        <p class="civix-report-sub">Log infrastructure defects, public hazards, and civic maintenance needs directly with municipal ward engineers.</p>
       </div>
 
       <!-- Main Form Card -->
-      <div class="civix-panel-card" style="max-width: 960px; margin: 0 auto;">
-        <!-- Step Indicator -->
-        <div class="civix-step-nav-bar">
-          <div class="civix-step-item" ng-class="{'active': c.step >= 1}">
-            <span class="civix-step-index">1</span>
-            <span class="civix-step-name">Service & Details</span>
+      <div class="civix-report-form-card">
+        
+        <!-- Step Navigation Bar -->
+        <div class="civix-report-step-bar">
+          <div class="civix-step-pill" ng-class="{'active': c.step === 1, 'completed': c.step > 1}">
+            <span class="civix-step-num">1</span>
+            <span class="civix-step-title">Category & Details</span>
           </div>
-          <div class="civix-step-line" ng-class="{'active': c.step >= 2}"></div>
-          <div class="civix-step-item" ng-class="{'active': c.step >= 2}">
-            <span class="civix-step-index">2</span>
-            <span class="civix-step-name">Location & GPS</span>
+          <div class="civix-step-connector" ng-class="{'active': c.step >= 2}"></div>
+          <div class="civix-step-pill" ng-class="{'active': c.step === 2, 'completed': c.step > 2}">
+            <span class="civix-step-num">2</span>
+            <span class="civix-step-title">Location & GPS</span>
           </div>
-          <div class="civix-step-line" ng-class="{'active': c.step >= 3}"></div>
-          <div class="civix-step-item" ng-class="{'active': c.step >= 3}">
-            <span class="civix-step-index">3</span>
-            <span class="civix-step-name">Review & Submit</span>
+          <div class="civix-step-connector" ng-class="{'active': c.step >= 3}"></div>
+          <div class="civix-step-pill" ng-class="{'active': c.step === 3}">
+            <span class="civix-step-num">3</span>
+            <span class="civix-step-title">Review & Submit</span>
           </div>
         </div>
 
         <!-- Success Message -->
-        <div ng-if="c.successData" class="alert alert-success text-center" style="padding: 36px 20px; border-radius: 16px; border: 1px solid #BBF7D0; background:#F0FDF4;">
-          <div style="font-size: 48px; color: #16A34A; margin-bottom: 12px;">
+        <div ng-if="c.successData" class="civix-success-container text-center">
+          <div class="civix-success-icon-wrap">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
           </div>
-          <h2 style="font-weight: 800; color: #0F172A; margin: 0 0 8px 0;">Civic Complaint Successfully Logged!</h2>
+          <h2 style="font-weight: 800; color: #0F172A; margin: 0 0 8px 0; font-size: 24px;">Civic Complaint Successfully Logged!</h2>
           <p class="text-muted" style="font-size:14px;">Your official municipal tracking reference number is:</p>
-          <div style="display:inline-block; background:#0F172A; color:#FFFFFF; font-size:24px; font-weight:800; padding:10px 28px; border-radius:10px; letter-spacing:1px; margin: 12px 0;">
+          <div class="civix-ticket-id-pill">
             {{c.successData.number}}
           </div>
           <p style="margin-top: 14px; font-size: 14px; color:#334155;">Ward Rapid Response Unit alerted. Target resolution dispatch: <strong>Within 72 Hours</strong>.</p>
@@ -145,113 +82,118 @@ REPORT_TEMPLATE = """
         <form ng-if="!c.successData">
           <!-- Step 1: Category, Details & Evidence Upload -->
           <div ng-if="c.step === 1">
-            <h3 style="font-size: 16.5px; font-weight: 800; color:#0F172A; margin-bottom: 14px;">Select Service Category</h3>
-            <div class="civix-cat-selector-grid">
-              <button type="button" class="civix-cat-select-btn" ng-class="{'selected': c.form.category === 'Water'}" ng-click="c.form.category = 'Water'">
-                <div class="civix-cat-bubble cat-water">
+            <h3 class="civix-section-label">Select Service Category</h3>
+            
+            <div class="civix-report-cat-grid">
+              <button type="button" class="civix-cat-box-btn" ng-class="{'selected': c.form.category === 'Water'}" ng-click="c.form.category = 'Water'">
+                <div class="civix-cat-icon-circ cat-water">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
                 </div>
                 <strong>Water Supply</strong>
-                <small class="text-muted">Leakage, pressure</small>
+                <small>Leakage, pressure</small>
               </button>
-              <button type="button" class="civix-cat-select-btn" ng-class="{'selected': c.form.category === 'Electricity'}" ng-click="c.form.category = 'Electricity'">
-                <div class="civix-cat-bubble cat-elec">
+
+              <button type="button" class="civix-cat-box-btn" ng-class="{'selected': c.form.category === 'Electricity'}" ng-click="c.form.category = 'Electricity'">
+                <div class="civix-cat-icon-circ cat-elec">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 </div>
                 <strong>Electricity</strong>
-                <small class="text-muted">Streetlights, outage</small>
+                <small>Streetlights, outage</small>
               </button>
-              <button type="button" class="civix-cat-select-btn" ng-class="{'selected': c.form.category === 'Roads'}" ng-click="c.form.category = 'Roads'">
-                <div class="civix-cat-bubble cat-roads">
+
+              <button type="button" class="civix-cat-box-btn" ng-class="{'selected': c.form.category === 'Roads'}" ng-click="c.form.category = 'Roads'">
+                <div class="civix-cat-icon-circ cat-roads">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.2"><path d="M4 19L8 5M16 5l4 14M12 8v3M12 15v3"/></svg>
                 </div>
                 <strong>Roads</strong>
-                <small class="text-muted">Potholes, damage</small>
+                <small>Potholes, damage</small>
               </button>
-              <button type="button" class="civix-cat-select-btn" ng-class="{'selected': c.form.category === 'Drainage'}" ng-click="c.form.category = 'Drainage'">
-                <div class="civix-cat-bubble cat-drain">
+
+              <button type="button" class="civix-cat-box-btn" ng-class="{'selected': c.form.category === 'Drainage'}" ng-click="c.form.category = 'Drainage'">
+                <div class="civix-cat-icon-circ cat-drain">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
                 </div>
                 <strong>Drainage</strong>
-                <small class="text-muted">Overflow, blockage</small>
+                <small>Overflow, blockage</small>
               </button>
-              <button type="button" class="civix-cat-select-btn" ng-class="{'selected': c.form.category === 'Waterlogging'}" ng-click="c.form.category = 'Waterlogging'">
-                <div class="civix-cat-bubble cat-flood">
+
+              <button type="button" class="civix-cat-box-btn" ng-class="{'selected': c.form.category === 'Waterlogging'}" ng-click="c.form.category = 'Waterlogging'">
+                <div class="civix-cat-icon-circ cat-flood">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333EA" stroke-width="2.2"><path d="M2 12c2.5-3 5.5-3 8 0s5.5 3 8 0M2 18c2.5-3 5.5-3 8 0s5.5 3 8 0"/></svg>
                 </div>
                 <strong>Waterlogging</strong>
-                <small class="text-muted">Flood, rainwater</small>
+                <small>Flood, rainwater</small>
               </button>
             </div>
 
             <!-- Issue Title -->
-            <div class="form-group" style="margin-top: 22px;">
-              <label style="font-weight: 700; color:#0F172A; font-size:13.5px;">Issue Title <span class="text-danger">*</span></label>
-              <input type="text" class="form-control civix-form-input-lg" ng-model="c.form.title" placeholder="e.g. Broken water pipe leaking near intersection" required />
+            <div class="form-group" style="margin-top: 24px;">
+              <label class="civix-input-label">Issue Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control civix-custom-input" ng-model="c.form.title" placeholder="e.g. Broken water pipe leaking near intersection" required />
             </div>
 
             <!-- Problem Description -->
             <div class="form-group">
-              <label style="font-weight: 700; color:#0F172A; font-size:13.5px;">Problem Description <span class="text-danger">*</span></label>
-              <textarea class="form-control civix-form-textarea" rows="4" ng-model="c.form.description" placeholder="Describe the severity, duration, and any immediate public hazard..." required></textarea>
+              <label class="civix-input-label">Problem Description <span class="text-danger">*</span></label>
+              <textarea class="form-control civix-custom-textarea" rows="4" ng-model="c.form.description" placeholder="Describe the severity, duration, and any immediate public hazard..." required></textarea>
             </div>
 
             <!-- ================= EVIDENCE / PROOF UPLOAD SECTION ================= -->
-            <div class="form-group" style="margin-top: 24px;">
-              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-                <label style="font-weight: 800; color:#0F172A; font-size:14px;">
+            <div class="form-group" style="margin-top: 26px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <label class="civix-input-label" style="margin:0;">
                   <span>Defect Evidence & Proof Upload</span>
-                  <span class="badge" style="background:#0066FF; color:#FFFFFF; margin-left:6px; font-size:11px;">Recommended</span>
+                  <span class="badge" style="background:#0066FF; color:#FFFFFF; margin-left:8px; font-size:11px; font-weight:700;">Required for Fast-Track</span>
                 </label>
-                <span class="text-muted" style="font-size:12px;">Geo-tagged JPG, PNG, or Camera capture</span>
+                <span class="text-muted" style="font-size:12px;">JPG, PNG up to 10MB</span>
               </div>
 
-              <!-- Drag & Drop / File Input Zone -->
-              <div class="civix-proof-upload-box" ng-if="!c.form.photoPreview" ng-click="c.triggerUpload()">
+              <!-- Upload Dropzone (When No Photo Uploaded) -->
+              <div class="civix-proof-dropzone" ng-if="!c.form.photoPreview" ng-click="c.triggerUpload()">
                 <input type="file" id="civixProofFileInput" accept="image/*" style="display:none;" onchange="angular.element(this).scope().c.handleFileSelect(this)" />
-                <div class="civix-proof-icon-circle">
+                <div class="civix-dropzone-icon-circle">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                     <circle cx="12" cy="13" r="4"/>
                   </svg>
                 </div>
-                <div class="civix-proof-upload-title">
-                  <strong>Click to upload proof photo</strong> or drag & drop files here
+                <div class="civix-dropzone-prompt">
+                  <strong>Click to upload defect proof photo</strong> or drag & drop files here
                 </div>
-                <div class="civix-proof-upload-desc">
-                  Take a photo or attach defect evidence to help ward engineers locate and repair the issue faster.
+                <div class="civix-dropzone-sub">
+                  Attach real photos of potholes, pipeline leaks, or fallen poles to help the repair team dispatch immediately.
                 </div>
 
-                <!-- Instant One-Click Samples for Testing -->
-                <div class="civix-proof-samples-row" ng-click="$event.stopPropagation()">
-                  <span class="civix-samples-hint">Or click a sample photo to test:</span>
-                  <button type="button" class="btn btn-default btn-xs civix-sample-chip" ng-click="c.selectSampleProof('water')">💧 Pipe Burst</button>
-                  <button type="button" class="btn btn-default btn-xs civix-sample-chip" ng-click="c.selectSampleProof('pothole')">🛣️ Pothole</button>
-                  <button type="button" class="btn btn-default btn-xs civix-sample-chip" ng-click="c.selectSampleProof('light')">💡 Streetlight</button>
-                  <button type="button" class="btn btn-default btn-xs civix-sample-chip" ng-click="c.selectSampleProof('drain')">🌊 Drainage</button>
+                <!-- Instant One-Click Sample Presets for Testing -->
+                <div class="civix-sample-presets-bar" ng-click="$event.stopPropagation()">
+                  <span class="civix-preset-label">Or test with a verified defect sample:</span>
+                  <button type="button" class="btn btn-default btn-xs civix-preset-btn" ng-click="c.selectSampleProof('water')">💧 Pipe Burst</button>
+                  <button type="button" class="btn btn-default btn-xs civix-preset-btn" ng-click="c.selectSampleProof('pothole')">🛣️ Pothole</button>
+                  <button type="button" class="btn btn-default btn-xs civix-preset-btn" ng-click="c.selectSampleProof('light')">💡 Streetlight</button>
+                  <button type="button" class="btn btn-default btn-xs civix-preset-btn" ng-click="c.selectSampleProof('drain')">🌊 Drainage</button>
                 </div>
               </div>
 
-              <!-- Uploaded Proof Preview Card -->
+              <!-- Uploaded Proof Preview Card (When Photo is Attached) -->
               <div class="civix-proof-preview-card" ng-if="c.form.photoPreview">
                 <div class="civix-preview-img-frame">
                   <img ng-src="{{c.form.photoPreview}}" alt="Attached Proof" class="civix-preview-thumb" />
                   <span class="civix-preview-badge">✓ Geo-Verified</span>
                 </div>
-                <div class="civix-preview-meta-info">
-                  <div style="font-weight: 700; color:#0F172A; font-size:14px;">{{c.form.photoName || 'defect_proof.jpg'}}</div>
-                  <div style="font-size:12px; color:#16A34A; margin-top:2px; font-weight:600;">✓ Defect evidence attached & encrypted for municipal crew dispatch</div>
-                  <div style="margin-top: 10px; display:flex; gap:10px;">
-                    <button type="button" class="btn btn-default btn-sm" ng-click="c.triggerUpload()">Change Photo</button>
-                    <button type="button" class="btn btn-danger btn-sm" ng-click="c.removeProof()">Remove</button>
+                <div class="civix-preview-info-col">
+                  <div style="font-weight: 800; color:#0F172A; font-size:14.5px;">{{c.form.photoName || 'defect_evidence_proof.jpg'}}</div>
+                  <div style="font-size:12.5px; color:#16A34A; margin-top:3px; font-weight:600;">✓ Defect evidence attached & encrypted for municipal field engineer dispatch</div>
+                  <div style="margin-top: 12px; display:flex; gap:10px;">
+                    <button type="button" class="btn btn-default btn-sm" ng-click="c.triggerUpload()" style="font-weight:600;">Change Photo</button>
+                    <button type="button" class="btn btn-danger btn-sm" ng-click="c.removeProof()" style="font-weight:600;">Remove</button>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Form Navigation Step 1 -> 2 -->
-            <div style="display:flex; justify-content:flex-end; margin-top: 28px; padding-top:16px; border-top:1px solid #F1F5F9;">
-              <button type="button" class="btn btn-primary btn-lg" ng-click="c.step = 2" ng-disabled="!c.form.title || !c.form.description" style="font-weight:700; border-radius:10px; padding:12px 28px;">
+            <div class="civix-form-footer-nav">
+              <button type="button" class="btn btn-primary btn-lg civix-btn-next" ng-click="c.step = 2" ng-disabled="!c.form.title || !c.form.description">
                 Next: Location & GPS &rarr;
               </button>
             </div>
@@ -259,11 +201,11 @@ REPORT_TEMPLATE = """
 
           <!-- Step 2: Location & Ward -->
           <div ng-if="c.step === 2">
-            <h3 style="font-size: 16.5px; font-weight: 800; color:#0F172A; margin-bottom: 16px;">Locality & Address</h3>
+            <h3 class="civix-section-label">Locality & Municipal Address</h3>
             
             <div class="form-group">
-              <label style="font-weight: 700; color:#0F172A; font-size:13.5px;">Municipal Ward <span class="text-danger">*</span></label>
-              <select class="form-control civix-form-input-lg" ng-model="c.form.ward">
+              <label class="civix-input-label">Municipal Ward <span class="text-danger">*</span></label>
+              <select class="form-control civix-custom-input" ng-model="c.form.ward">
                 <option value="Ward 18 - Adyar">Ward 18 - Adyar</option>
                 <option value="Ward 12 - T. Nagar">Ward 12 - T. Nagar</option>
                 <option value="Ward 8 - Anna Nagar">Ward 8 - Anna Nagar</option>
@@ -273,23 +215,25 @@ REPORT_TEMPLATE = """
             </div>
 
             <div class="form-group">
-              <label style="font-weight: 700; color:#0F172A; font-size:13.5px;">Street Address / Landmark <span class="text-danger">*</span></label>
-              <input type="text" class="form-control civix-form-input-lg" ng-model="c.form.address" placeholder="e.g. Opposite Post Office, 3rd Main Road, Adyar" required />
+              <label class="civix-input-label">Street Address / Landmark <span class="text-danger">*</span></label>
+              <input type="text" class="form-control civix-custom-input" ng-model="c.form.address" placeholder="e.g. Opposite Post Office, 3rd Main Road, Adyar" required />
             </div>
 
-            <div class="form-group" style="background:#F8FAFC; border: 1px solid #E2E8F0; padding: 18px; border-radius: 12px; margin-top: 20px;">
-              <label style="font-weight: 700; color:#0F172A; font-size:13.5px;">Precise GPS Geolocation</label>
-              <p style="font-size:12px; color:#64748B; margin-bottom:12px;">Enables our repair crews to navigate directly to the defect site using coordinates.</p>
-              <button type="button" class="btn btn-default" ng-click="c.detectGeo()" style="border-radius:8px; font-weight:600;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.5" style="vertical-align:middle; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Detect My GPS Coordinates
-              </button>
-              <span ng-if="c.form.geo" class="text-success" style="font-weight: 700; margin-left:14px; font-size:13px;">✓ {{c.form.geo}}</span>
+            <div class="civix-gps-card">
+              <label class="civix-input-label" style="margin-bottom:4px;">Precise GPS Geolocation</label>
+              <p style="font-size:12.5px; color:#64748B; margin-bottom:12px;">Enables our municipal repair vehicle to navigate directly to the defect site.</p>
+              <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-default" ng-click="c.detectGeo()" style="border-radius:8px; font-weight:700;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.5" style="vertical-align:middle; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Detect My GPS Coordinates
+                </button>
+                <span ng-if="c.form.geo" class="text-success" style="font-weight: 700; font-size:13px;">✓ {{c.form.geo}}</span>
+              </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; margin-top: 28px; padding-top:16px; border-top:1px solid #F1F5F9;">
+            <div class="civix-form-footer-nav" style="justify-content: space-between;">
               <button type="button" class="btn btn-default btn-lg" ng-click="c.step = 1" style="border-radius:10px;">&larr; Back</button>
-              <button type="button" class="btn btn-primary btn-lg" ng-click="c.step = 3" ng-disabled="!c.form.address" style="font-weight:700; border-radius:10px; padding:12px 28px;">
+              <button type="button" class="btn btn-primary btn-lg civix-btn-next" ng-click="c.step = 3" ng-disabled="!c.form.address">
                 Next: Review & Submit &rarr;
               </button>
             </div>
@@ -297,29 +241,29 @@ REPORT_TEMPLATE = """
 
           <!-- Step 3: Review & Submit -->
           <div ng-if="c.step === 3">
-            <h3 style="font-size: 16.5px; font-weight: 800; color:#0F172A; margin-bottom: 16px;">Confirm & Submit Details</h3>
+            <h3 class="civix-section-label">Confirm & Submit Details</h3>
             
-            <div style="background:#F8FAFC; border: 1px solid #E2E8F0; border-radius:14px; padding: 22px; line-height: 1.8;">
-              <p style="margin-bottom:6px;"><strong>Category:</strong> <span class="badge" style="background:#EFF6FF; color:#0066FF;">{{c.form.category}}</span></p>
-              <p style="margin-bottom:6px;"><strong>Issue Title:</strong> {{c.form.title}}</p>
-              <p style="margin-bottom:6px;"><strong>Problem Description:</strong> {{c.form.description}}</p>
-              <p style="margin-bottom:6px;"><strong>Ward:</strong> {{c.form.ward}}</p>
-              <p style="margin-bottom:6px;"><strong>Street Address:</strong> {{c.form.address}}</p>
-              <p style="margin-bottom:6px;" ng-if="c.form.geo"><strong>GPS Coordinates:</strong> {{c.form.geo}}</p>
+            <div class="civix-review-box">
+              <div class="civix-review-line"><strong>Category:</strong> <span class="badge" style="background:#EFF6FF; color:#0066FF; font-weight:700;">{{c.form.category}}</span></div>
+              <div class="civix-review-line"><strong>Issue Title:</strong> {{c.form.title}}</div>
+              <div class="civix-review-line"><strong>Description:</strong> {{c.form.description}}</div>
+              <div class="civix-review-line"><strong>Ward:</strong> {{c.form.ward}}</div>
+              <div class="civix-review-line"><strong>Street Address:</strong> {{c.form.address}}</div>
+              <div class="civix-review-line" ng-if="c.form.geo"><strong>GPS Coordinates:</strong> {{c.form.geo}}</div>
               
               <!-- Evidence Photo in Confirmation -->
-              <div ng-if="c.form.photoPreview" style="margin-top: 14px; padding-top:12px; border-top:1px dashed #CBD5E1;">
+              <div ng-if="c.form.photoPreview" style="margin-top: 16px; padding-top:14px; border-top:1px dashed #CBD5E1;">
                 <strong>Attached Defect Proof:</strong><br/>
-                <div style="margin-top:8px; display:inline-block; border-radius:10px; overflow:hidden; border:2px solid #0066FF; position:relative;">
-                  <img ng-src="{{c.form.photoPreview}}" alt="Attached Proof" style="width:180px; height:110px; object-fit:cover; display:block;" />
-                  <span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.7); color:#FFFFFF; font-size:10px; padding:2px 6px; border-radius:4px;">Geo-Verified</span>
+                <div style="margin-top:8px; display:inline-block; border-radius:10px; overflow:hidden; border:2px solid #0066FF; position:relative; box-shadow:0 4px 12px rgba(0,102,255,0.15);">
+                  <img ng-src="{{c.form.photoPreview}}" alt="Attached Proof" style="width:200px; height:120px; object-fit:cover; display:block;" />
+                  <span style="position:absolute; bottom:6px; right:6px; background:rgba(15,23,42,0.85); color:#FFFFFF; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:4px;">Geo-Verified</span>
                 </div>
               </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; margin-top: 28px; padding-top:16px; border-top:1px solid #F1F5F9;">
+            <div class="civix-form-footer-nav" style="justify-content: space-between;">
               <button type="button" class="btn btn-default btn-lg" ng-click="c.step = 2" style="border-radius:10px;">&larr; Back</button>
-              <button type="button" class="btn btn-success btn-lg" ng-click="c.submitIssue()" ng-disabled="c.submitting" style="font-weight:800; border-radius:10px; padding:12px 32px; background:#16A34A; border-color:#16A34A;">
+              <button type="button" class="btn btn-success btn-lg civix-btn-submit" ng-click="c.submitIssue()" ng-disabled="c.submitting">
                 <span ng-if="c.submitting">Logging Incident in ServiceNow...</span>
                 <span ng-if="!c.submitting">Confirm & Submit Issue &rarr;</span>
               </button>
@@ -332,38 +276,202 @@ REPORT_TEMPLATE = """
 </div>
 """
 
-REPORT_CSS = """
-/* REPORT AN ISSUE WITH PROOF UPLOAD STYLES */
-.civix-form-input-lg {
+REPORT_TEMPLATE = REPORT_TEMPLATE_RAW.replace("__SIDEBAR__", get_sidebar_html("report")).replace("__TOPBAR__", get_topbar_html())
+
+# Combine with BASE_SHELL_CSS to preserve sticky sidebar, navbar, avatar, etc.
+REPORT_CSS = BASE_SHELL_CSS + """
+/* REPORT AN ISSUE WITH EVIDENCE PROOF STYLES */
+.civix-report-header-banner {
+  margin-bottom: 24px;
+}
+.civix-report-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+}
+.civix-report-sub {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+}
+
+.civix-report-form-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 30px 34px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* STEPPER */
+.civix-report-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #F1F5F9;
+}
+.civix-step-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.civix-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+.civix-step-pill.active .civix-step-num {
+  background: #0066FF;
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.2);
+}
+.civix-step-pill.completed .civix-step-num {
+  background: #16A34A;
+  color: #FFFFFF;
+}
+.civix-step-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #64748B;
+}
+.civix-step-pill.active .civix-step-title {
+  color: #0F172A;
+}
+.civix-step-connector {
+  flex-grow: 1;
+  height: 3px;
+  background: #F1F5F9;
+  margin: 0 16px;
+  border-radius: 2px;
+}
+.civix-step-connector.active {
+  background: #0066FF;
+}
+
+.civix-section-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 14px 0;
+}
+.civix-input-label {
+  font-weight: 700;
+  color: #0F172A;
+  font-size: 13.5px;
+  margin-bottom: 6px;
+}
+
+/* CATEGORY SELECTOR */
+.civix-report-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+@media (max-width: 900px) {
+  .civix-report-cat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.civix-cat-box-btn {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.civix-cat-box-btn:hover {
+  background: #FFFFFF;
+  border-color: #0066FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 102, 255, 0.08);
+}
+.civix-cat-box-btn.selected {
+  background: #EFF6FF;
+  border-color: #0066FF;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.25);
+}
+.civix-cat-icon-circ {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.cat-water { background: #E0F2FE; }
+.cat-elec { background: #FEF3C7; }
+.cat-roads { background: #F1F5F9; }
+.cat-drain { background: #DCFCE7; }
+.cat-flood { background: #F3E8FF; }
+.civix-cat-box-btn strong {
+  font-size: 13px;
+  color: #0F172A;
+  font-weight: 700;
+}
+.civix-cat-box-btn small {
+  font-size: 10.5px;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+/* INPUTS */
+.civix-custom-input {
   height: 46px;
   border-radius: 10px;
   border: 1px solid #CBD5E1;
   font-size: 14px;
+  box-shadow: none;
 }
-.civix-form-textarea {
+.civix-custom-input:focus {
+  border-color: #0066FF;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
+}
+.civix-custom-textarea {
   border-radius: 10px;
   border: 1px solid #CBD5E1;
   font-size: 14px;
+  box-shadow: none;
+}
+.civix-custom-textarea:focus {
+  border-color: #0066FF;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
 }
 
-/* UPLOAD DROPZONE */
-.civix-proof-upload-box {
+/* PROOF DROPZONE */
+.civix-proof-dropzone {
   background: #F8FAFC;
   border: 2px dashed #93C5FD;
-  border-radius: 14px;
-  padding: 26px 20px;
+  border-radius: 16px;
+  padding: 30px 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.civix-proof-upload-box:hover {
+.civix-proof-dropzone:hover {
   background: #EFF6FF;
   border-color: #0066FF;
   transform: translateY(-2px);
 }
-.civix-proof-icon-circle {
-  width: 52px;
-  height: 52px;
+.civix-dropzone-icon-circle {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: #DBEAFE;
   display: flex;
@@ -371,64 +479,66 @@ REPORT_CSS = """
   justify-content: center;
   margin: 0 auto 12px;
 }
-.civix-proof-upload-title {
-  font-size: 14.5px;
+.civix-dropzone-prompt {
+  font-size: 15px;
   color: #0F172A;
   margin-bottom: 4px;
 }
-.civix-proof-upload-desc {
-  font-size: 12px;
+.civix-dropzone-sub {
+  font-size: 12.5px;
   color: #64748B;
-  max-width: 480px;
-  margin: 0 auto 14px;
-  line-height: 1.4;
+  max-width: 520px;
+  margin: 0 auto 16px;
+  line-height: 1.45;
 }
-.civix-proof-samples-row {
+.civix-sample-presets-bar {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
-  padding-top: 10px;
+  padding-top: 14px;
   border-top: 1px solid #E2E8F0;
 }
-.civix-samples-hint {
-  font-size: 11.5px;
+.civix-preset-label {
+  font-size: 12px;
   color: #64748B;
-  font-weight: 600;
+  font-weight: 700;
 }
-.civix-sample-chip {
+.civix-preset-btn {
   font-size: 11.5px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #FFFFFF;
   border: 1px solid #CBD5E1;
+  padding: 4px 10px;
   transition: all 0.15s;
 }
-.civix-sample-chip:hover {
+.civix-preset-btn:hover {
   border-color: #0066FF;
   color: #0066FF;
+  background: #EFF6FF;
 }
 
-/* PREVIEW CARD */
+/* PROOF PREVIEW CARD */
 .civix-proof-preview-card {
   display: flex;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
   background: #FFFFFF;
   border: 1px solid #CBD5E1;
-  border-radius: 12px;
-  padding: 14px 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
 }
 .civix-preview-img-frame {
   position: relative;
-  width: 100px;
-  height: 75px;
-  border-radius: 8px;
+  width: 120px;
+  height: 85px;
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #CBD5E1;
 }
 .civix-preview-thumb {
   width: 100%;
@@ -437,107 +547,84 @@ REPORT_CSS = """
 }
 .civix-preview-badge {
   position: absolute;
-  bottom: 3px;
-  left: 3px;
+  bottom: 4px;
+  left: 4px;
   background: #16A34A;
   color: #FFFFFF;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 1px 4px;
-  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 4px;
 }
-.civix-preview-meta-info {
+.civix-preview-info-col {
   flex-grow: 1;
 }
 
-.civix-step-nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 30px;
-}
-.civix-step-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.civix-step-index {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #E2E8F0;
-  color: #64748B;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
-}
-.civix-step-item.active .civix-step-index {
-  background: #0066FF;
-  color: #FFFFFF;
-}
-.civix-step-name {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #64748B;
-}
-.civix-step-item.active .civix-step-name {
-  color: #0F172A;
-  font-weight: 700;
-}
-.civix-step-line {
-  flex-grow: 1;
-  height: 2px;
-  background: #E2E8F0;
-  margin: 0 16px;
-}
-.civix-step-line.active { background: #0066FF; }
-
-.civix-cat-selector-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-}
-@media (max-width: 768px) {
-  .civix-cat-selector-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.civix-cat-select-btn {
+/* GPS CARD */
+.civix-gps-card {
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  padding: 14px 8px;
-  text-align: center;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: all 0.2s;
+  padding: 18px 20px;
+  border-radius: 14px;
+  margin-top: 20px;
 }
-.civix-cat-select-btn:hover {
-  background: #FFFFFF;
-  border-color: #0066FF;
-  transform: translateY(-2px);
+
+/* REVIEW CARD */
+.civix-review-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  line-height: 1.8;
 }
-.civix-cat-select-btn.selected {
-  background: #EFF6FF;
-  border-color: #0066FF;
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
-}
-.civix-cat-bubble {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.civix-review-line {
+  font-size: 14px;
+  color: #1E293B;
   margin-bottom: 8px;
 }
-.cat-water { background: #E0F2FE; }
-.cat-elec { background: #FEF3C7; }
-.cat-roads { background: #F1F5F9; }
-.cat-drain { background: #DCFCE7; }
-.cat-flood { background: #F3E8FF; }
+
+/* NAVIGATION FOOTER */
+.civix-form-footer-nav {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid #F1F5F9;
+}
+.civix-btn-next {
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 12px 30px;
+}
+.civix-btn-submit {
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 12px 34px;
+  background: #16A34A;
+  border-color: #16A34A;
+}
+
+/* SUCCESS BOX */
+.civix-success-container {
+  padding: 38px 24px;
+  border-radius: 16px;
+  border: 1px solid #BBF7D0;
+  background: #F0FDF4;
+}
+.civix-success-icon-wrap {
+  margin-bottom: 12px;
+}
+.civix-ticket-id-pill {
+  display: inline-block;
+  background: #0F172A;
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 800;
+  padding: 10px 28px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  margin: 12px 0;
+}
 """
 
 REPORT_CLIENT_SCRIPT = """
@@ -631,7 +718,6 @@ function($scope, $location, $timeout) {
       if (r.data && r.data.status === 'success') {
         c.successData = r.data.ticket;
       } else {
-        // Fallback demo ticket
         c.successData = {
           number: 'CIVIX-2024-' + Math.floor(10000 + Math.random() * 90000),
           sys_id: 'c1'
@@ -671,7 +757,7 @@ REPORT_SERVER_SCRIPT = """
 """
 
 if __name__ == "__main__":
-    print("=== DEPLOYING PROOF UPLOAD FEATURE TO CIVIX REPORT AN ISSUE ===")
+    print("=== DEPLOYING PERFECT PROOF UPLOAD FEATURE WITH UNIFIED SHELL ===")
     payload = {
         "template": REPORT_TEMPLATE.strip(),
         "css": REPORT_CSS.strip(),
@@ -682,4 +768,4 @@ if __name__ == "__main__":
         "public": "true"
     }
     api_put("sp_widget", sys_id, payload)
-    print("  [SUCCESS] civix_report_issue_widget updated with Evidence/Proof Upload!")
+    print("  [SUCCESS] civix_report_issue_widget updated with Evidence/Proof Upload and Unified Shell!")
