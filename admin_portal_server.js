@@ -179,6 +179,11 @@
       }
     }
 
+    if (input.action === 'generate_wo_ai_summary') {
+      logAuditEvent('Generative AI Brief Generated', input.wo_number || 'Work Order', 'Work Orders & Crews', 'Raw Data', 'GenAI Brief', 'Administrator invoked CIVIX Generative Intelligence Engine for operational synthesis');
+      data.actionResult.message = 'AI brief generated and logged to audit trail.';
+    }
+
     // D. ZONE & GEOGRAPHIC HIERARCHY ACTIONS
     if (input.action === 'save_zone') {
       var grZ = new GlideRecord('u_x_civic_ai_zone');

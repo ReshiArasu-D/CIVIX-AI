@@ -1647,3 +1647,234 @@
   border: 1px solid #DDD6FE !important;
 }
 
+/* --- WORK ORDER DETAILS & GENERATIVE INTELLIGENCE STYLES --- */
+.civix-wo-row-clickable {
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.civix-wo-row-clickable:hover {
+  background-color: #F8FAFC !important;
+}
+
+.civix-wo-link {
+  color: #0072CE !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+}
+
+.civix-wo-link:hover {
+  color: #004B87 !important;
+  text-decoration: underline !important;
+}
+
+.civix-btn-ai {
+  background: linear-gradient(135deg, #4338CA 0%, #6366F1 50%, #06B6D4 100%) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.civix-btn-ai:hover {
+  background: linear-gradient(135deg, #3730A3 0%, #4F46E5 50%, #0891B2 100%) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5) !important;
+  transform: translateY(-1px) !important;
+  color: #FFFFFF !important;
+}
+
+.civix-btn-ai:active {
+  transform: translateY(0) !important;
+}
+
+.civix-btn-ai-glow {
+  animation: civix-ai-pulse 2s infinite !important;
+}
+
+@keyframes civix-ai-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+
+.civix-ai-card {
+  background: linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%) !important;
+  border: 1px solid #C7D2FE !important;
+  border-left: 4px solid #6366F1 !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.08) !important;
+}
+
+.civix-ai-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid #E0E7FF !important;
+}
+
+.civix-ai-header-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: #1E1B4B !important;
+}
+
+.civix-ai-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 3px 8px !important;
+  background: linear-gradient(135deg, #4F46E5, #06B6D4) !important;
+  color: #FFFFFF !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+.civix-ai-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+
+.civix-ai-box {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 6px !important;
+  padding: 12px !important;
+}
+
+.civix-ai-box-full {
+  grid-column: 1 / -1 !important;
+}
+
+.civix-ai-box-title {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #4338CA !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.civix-ai-box-body {
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  color: #334155 !important;
+}
+
+.civix-ai-box-body ul {
+  margin: 4px 0 0 16px !important;
+  padding: 0 !important;
+}
+
+.civix-ai-box-body li {
+  margin-bottom: 4px !important;
+}
+
+.civix-ai-shimmer {
+  padding: 24px !important;
+  text-align: center !important;
+  background: #F1F5F9 !important;
+  border-radius: 6px !important;
+  color: #475569 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.civix-wo-details-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+.civix-wo-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 6px !important;
+  padding: 14px !important;
+}
+
+.civix-wo-card-title {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #0F172A !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 6px !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.civix-wo-field-list {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  row-gap: 8px !important;
+  column-gap: 12px !important;
+  font-size: 12px !important;
+}
+
+.civix-wo-field-label {
+  font-size: 10.5px !important;
+  color: #64748B !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+}
+
+.civix-wo-field-value {
+  font-weight: 700 !important;
+  color: #0F172A !important;
+}
+
+.civix-wo-timeline {
+  margin-top: 8px !important;
+  padding-left: 16px !important;
+  border-left: 2px solid #CBD5E1 !important;
+}
+
+.civix-wo-timeline-item {
+  position: relative !important;
+  margin-bottom: 10px !important;
+  font-size: 11.5px !important;
+}
+
+.civix-wo-timeline-item::before {
+  content: "" !important;
+  position: absolute !important;
+  left: -21px !important;
+  top: 3px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #0072CE !important;
+}
+
+.civix-wo-timeline-time {
+  font-size: 10.5px !important;
+  color: #64748B !important;
+  font-weight: 600 !important;
+}
+
+

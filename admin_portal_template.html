@@ -824,25 +824,31 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="wo in c.data.workOrders">
-                  <td><strong>{{wo.u_number}}</strong></td>
+                <tr ng-repeat="wo in c.data.workOrders" class="civix-wo-row-clickable" ng-click="c.openWorkOrderDetails(wo)">
+                  <td>
+                    <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.openWorkOrderDetails(wo); $event.stopPropagation();">
+                      <i class="fa fa-file-text-o text-primary"></i> <strong>{{wo.u_number}}</strong>
+                    </a>
+                  </td>
                   <td>{{wo.u_case_number}}</td>
                   <td>{{wo.u_category}}</td>
                   <td>{{wo.u_ward}}</td>
-                  <td>{{wo.u_worker_name || 'Unassigned'}}</td>
+                  <td><strong>{{wo.u_assigned_name || wo.u_worker_name || 'Unassigned'}}</strong></td>
                   <td>
-                    <span class="civix-badge" ng-class="{'civix-badge-success': wo.u_state === 'Completed', 'civix-badge-info': wo.u_state === 'In Progress' || wo.u_state === 'Assigned', 'civix-badge-warning': wo.u_state === 'Pending Assignment'}">
+                    <span class="civix-badge" ng-class="{'civix-badge-success': wo.u_state === 'Completed', 'civix-badge-info': wo.u_state === 'In Progress' || wo.u_state === 'Assigned', 'civix-badge-warning': wo.u_state === 'Pending Assignment' || wo.u_state === 'On Hold'}">
                       {{wo.u_state}}
                     </span>
                   </td>
                   <td>
-                    <span class="civix-badge" ng-class="{'civix-badge-success': wo.u_verification_status === 'Approved', 'civix-badge-danger': wo.u_verification_status.indexOf('Rejected')!==-1, 'civix-badge-neutral': !wo.u_verification_status}">
+                    <span class="civix-badge" ng-class="{'civix-badge-success': wo.u_verification_status === 'Approved', 'civix-badge-danger': wo.u_verification_status.indexOf('Rejected')!==-1, 'civix-badge-neutral': !wo.u_verification_status || wo.u_verification_status === 'Pending'}">
                       {{wo.u_verification_status || 'Pending Review'}}
                     </span>
                   </td>
                   <td>
-                    <div style="display: flex; gap: 4px;">
-                      <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openCrewRecommendationModal(wo)" title="Calculate Crew Fit"><i class="fa fa-users"></i> Recommend Crew</button>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;" ng-click="$event.stopPropagation();">
+                      <button class="civix-btn civix-btn-sm civix-btn-outline" ng-click="c.openWorkOrderDetails(wo)" title="View Work Order Details"><i class="fa fa-eye"></i> Details</button>
+                      <button class="civix-btn civix-btn-sm civix-btn-ai" ng-click="c.openWorkOrderAiSummary(wo, $event)" title="Generative Intelligence Summary"><i class="fa fa-magic"></i> GenAI Summary</button>
+                      <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openCrewRecommendationModal(wo)" title="Calculate Crew Fit"><i class="fa fa-users"></i> Recommend</button>
                       <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openVerifyModal(wo)"><i class="fa fa-check-square-o"></i> Verify</button>
                     </div>
                   </td>
@@ -2323,6 +2329,236 @@
       </div>
       <div class="civix-modal-footer">
         <button class="civix-btn civix-btn-secondary" ng-click="c.showOpZoneDetailModal = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. Work Order Details & Generative Intelligence Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showWorkOrderDetailsModal">
+    <div class="civix-modal civix-modal-lg" style="max-width: 950px; width: 92%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="civix-modal-header" style="flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <h4 style="margin: 0;"><i class="fa fa-wrench text-primary"></i> Work Order: {{c.selectedWorkOrder.u_number}}</h4>
+          <span class="civix-badge" ng-class="{'civix-badge-success': c.selectedWorkOrder.u_state === 'Completed', 'civix-badge-info': c.selectedWorkOrder.u_state === 'In Progress' || c.selectedWorkOrder.u_state === 'Assigned', 'civix-badge-warning': c.selectedWorkOrder.u_state === 'Pending Assignment' || c.selectedWorkOrder.u_state === 'On Hold'}">
+            {{c.selectedWorkOrder.u_state}}
+          </span>
+          <span class="civix-badge civix-badge-danger" ng-if="c.selectedWorkOrder.u_priority">{{c.selectedWorkOrder.u_priority}}</span>
+          <span class="civix-badge civix-badge-secondary" ng-if="c.selectedWorkOrder.u_category">{{c.selectedWorkOrder.u_category}}</span>
+        </div>
+        <button class="civix-modal-close" ng-click="c.showWorkOrderDetailsModal = false">&times;</button>
+      </div>
+
+      <div class="civix-modal-body" style="overflow-y: auto; flex: 1 1 auto; padding: 20px;">
+        <!-- GENERATIVE INTELLIGENCE SYNTHESIS PANEL -->
+        <div class="civix-ai-card">
+          <div class="civix-ai-header">
+            <div class="civix-ai-header-title">
+              <i class="fa fa-magic text-primary" style="font-size: 18px;"></i>
+              <span>CIVIX AI &bull; Generative Intelligence Operational Brief</span>
+              <span class="civix-ai-badge"><i class="fa fa-bolt"></i> GenAI 2.0</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="civix-btn civix-btn-sm civix-btn-ai civix-btn-ai-glow" ng-click="c.generateAiSummary(c.selectedWorkOrder)" ng-disabled="c.isGeneratingAi">
+                <i class="fa fa-magic" ng-class="{'fa-spin': c.isGeneratingAi}"></i>
+                {{c.isGeneratingAi ? 'Synthesizing...' : (c.selectedWorkOrderAiSummary ? 'Re-generate Brief' : 'Generate AI Brief')}}
+              </button>
+              <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-if="c.selectedWorkOrderAiSummary" ng-click="c.copyAiSummaryToClipboard()" title="Copy to clipboard">
+                <i class="fa fa-clipboard"></i> Copy Brief
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Shimmer State -->
+          <div class="civix-ai-shimmer" ng-if="c.isGeneratingAi">
+            <i class="fa fa-spinner fa-spin fa-2x" style="color: #6366F1; margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 13.5px; font-weight: 700; color: #1E1B4B;">CIVIX Generative Intelligence synthesizing failure telemetry, failure diagnostics & crew execution protocols...</div>
+            <div style="font-size: 11.5px; color: #64748B; margin-top: 4px;">Analyzing cross-departmental utility clearances and field equipment safety requirements</div>
+          </div>
+
+          <!-- Pre-generation Prompt (if not yet generated) -->
+          <div ng-if="!c.selectedWorkOrderAiSummary && !c.isGeneratingAi" style="text-align: center; padding: 18px; background: rgba(255,255,255,0.7); border: 1px dashed #C7D2FE; border-radius: 6px;">
+            <div style="font-size: 13px; font-weight: 700; color: #3730A3; margin-bottom: 4px;">
+              <i class="fa fa-lightbulb-o"></i> On-Demand Generative Intelligence Synthesis Available
+            </div>
+            <p style="font-size: 12px; color: #64748B; margin: 0 0 12px 0;">Click the button below to generate an executive diagnostic synopsis, root cause analysis, safety protocols, and field sign-off checklist.</p>
+            <button class="civix-btn civix-btn-ai civix-btn-ai-glow" ng-click="c.generateAiSummary(c.selectedWorkOrder)">
+              <i class="fa fa-magic"></i> Generate Intelligence Summary Now
+            </button>
+          </div>
+
+          <!-- Generated AI Summary Content -->
+          <div class="civix-ai-grid" ng-if="c.selectedWorkOrderAiSummary && !c.isGeneratingAi">
+            <!-- 1. Executive Synopsis -->
+            <div class="civix-ai-box civix-ai-box-full" style="background: #FFFFFF; border-left: 3px solid #4F46E5;">
+              <div class="civix-ai-box-title"><i class="fa fa-align-left"></i> 1. Executive Incident Synopsis</div>
+              <div class="civix-ai-box-body"><strong>{{c.selectedWorkOrderAiSummary.synopsis}}</strong></div>
+            </div>
+
+            <!-- 2. Root Cause Analysis -->
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-microchip"></i> 2. Technical Root Cause & Diagnostics</div>
+              <div class="civix-ai-box-body">{{c.selectedWorkOrderAiSummary.rootCause}}</div>
+            </div>
+
+            <!-- 3. Risk & Public Hazard Assessment -->
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-exclamation-triangle text-warning"></i> 3. Public Hazard & Safety Impact</div>
+              <div class="civix-ai-box-body">{{c.selectedWorkOrderAiSummary.riskAssessment}}</div>
+            </div>
+
+            <!-- 4. Required Equipment & Machinery -->
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-truck"></i> 4. Mandatory Machinery & Tooling</div>
+              <div class="civix-ai-box-body">{{c.selectedWorkOrderAiSummary.equipment}}</div>
+            </div>
+
+            <!-- 5. SLA Resolution & Critical Path Roadmap -->
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-clock-o"></i> 5. SLA Resolution Roadmap</div>
+              <div class="civix-ai-box-body">{{c.selectedWorkOrderAiSummary.slaRoadmap}}</div>
+            </div>
+
+            <!-- 6. Step-by-Step Field Protocols -->
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-list-ol"></i> 6. Field Execution Protocols</div>
+              <div class="civix-ai-box-body">
+                <ul>
+                  <li ng-repeat="proto in c.selectedWorkOrderAiSummary.protocols">{{proto}}</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- 7. Quality Verification & Audit Checklist -->
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-check-square-o text-success"></i> 7. Verification Audit Sign-Off Checklist</div>
+              <div class="civix-ai-box-body">
+                <ul>
+                  <li ng-repeat="crit in c.selectedWorkOrderAiSummary.verificationCriteria">{{crit}}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WORK ORDER MASTER SPECIFICATION CARDS -->
+        <div class="civix-wo-details-grid">
+          <!-- Card 1: Incident & Case Record -->
+          <div class="civix-wo-card">
+            <div class="civix-wo-card-title"><i class="fa fa-file-text-o text-primary"></i> Incident & Linked Case</div>
+            <div class="civix-wo-field-list">
+              <div>
+                <div class="civix-wo-field-label">Linked Civic Case</div>
+                <div class="civix-wo-field-value text-primary"><strong>{{c.selectedWorkOrder.u_case_number}}</strong></div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Category</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_category}}</div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <div class="civix-wo-field-label">Issue Summary</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_short_description || c.selectedWorkOrder.u_description}}</div>
+              </div>
+              <div style="grid-column: 1 / -1;" ng-if="c.selectedWorkOrder.u_hold_reason">
+                <div class="civix-wo-field-label" style="color: #DC2626;">Hold Reason / Bottleneck</div>
+                <div class="civix-wo-field-value" style="color: #B91C1C; background: #FEF2F2; padding: 6px 10px; border-radius: 4px; border: 1px solid #FECACA;">
+                  <i class="fa fa-pause-circle"></i> {{c.selectedWorkOrder.u_hold_reason}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Geographic Hierarchy & Location -->
+          <div class="civix-wo-card">
+            <div class="civix-wo-card-title"><i class="fa fa-map-marker text-danger"></i> Geographic Hierarchy & Location</div>
+            <div class="civix-wo-field-list">
+              <div>
+                <div class="civix-wo-field-label">National Zone</div>
+                <div class="civix-wo-field-value"><span class="civix-badge civix-badge-zone2">{{c.selectedWorkOrder.u_op_zone || 'Zone 2 — South Zone'}}</span></div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">State / UT</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_state_name || 'Tamil Nadu'}}</div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">District & Local Body</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_district_name || 'Chennai'}} &bull; {{c.selectedWorkOrder.u_local_body_name || 'Greater Chennai Corporation'}}</div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Municipal Zone & Ward</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_zone}} &bull; {{c.selectedWorkOrder.u_ward}}</div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <div class="civix-wo-field-label">Exact Physical Address & Landmark</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_location}} ({{c.selectedWorkOrder.u_landmark}})</div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <div class="civix-wo-field-label">GPS Telemetry Coordinates</div>
+                <div class="civix-wo-field-value" style="font-family: monospace; font-size: 11px;">
+                  <i class="fa fa-crosshairs"></i> Lat: {{c.selectedWorkOrder.u_latitude || '13.0002'}}, Lng: {{c.selectedWorkOrder.u_longitude || '80.2689'}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Assigned Crew & Technician -->
+          <div class="civix-wo-card">
+            <div class="civix-wo-card-title"><i class="fa fa-users text-primary"></i> Field Crew & Assigned Technician</div>
+            <div class="civix-wo-field-list">
+              <div>
+                <div class="civix-wo-field-label">Assigned Technician</div>
+                <div class="civix-wo-field-value"><strong>{{c.selectedWorkOrder.u_assigned_name || c.selectedWorkOrder.u_worker_name || 'Unassigned'}}</strong></div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Worker ID / Badge</div>
+                <div class="civix-wo-field-value"><code>{{c.selectedWorkOrder.u_worker_id || 'EMP-9021'}}</code></div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Assignment Timestamp</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_assigned_date || '2026-10-09 14:00:00'}}</div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Field Arrival OTP</div>
+                <div class="civix-wo-field-value">
+                  <span class="civix-badge civix-badge-info">OTP: {{c.selectedWorkOrder.u_arrival_otp || '3912'}}</span>
+                  <span class="civix-badge civix-badge-success" ng-if="c.selectedWorkOrder.u_arrival_verified === 'true'"><i class="fa fa-check"></i> Verified</span>
+                </div>
+              </div>
+              <div style="grid-column: 1 / -1;" ng-if="c.selectedWorkOrder.u_arrival_timestamp">
+                <div class="civix-wo-field-label">On-Site Arrival Confirmed</div>
+                <div class="civix-wo-field-value">{{c.selectedWorkOrder.u_arrival_timestamp}}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Milestones & Progress Log -->
+          <div class="civix-wo-card">
+            <div class="civix-wo-card-title"><i class="fa fa-history text-primary"></i> Progress Updates & Milestones</div>
+            <div class="civix-wo-timeline" ng-if="c.selectedWorkOrderProgress.length > 0">
+              <div class="civix-wo-timeline-item" ng-repeat="item in c.selectedWorkOrderProgress">
+                <div class="civix-wo-timeline-time">{{item.time}} &bull; <span class="civix-badge civix-badge-secondary" style="font-size: 9.5px;">{{item.category || 'Update'}}</span></div>
+                <div style="font-weight: 600; color: #1E293B; margin-top: 2px;">{{item.text}}</div>
+              </div>
+            </div>
+            <div ng-if="c.selectedWorkOrderProgress.length === 0" style="color: #64748B; font-size: 11.5px; padding: 12px 0;">
+              <i class="fa fa-info-circle"></i> No intermediate field milestone logs recorded yet.
+            </div>
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #F1F5F9; font-size: 11.5px;">
+              <strong>Target SLA Deadline:</strong> <span class="text-primary">{{c.selectedWorkOrder.u_target_sla || 'Standard Municipal Window'}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="civix-modal-footer" style="flex-shrink: 0; justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <button class="civix-btn civix-btn-primary" ng-click="c.showWorkOrderDetailsModal = false; c.openCrewRecommendationModal(c.selectedWorkOrder)">
+            <i class="fa fa-users"></i> Re-Calculate Crew Fit
+          </button>
+          <button class="civix-btn civix-btn-secondary" ng-click="c.showWorkOrderDetailsModal = false; c.openVerifyModal(c.selectedWorkOrder)">
+            <i class="fa fa-check-square-o"></i> Officer Verification
+          </button>
+        </div>
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showWorkOrderDetailsModal = false">Close</button>
       </div>
     </div>
   </div>
