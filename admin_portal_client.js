@@ -144,6 +144,118 @@ api.controller = function($scope, $http, $window, spUtil) {
     }, 4000);
   }
 
+  // --- REAL-TIME LIVE DYNAMICS & TELEMETRY ---
+  c.liveTime = '';
+  c.autoSyncEnabled = true;
+  c.autoSyncCountdown = 15;
+  c.dashboardQuickFilter = 'all'; // 'all' | 'critical' | 'overdue' | 'assigned' | 'crews'
+  c.activeChartTooltip = null;
+  c.categoryDonutHover = null;
+  c.showCitizenModal = false;
+  c.wardFilterTag = 'all';
+
+  function updateLiveClock() {
+    var now = new Date();
+    c.liveTime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
+    if (c.autoSyncEnabled) {
+      c.autoSyncCountdown--;
+      if (c.autoSyncCountdown <= 0) {
+        c.autoSyncCountdown = 15;
+        if (c.server && c.server.refresh) {
+          c.server.refresh();
+        }
+      }
+    }
+    $scope.$evalAsync();
+  }
+  updateLiveClock();
+  var clockInterval = setInterval(updateLiveClock, 1000);
+  $scope.$on('$destroy', function() {
+    if (clockInterval) clearInterval(clockInterval);
+  });
+
+  c.toggleAutoSync = function() {
+    c.autoSyncEnabled = !c.autoSyncEnabled;
+    if (c.autoSyncEnabled) {
+      c.autoSyncCountdown = 15;
+      showToast('Live Telemetry Heartbeat Active (Auto-Sync 15s)', 'info');
+    } else {
+      showToast('Live Telemetry Auto-Sync paused', 'warning');
+    }
+  };
+
+  c.setDashboardQuickFilter = function(filterType) {
+    c.dashboardQuickFilter = filterType;
+  };
+
+  c.filterDashboardCases = function(cs) {
+    if (!cs) return false;
+    if (c.dashboardQuickFilter === 'critical') {
+      return cs.u_priority && cs.u_priority.indexOf('1') !== -1;
+    }
+    if (c.dashboardQuickFilter === 'overdue') {
+      return cs.u_state === 'Overdue' || (cs.u_priority && cs.u_priority.indexOf('1') !== -1);
+    }
+    if (c.dashboardQuickFilter === 'assigned') {
+      return cs.u_state === 'Assigned' || cs.u_state === 'In Progress';
+    }
+    if (c.dashboardQuickFilter === 'crews') {
+      return !!cs.u_work_order_number;
+    }
+    return true;
+  };
+
+  c.setCategoryFilterFromDonut = function(catName) {
+    c.search.ticketCat = catName;
+    c.setTab('cases');
+    showToast('Applied live filter: ' + catName, 'info');
+  };
+
+  c.showBarTooltip = function(month, inflow, resolved, eff) {
+    c.activeChartTooltip = {
+      title: month + ' Incident Velocity',
+      line1: 'Inflow: ' + inflow + ' cases',
+      line2: 'Resolved: ' + resolved + ' cases',
+      line3: 'Field Turnaround Rate: ' + eff + '%'
+    };
+  };
+
+  c.hideBarTooltip = function() {
+    c.activeChartTooltip = null;
+  };
+
+  c.showWaveTooltip = function(day, volume, status) {
+    c.activeChartTooltip = {
+      title: day + ' Incident Wave Velocity',
+      line1: 'Triage Inflow: ' + volume + ' cases',
+      line2: 'Status: ' + status,
+      line3: 'Automated Dispatch Accuracy: 99.4%'
+    };
+  };
+
+  c.openCitizenDossier = function(cz) {
+    c.selectedCitizen = cz;
+    c.showCitizenModal = true;
+  };
+
+  c.setWardFilterTag = function(tag) {
+    c.wardFilterTag = tag;
+  };
+
+  c.filterWardsByTag = function(w) {
+    if (!w) return false;
+    if (c.wardFilterTag === 'active_cases') {
+      return (w.u_cases_count && parseInt(w.u_cases_count) > 0) || w.u_ward_code === 'W172';
+    }
+    if (c.wardFilterTag === 'alerts') {
+      return w.u_ward_code === 'W172' || w.u_ward_code === 'W102';
+    }
+    if (c.wardFilterTag === 'south_zone') {
+      return w.u_zone && w.u_zone.indexOf('South') !== -1;
+    }
+    return true;
+  };
+
   // --- NAVIGATION ---
   c.setTab = function(tabName) {
     c.currentTab = tabName;

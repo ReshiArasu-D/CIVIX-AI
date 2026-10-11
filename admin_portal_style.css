@@ -1816,3 +1816,233 @@ textarea.civix-form-control {
 
 
 
+
+
+/* ==========================================================================
+   DYNAMIC REAL-TIME & LIVE INTERACTION STYLES
+   ========================================================================== */
+
+@keyframes radarPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.civix-radar-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background-color: #10B981 !important;
+  display: inline-block !important;
+  animation: radarPulse 1.8s infinite !important;
+  margin-right: 4px !important;
+  vertical-align: middle !important;
+}
+
+.civix-header-telemetry-strip {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.civix-telemetry-live-pill {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  color: #A7F3D0 !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.civix-telemetry-live-pill:hover {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border-color: #34D399 !important;
+  transform: translateY(-1px) !important;
+}
+
+.civix-sync-badge {
+  background: #10B981 !important;
+  color: #064E3B !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  padding: 1px 6px !important;
+  border-radius: 9999px !important;
+  margin-left: 2px !important;
+}
+
+.civix-live-clock {
+  color: #93C5FD !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Dynamic Quick Triage Strip */
+.civix-quick-filter-strip {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 18px !important;
+  flex-wrap: wrap !important;
+  background: #FFFFFF !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+}
+
+.civix-quick-filter-title {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #475569 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-right: 4px !important;
+}
+
+.civix-filter-pill {
+  background: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #334155 !important;
+  padding: 5px 12px !important;
+  border-radius: 9999px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.civix-filter-pill:hover {
+  background: #E2E8F0 !important;
+  color: #0F172A !important;
+  transform: translateY(-1px) !important;
+}
+
+.civix-filter-pill.active {
+  background: #0072CE !important;
+  color: #FFFFFF !important;
+  border-color: #005A9E !important;
+  box-shadow: 0 2px 6px rgba(0, 114, 206, 0.3) !important;
+}
+
+.civix-filter-pill.pill-danger.active {
+  background: #DC2626 !important;
+  border-color: #B91C1C !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3) !important;
+}
+
+.civix-filter-pill.pill-warning.active {
+  background: #D97706 !important;
+  border-color: #B45309 !important;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3) !important;
+}
+
+.civix-filter-pill.pill-info.active {
+  background: #2563EB !important;
+  border-color: #1D4ED8 !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+}
+
+.civix-filter-pill.pill-success.active {
+  background: #059669 !important;
+  border-color: #047857 !important;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3) !important;
+}
+
+.civix-pill-cnt {
+  background: rgba(0, 0, 0, 0.08) !important;
+  padding: 1px 6px !important;
+  border-radius: 9999px !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+}
+
+.civix-filter-pill.active .civix-pill-cnt {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
+/* Floating Chart Tooltip */
+.civix-chart-card {
+  position: relative !important;
+}
+
+.civix-dynamic-chart-tooltip {
+  position: absolute !important;
+  top: 14px !important;
+  right: 18px !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  color: #FFFFFF !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  font-size: 11.5px !important;
+  pointer-events: none !important;
+  z-index: 100 !important;
+  animation: civixFadeIn 0.15s ease-out !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.civix-tooltip-title {
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  color: #38BDF8 !important;
+  margin-bottom: 4px !important;
+}
+
+.civix-tooltip-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-top: 3px !important;
+}
+
+/* Interactive SVG Bars */
+.civix-svg-bar {
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.civix-svg-bar:hover {
+  filter: brightness(1.2) drop-shadow(0 4px 8px rgba(37, 99, 235, 0.4)) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* AI Shimmer Button */
+.civix-btn-ai-glow {
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #2563EB 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.civix-btn-ai-glow:hover {
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+}

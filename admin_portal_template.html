@@ -15,6 +15,19 @@
       <span class="civix-workspace-badge">Admin & Operations</span>
     </div>
 
+    <!-- Real-Time SCADA Telemetry & Pulse Status Indicator -->
+    <div class="civix-header-telemetry-strip">
+      <div class="civix-telemetry-live-pill" ng-click="c.toggleAutoSync()" title="Click to pause or resume real-time Auto-Sync">
+        <span class="civix-radar-dot"></span>
+        <span style="font-weight: 700; font-size: 11px; letter-spacing: 0.04em;">SCADA TELEMETRY: LIVE</span>
+        <span class="civix-sync-badge">{{c.autoSyncEnabled ? c.autoSyncCountdown + 's' : 'PAUSED'}}</span>
+      </div>
+      <div class="civix-live-clock">
+        <i class="fa fa-clock-o text-muted"></i>
+        <span>{{c.liveTime || '18:45:00 IST'}}</span>
+      </div>
+    </div>
+
     <div class="civix-header-right">
       <!-- Chat Assistant Shortcut in Header -->
       <button class="civix-header-btn" ng-click="c.toggleChatAssistant()" title="Open CIVIX Operations Copilot">
@@ -193,6 +206,28 @@
             <button class="civix-btn civix-btn-secondary" ng-click="c.server.refresh()"><i class="fa fa-refresh"></i> Refresh</button>
             <button class="civix-btn civix-btn-primary" ng-click="c.setTab('tickets')"><i class="fa fa-plus"></i> Triage Queue</button>
           </div>
+        </div>
+
+        <!-- DYNAMIC QUICK TRIAGE & LIVE INCIDENT FILTER STRIP -->
+        <div class="civix-quick-filter-strip">
+          <span class="civix-quick-filter-title">
+            <span class="civix-radar-dot"></span> Live Incident Feed:
+          </span>
+          <button class="civix-filter-pill" ng-class="{'active': c.dashboardQuickFilter === 'all'}" ng-click="c.setDashboardQuickFilter('all')">
+            All Incidents <span class="civix-pill-cnt">{{c.data.cases.length}}</span>
+          </button>
+          <button class="civix-filter-pill pill-danger" ng-class="{'active': c.dashboardQuickFilter === 'critical'}" ng-click="c.setDashboardQuickFilter('critical')">
+            <i class="fa fa-bolt"></i> P1 Critical <span class="civix-pill-cnt">2</span>
+          </button>
+          <button class="civix-filter-pill pill-warning" ng-class="{'active': c.dashboardQuickFilter === 'overdue'}" ng-click="c.setDashboardQuickFilter('overdue')">
+            <i class="fa fa-exclamation-triangle"></i> Overdue / SLA Alert <span class="civix-pill-cnt">{{c.data.kpis.overdueCases}}</span>
+          </button>
+          <button class="civix-filter-pill pill-info" ng-class="{'active': c.dashboardQuickFilter === 'assigned'}" ng-click="c.setDashboardQuickFilter('assigned')">
+            <i class="fa fa-tasks"></i> Under Investigation <span class="civix-pill-cnt">{{c.data.kpis.openCases}}</span>
+          </button>
+          <button class="civix-filter-pill pill-success" ng-class="{'active': c.dashboardQuickFilter === 'crews'}" ng-click="c.setDashboardQuickFilter('crews')">
+            <i class="fa fa-truck"></i> Crews Dispatched <span class="civix-pill-cnt">{{c.data.kpis.activeWorkOrders}}</span>
+          </button>
         </div>
 
         <!-- 8 SERVICENOW UI16 KPI TILES (BLUE, RED, GREEN, AMBER) -->
@@ -377,7 +412,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="k in c.data.cases | limitTo:6">
+                <tr ng-repeat="k in c.data.cases | filter:c.filterDashboardCases | limitTo:6">
                   <td><a class="civix-wo-link" ng-click="c.openCaseWorkspace(k)"><i class="fa fa-folder-open-o"></i> {{k.u_number}}</a></td>
                   <td>{{k.u_category}}</td>
                   <td>{{k.u_ward}} ({{k.u_location}})</td>
@@ -659,7 +694,7 @@
                 <td>{{cz.u_phone}}</td>
                 <td>{{cz.u_email}}</td>
                 <td>{{cz.u_ward}}</td>
-                <td><span class="civix-badge civix-badge-info">{{cz.u_preferred_language}}</span></td>
+                <td><span class="civix-badge civix-badge-info"><i class="fa fa-globe"></i> {{cz.u_preferred_language || "English"}}</span></td>
                 <td><strong>{{cz.u_cases_count || 1}}</strong></td>
                 <td><span class="civix-badge civix-badge-success">{{cz.u_status}}</span></td>
                 <td>
@@ -966,34 +1001,42 @@
                 <text x="25" y="124" text-anchor="end" font-size="10" fill="#64748B">20</text>
                 <text x="25" y="168" text-anchor="end" font-size="10" fill="#64748B">0</text>
                 
+                <!-- Floating Interactive Chart Tooltip -->
+                <div class="civix-dynamic-chart-tooltip" ng-if="c.activeChartTooltip">
+                  <div class="civix-tooltip-title">{{c.activeChartTooltip.title}}</div>
+                  <div class="civix-tooltip-row text-primary"><i class="fa fa-arrow-down"></i> {{c.activeChartTooltip.line1}}</div>
+                  <div class="civix-tooltip-row text-success"><i class="fa fa-check-circle"></i> {{c.activeChartTooltip.line2}}</div>
+                  <div class="civix-tooltip-row text-info"><i class="fa fa-bolt"></i> {{c.activeChartTooltip.line3}}</div>
+                </div>
+
                 <!-- MAY BARS -->
-                <rect class="civix-svg-bar" x="55" y="80" width="18" height="85" rx="3" fill="#2563EB"><title>May Inflow: 38</title></rect>
-                <rect class="civix-svg-bar" x="76" y="95" width="18" height="70" rx="3" fill="#059669"><title>May Resolved: 32</title></rect>
+                <rect class="civix-svg-bar" x="55" y="80" width="18" height="85" rx="3" fill="#2563EB" ng-mouseenter="c.showBarTooltip('May 2026', 38, 32, 84.2)" ng-mouseleave="c.hideBarTooltip()"><title>May Inflow: 38</title></rect>
+                <rect class="civix-svg-bar" x="76" y="95" width="18" height="70" rx="3" fill="#059669" ng-mouseenter="c.showBarTooltip('May 2026', 38, 32, 84.2)" ng-mouseleave="c.hideBarTooltip()"><title>May Resolved: 32</title></rect>
                 <text x="74" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">May</text>
 
                 <!-- JUN BARS -->
-                <rect class="civix-svg-bar" x="125" y="65" width="18" height="100" rx="3" fill="#2563EB"><title>Jun Inflow: 45</title></rect>
-                <rect class="civix-svg-bar" x="146" y="75" width="18" height="90" rx="3" fill="#059669"><title>Jun Resolved: 40</title></rect>
+                <rect class="civix-svg-bar" x="125" y="65" width="18" height="100" rx="3" fill="#2563EB" ng-mouseenter="c.showBarTooltip('June 2026', 45, 40, 88.8)" ng-mouseleave="c.hideBarTooltip()"><title>Jun Inflow: 45</title></rect>
+                <rect class="civix-svg-bar" x="146" y="75" width="18" height="90" rx="3" fill="#059669" ng-mouseenter="c.showBarTooltip('June 2026', 45, 40, 88.8)" ng-mouseleave="c.hideBarTooltip()"><title>Jun Resolved: 40</title></rect>
                 <text x="144" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Jun</text>
 
                 <!-- JUL BARS -->
-                <rect class="civix-svg-bar" x="195" y="50" width="18" height="115" rx="3" fill="#2563EB"><title>Jul Inflow: 52</title></rect>
-                <rect class="civix-svg-bar" x="216" y="60" width="18" height="105" rx="3" fill="#059669"><title>Jul Resolved: 48</title></rect>
+                <rect class="civix-svg-bar" x="195" y="50" width="18" height="115" rx="3" fill="#2563EB" ng-mouseenter="c.showBarTooltip('July 2026', 52, 48, 92.3)" ng-mouseleave="c.hideBarTooltip()"><title>Jul Inflow: 52</title></rect>
+                <rect class="civix-svg-bar" x="216" y="60" width="18" height="105" rx="3" fill="#059669" ng-mouseenter="c.showBarTooltip('July 2026', 52, 48, 92.3)" ng-mouseleave="c.hideBarTooltip()"><title>Jul Resolved: 48</title></rect>
                 <text x="214" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Jul</text>
 
                 <!-- AUG BARS -->
-                <rect class="civix-svg-bar" x="265" y="40" width="18" height="125" rx="3" fill="#2563EB"><title>Aug Inflow: 56</title></rect>
-                <rect class="civix-svg-bar" x="286" y="48" width="18" height="117" rx="3" fill="#059669"><title>Aug Resolved: 53</title></rect>
+                <rect class="civix-svg-bar" x="265" y="40" width="18" height="125" rx="3" fill="#2563EB" ng-mouseenter="c.showBarTooltip('August 2026', 56, 53, 94.6)" ng-mouseleave="c.hideBarTooltip()"><title>Aug Inflow: 56</title></rect>
+                <rect class="civix-svg-bar" x="286" y="48" width="18" height="117" rx="3" fill="#059669" ng-mouseenter="c.showBarTooltip('August 2026', 56, 53, 94.6)" ng-mouseleave="c.hideBarTooltip()"><title>Aug Resolved: 53</title></rect>
                 <text x="284" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Aug</text>
 
                 <!-- SEP BARS -->
-                <rect class="civix-svg-bar" x="335" y="55" width="18" height="110" rx="3" fill="#2563EB"><title>Sep Inflow: 50</title></rect>
-                <rect class="civix-svg-bar" x="356" y="62" width="18" height="103" rx="3" fill="#059669"><title>Sep Resolved: 46</title></rect>
+                <rect class="civix-svg-bar" x="335" y="55" width="18" height="110" rx="3" fill="#2563EB" ng-mouseenter="c.showBarTooltip('September 2026', 50, 46, 92.0)" ng-mouseleave="c.hideBarTooltip()"><title>Sep Inflow: 50</title></rect>
+                <rect class="civix-svg-bar" x="356" y="62" width="18" height="103" rx="3" fill="#059669" ng-mouseenter="c.showBarTooltip('September 2026', 50, 46, 92.0)" ng-mouseleave="c.hideBarTooltip()"><title>Sep Resolved: 46</title></rect>
                 <text x="354" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Sep</text>
 
                 <!-- OCT BARS (CURRENT) -->
-                <rect class="civix-svg-bar" x="405" y="45" width="18" height="120" rx="3" fill="#1D4ED8"><title>Oct Inflow: 54</title></rect>
-                <rect class="civix-svg-bar" x="426" y="58" width="18" height="107" rx="3" fill="#10B981"><title>Oct Resolved: 49</title></rect>
+                <rect class="civix-svg-bar" x="405" y="45" width="18" height="120" rx="3" fill="#1D4ED8" ng-mouseenter="c.showBarTooltip('October 2026 (Live)', 54, 49, 90.7)" ng-mouseleave="c.hideBarTooltip()"><title>Oct Inflow: 54</title></rect>
+                <rect class="civix-svg-bar" x="426" y="58" width="18" height="107" rx="3" fill="#10B981" ng-mouseenter="c.showBarTooltip('October 2026 (Live)', 54, 49, 90.7)" ng-mouseleave="c.hideBarTooltip()"><title>Oct Resolved: 49</title></rect>
                 <text x="424" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#1D4ED8">Oct</text>
               </svg>
             </div>
@@ -2264,6 +2307,64 @@
           </button>
         </div>
         <button class="civix-btn civix-btn-secondary" ng-click="c.showCaseModal = false">Close Workspace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CITIZEN 360 PROFILE & GRIEVANCE DOSSIER MODAL -->
+  <div class="civix-modal-backdrop" ng-if="c.showCitizenModal">
+    <div class="civix-modal" style="max-width: 640px; width: 90%;">
+      <div class="civix-modal-header" style="border-bottom: 2px solid #0072CE;">
+        <h4><i class="fa fa-user-circle text-primary"></i> Citizen 360° Profile: {{c.selectedCitizen.u_citizen_id}}</h4>
+        <button class="civix-modal-close" ng-click="c.showCitizenModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;">
+          <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #0072CE, #38BDF8); color: #fff; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center;">
+            {{c.selectedCitizen.u_full_name.charAt(0) || 'C'}}
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">{{c.selectedCitizen.u_full_name}}</h3>
+            <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
+              <span class="civix-badge civix-badge-success" style="font-size: 10px;"><i class="fa fa-check-circle"></i> Aadhaar KYC Verified</span>
+              <span class="civix-badge civix-badge-info" style="font-size: 10px;"><i class="fa fa-globe"></i> {{c.selectedCitizen.u_preferred_language || 'English'}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 12.5px;">
+          <div style="background: #F8FAFC; padding: 10px 12px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Primary Phone</div>
+            <div style="font-weight: 700; color: #0F172A; margin-top: 2px;"><i class="fa fa-phone text-muted"></i> {{c.selectedCitizen.u_phone}}</div>
+          </div>
+          <div style="background: #F8FAFC; padding: 10px 12px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Email Contact</div>
+            <div style="font-weight: 700; color: #0F172A; margin-top: 2px;"><i class="fa fa-envelope-o text-muted"></i> {{c.selectedCitizen.u_email}}</div>
+          </div>
+          <div style="background: #F8FAFC; padding: 10px 12px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Jurisdictional Ward</div>
+            <div style="font-weight: 700; color: #0F172A; margin-top: 2px;"><i class="fa fa-map-marker text-muted"></i> {{c.selectedCitizen.u_ward}}</div>
+          </div>
+          <div style="background: #F8FAFC; padding: 10px 12px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Civic Trust Score</div>
+            <div style="font-weight: 800; color: #059669; margin-top: 2px;"><i class="fa fa-star"></i> 98 / 100 (Exemplary)</div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #E2E8F0; padding-top: 14px;">
+          <h5 style="margin: 0 0 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; color: #475569;">Grievance & Case Records</h5>
+          <div style="background: #F1F5F9; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: #0F172A; font-size: 12.5px;">CIV-2026-00860 &bull; Public Safety & Hazards</strong>
+              <div style="font-size: 11px; color: #64748B;">Ward 102 - Anna Nagar &bull; Dispatched to WO-2026-00105</div>
+            </div>
+            <span class="civix-badge civix-badge-info">Assigned</span>
+          </div>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showCitizenModal = false">Close</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.setTab('cases'); c.showCitizenModal = false"><i class="fa fa-folder-open-o"></i> View Citizen Cases</button>
       </div>
     </div>
   </div>
