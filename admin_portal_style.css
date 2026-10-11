@@ -1248,3 +1248,204 @@
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* ==========================================================================
+   7. ADVANCED ANALYTICS CHARTS & DATA VISUALIZATIONS (UI16 VISUAL SUITE)
+   ========================================================================== */
+.civix-charts-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px !important;
+  margin-bottom: 24px !important;
+}
+
+.civix-charts-row-3 {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  margin-bottom: 24px !important;
+}
+
+.civix-chart-card {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: all 0.25s ease !important;
+}
+
+.civix-chart-card:hover {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08) !important;
+  border-color: #93C5FD !important;
+}
+
+.civix-chart-card-header {
+  padding: 12px 18px !important;
+  background: #F8FAFC !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.civix-chart-title {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #0F2D54 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.civix-chart-card-body {
+  padding: 20px !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.civix-donut-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  gap: 20px !important;
+  flex-wrap: wrap !important;
+}
+
+.civix-legend-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  flex: 1 !important;
+  min-width: 170px !important;
+}
+
+.civix-legend-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 12px !important;
+  color: #1E293B !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+.civix-legend-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.civix-legend-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+}
+
+.civix-legend-val {
+  font-weight: 700 !important;
+  color: #0F172A !important;
+}
+
+/* Callout KPI Grid for Analytics Dashboard */
+.civix-analytics-callouts {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 16px !important;
+  margin-bottom: 24px !important;
+}
+
+.civix-callout-card {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 6px !important;
+  padding: 16px 20px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-left: 4px solid #2563EB !important;
+  transition: all 0.2s ease !important;
+}
+
+.civix-callout-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.12) !important;
+}
+
+.civix-callout-label {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 6px !important;
+}
+
+.civix-callout-val {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #0F2D54 !important;
+  line-height: 1.1 !important;
+  margin-bottom: 4px !important;
+}
+
+.civix-callout-sub {
+  font-size: 11.5px !important;
+  color: #475569 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Interactive SVG Bar Chart animations */
+.civix-svg-bar {
+  transition: all 0.25s ease !important;
+  cursor: pointer !important;
+}
+
+.civix-svg-bar:hover {
+  filter: brightness(1.2) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25)) !important;
+  transform: scaleY(1.02) !important;
+}
+
+.civix-progress-bar-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.civix-progress-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.civix-progress-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+}
+
+.civix-progress-track {
+  height: 10px !important;
+  background: #E2E8F0 !important;
+  border-radius: 5px !important;
+  overflow: hidden !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.civix-progress-fill {
+  height: 100% !important;
+  border-radius: 5px !important;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}

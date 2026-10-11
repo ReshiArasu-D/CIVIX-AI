@@ -270,51 +270,88 @@
           </div>
         </div>
 
-        <!-- OPERATIONAL VISUALIZATIONS -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
-          <!-- Category Distribution Panel -->
+        <!-- OPERATIONAL VISUALIZATIONS (RICH ANALYTICS DASHBOARD) -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <!-- Category Distribution Panel with SVG Donut & Visual Progress Bars -->
           <div class="civix-panel">
             <div class="civix-panel-header">
               <h3 class="civix-panel-title"><i class="fa fa-pie-chart text-primary"></i> Incidents by Service Category</h3>
               <span class="civix-badge civix-badge-info">Deterministic Aggregation</span>
             </div>
-            <div class="civix-panel-body">
-              <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div ng-repeat="cat in c.data.categories | limitTo:5">
-                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 5px;">
-                    <span style="color: #0F172A !important; font-weight: 800;">{{cat.u_category_name}}</span>
-                    <span style="color: #2563EB !important; font-weight: 700;">Active: 1</span>
-                  </div>
-                  <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
-                    <div style="height: 100%; background: var(--sn-primary-blue); width: 25%; border-radius: 3px;"></div>
+            <div class="civix-panel-body" style="padding: 16px;">
+              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 20px; align-items: center;">
+                <!-- SVG Donut Chart -->
+                <div style="text-align: center;">
+                  <svg viewBox="0 0 140 140" width="130" height="130" style="transform: rotate(-90deg);">
+                    <circle r="48" cx="70" cy="70" fill="transparent" stroke="#E2E8F0" stroke-width="22"></circle>
+                    <!-- Roads & Potholes (35% - #2563EB) -->
+                    <circle r="48" cx="70" cy="70" fill="transparent" stroke="#2563EB" stroke-width="22" stroke-dasharray="105 196" stroke-dashoffset="0"></circle>
+                    <!-- Solid Waste (25% - #059669) -->
+                    <circle r="48" cx="70" cy="70" fill="transparent" stroke="#059669" stroke-width="22" stroke-dasharray="75 226" stroke-dashoffset="-105"></circle>
+                    <!-- Water & Sewage (20% - #0284C7) -->
+                    <circle r="48" cx="70" cy="70" fill="transparent" stroke="#0284C7" stroke-width="22" stroke-dasharray="60 241" stroke-dashoffset="-180"></circle>
+                    <!-- Street Lighting (20% - #D97706) -->
+                    <circle r="48" cx="70" cy="70" fill="transparent" stroke="#D97706" stroke-width="22" stroke-dasharray="60 241" stroke-dashoffset="-240"></circle>
+                    <g style="transform: rotate(90deg); transform-origin: 70px 70px;">
+                      <text x="70" y="66" text-anchor="middle" font-size="18" font-weight="900" fill="#0F172A">{{c.data.cases.length || 5}}</text>
+                      <text x="70" y="82" text-anchor="middle" font-size="8.5" font-weight="700" fill="#64748B">ACTIVE</text>
+                    </g>
+                  </svg>
+                </div>
+
+                <!-- Visual Category Progress Bars -->
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div ng-repeat="cat in c.data.categories | limitTo:4">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+                      <span style="color: #0F172A !important; font-weight: 800;"><i class="fa fa-folder-o text-muted" style="margin-right: 4px;"></i> {{cat.u_name || cat.u_category_name}}</span>
+                      <span style="color: #2563EB !important; font-weight: 800;">{{$index === 0 ? '35%' : ($index === 1 ? '25%' : '20%')}}</span>
+                    </div>
+                    <div style="height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                      <div style="height: 100%; border-radius: 4px; transition: width 0.4s ease;" 
+                           ng-style="{'width': ($index === 0 ? '35%' : ($index === 1 ? '25%' : '20%')), 'background': ($index === 0 ? '#2563EB' : ($index === 1 ? '#059669' : ($index === 2 ? '#0284C7' : '#D97706')))}"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Telemetry Grid Health Status -->
+          <!-- Real-Time SLA Speedometer Radial Gauge & SCADA Telemetry -->
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-signal text-primary"></i> Telemetry Grid Health</h3>
+              <h3 class="civix-panel-title"><i class="fa fa-dashboard text-primary"></i> Real-Time SLA Health & Grid</h3>
               <span class="civix-badge civix-badge-success">SCADA Live</span>
             </div>
-            <div class="civix-panel-body" style="display: flex; flex-direction: column; gap: 10px;">
-              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
-                <span>Flood Depth Sentinels</span>
-                <span class="civix-badge civix-badge-success">2 Active</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
-                <span>Air Quality Monitors (AQI)</span>
-                <span class="civix-badge civix-badge-success">1 Active</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
-                <span>Solid Waste Bin Sensors</span>
-                <span class="civix-badge civix-badge-success">1 Active</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
-                <span>Smart Streetlight Photocell</span>
-                <span class="civix-badge civix-badge-success">1 Active</span>
+            <div class="civix-panel-body" style="padding: 16px; display: flex; flex-direction: column; align-items: center;">
+              <!-- Radial Half-Gauge / Speedometer -->
+              <svg viewBox="0 0 200 110" width="180" height="100" style="overflow: visible;">
+                <!-- Gray background arc -->
+                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#E2E8F0" stroke-width="16" stroke-linecap="round"></path>
+                <!-- Red Zone (<60%) -->
+                <path d="M 20 100 A 80 80 0 0 1 65 38" fill="none" stroke="#F87171" stroke-width="16" stroke-linecap="round"></path>
+                <!-- Amber Zone (60-80%) -->
+                <path d="M 65 38 A 80 80 0 0 1 125 25" fill="none" stroke="#FBBF24" stroke-width="16"></path>
+                <!-- Green Zone (80-100%) -->
+                <path d="M 125 25 A 80 80 0 0 1 180 100" fill="none" stroke="#10B981" stroke-width="16" stroke-linecap="round"></path>
+                <!-- Needle Pointer -->
+                <line x1="100" y1="100" x2="148" y2="45" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round"></line>
+                <circle cx="100" cy="100" r="7" fill="#1E293B"></circle>
+                <circle cx="100" cy="100" r="3" fill="#FFFFFF"></circle>
+                <!-- Gauge Value Text -->
+                <text x="100" y="85" text-anchor="middle" font-size="20" font-weight="900" fill="#0F172A">{{c.data.kpis.slaCompliance}}%</text>
+                <text x="100" y="98" text-anchor="middle" font-size="9" font-weight="700" fill="#059669">COMPLIANT TARGET</text>
+              </svg>
+
+              <!-- Telemetry Quick Status Strip -->
+              <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 6px 10px; font-size: 11px;">
+                  <span style="color: #64748B;">Sensors Online:</span>
+                  <div style="font-weight: 800; color: #059669; font-size: 13px;"><i class="fa fa-wifi"></i> 5 / 5 Grid Units</div>
+                </div>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 6px 10px; font-size: 11px;">
+                  <span style="color: #64748B;">Overdue Breaches:</span>
+                  <div style="font-weight: 800; color: #DC2626; font-size: 13px;"><i class="fa fa-clock-o"></i> 1 Case Alert</div>
+                </div>
               </div>
             </div>
           </div>
@@ -792,10 +829,268 @@
           </div>
         </div>
 
+        <!-- 1. TOP ANALYTICS CALLOUT METRICS -->
+        <div class="civix-analytics-callouts">
+          <div class="civix-callout-card" style="border-left-color: #2563EB;">
+            <span class="civix-callout-label">Mean Time to Acknowledge</span>
+            <div class="civix-callout-val">18 <span style="font-size: 14px; font-weight: 600; color: #64748B;">Mins</span></div>
+            <div class="civix-callout-sub text-success"><i class="fa fa-arrow-down"></i> <strong>24% faster</strong> than benchmark</div>
+          </div>
+          <div class="civix-callout-card" style="border-left-color: #059669;">
+            <span class="civix-callout-label">Mean Time to Resolve (MTTR)</span>
+            <div class="civix-callout-val">14.2 <span style="font-size: 14px; font-weight: 600; color: #64748B;">Hours</span></div>
+            <div class="civix-callout-sub text-success"><i class="fa fa-check"></i> Within standard 24h window</div>
+          </div>
+          <div class="civix-callout-card" style="border-left-color: #0284C7;">
+            <span class="civix-callout-label">First-Time Resolution (FTR)</span>
+            <div class="civix-callout-val">91.5%</div>
+            <div class="civix-callout-sub text-success"><i class="fa fa-arrow-up"></i> High verification accuracy</div>
+          </div>
+          <div class="civix-callout-card" style="border-left-color: #D97706;">
+            <span class="civix-callout-label">SLA Compliance Rate</span>
+            <div class="civix-callout-val">{{c.data.kpis.slaCompliance}}%</div>
+            <div class="civix-callout-sub text-warning"><i class="fa fa-exclamation-triangle"></i> 1 Case past target deadline</div>
+          </div>
+        </div>
+
+        <!-- 2. VISUAL CHARTS ROW 1: BAR CHART & DONUT CHART -->
+        <div class="civix-charts-row">
+          
+          <!-- MULTI-COLUMN BAR CHART (INFLOW VS RESOLVED) -->
+          <div class="civix-chart-card">
+            <div class="civix-chart-card-header">
+              <h3 class="civix-chart-title"><i class="fa fa-bar-chart text-primary"></i> Monthly Incident Inflow vs Resolution Trend</h3>
+              <div style="display: flex; gap: 8px; font-size: 11px;">
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #2563EB; border-radius: 2px;"></span> Inflow</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: #059669; border-radius: 2px;"></span> Resolved</span>
+              </div>
+            </div>
+            <div class="civix-chart-card-body">
+              <svg viewBox="0 0 500 200" width="100%" height="200" style="overflow: visible;">
+                <!-- Grid Lines -->
+                <line x1="35" y1="30" x2="480" y2="30" stroke="#E2E8F0" stroke-dasharray="3 3"></line>
+                <line x1="35" y1="75" x2="480" y2="75" stroke="#E2E8F0" stroke-dasharray="3 3"></line>
+                <line x1="35" y1="120" x2="480" y2="120" stroke="#E2E8F0" stroke-dasharray="3 3"></line>
+                <line x1="35" y1="165" x2="480" y2="165" stroke="#CBD5E1" stroke-width="1.5"></line>
+                <!-- Y-Axis Labels -->
+                <text x="25" y="34" text-anchor="end" font-size="10" fill="#64748B">60</text>
+                <text x="25" y="79" text-anchor="end" font-size="10" fill="#64748B">40</text>
+                <text x="25" y="124" text-anchor="end" font-size="10" fill="#64748B">20</text>
+                <text x="25" y="168" text-anchor="end" font-size="10" fill="#64748B">0</text>
+                
+                <!-- MAY BARS -->
+                <rect class="civix-svg-bar" x="55" y="80" width="18" height="85" rx="3" fill="#2563EB"><title>May Inflow: 38</title></rect>
+                <rect class="civix-svg-bar" x="76" y="95" width="18" height="70" rx="3" fill="#059669"><title>May Resolved: 32</title></rect>
+                <text x="74" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">May</text>
+
+                <!-- JUN BARS -->
+                <rect class="civix-svg-bar" x="125" y="65" width="18" height="100" rx="3" fill="#2563EB"><title>Jun Inflow: 45</title></rect>
+                <rect class="civix-svg-bar" x="146" y="75" width="18" height="90" rx="3" fill="#059669"><title>Jun Resolved: 40</title></rect>
+                <text x="144" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Jun</text>
+
+                <!-- JUL BARS -->
+                <rect class="civix-svg-bar" x="195" y="50" width="18" height="115" rx="3" fill="#2563EB"><title>Jul Inflow: 52</title></rect>
+                <rect class="civix-svg-bar" x="216" y="60" width="18" height="105" rx="3" fill="#059669"><title>Jul Resolved: 48</title></rect>
+                <text x="214" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Jul</text>
+
+                <!-- AUG BARS -->
+                <rect class="civix-svg-bar" x="265" y="40" width="18" height="125" rx="3" fill="#2563EB"><title>Aug Inflow: 56</title></rect>
+                <rect class="civix-svg-bar" x="286" y="48" width="18" height="117" rx="3" fill="#059669"><title>Aug Resolved: 53</title></rect>
+                <text x="284" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Aug</text>
+
+                <!-- SEP BARS -->
+                <rect class="civix-svg-bar" x="335" y="55" width="18" height="110" rx="3" fill="#2563EB"><title>Sep Inflow: 50</title></rect>
+                <rect class="civix-svg-bar" x="356" y="62" width="18" height="103" rx="3" fill="#059669"><title>Sep Resolved: 46</title></rect>
+                <text x="354" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Sep</text>
+
+                <!-- OCT BARS (CURRENT) -->
+                <rect class="civix-svg-bar" x="405" y="45" width="18" height="120" rx="3" fill="#1D4ED8"><title>Oct Inflow: 54</title></rect>
+                <rect class="civix-svg-bar" x="426" y="58" width="18" height="107" rx="3" fill="#10B981"><title>Oct Resolved: 49</title></rect>
+                <text x="424" y="182" text-anchor="middle" font-size="11" font-weight="700" fill="#1D4ED8">Oct</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- SVG DONUT / PIE CHART (PRIORITY DISTRIBUTION) -->
+          <div class="civix-chart-card">
+            <div class="civix-chart-card-header">
+              <h3 class="civix-chart-title"><i class="fa fa-pie-chart text-primary"></i> Incident Priority Distribution</h3>
+              <span class="civix-badge civix-badge-info">Active Severity Breakdown</span>
+            </div>
+            <div class="civix-chart-card-body">
+              <div class="civix-donut-wrap">
+                <!-- SVG Donut Chart -->
+                <svg viewBox="0 0 160 160" width="150" height="150" style="transform: rotate(-90deg);">
+                  <!-- Background Track -->
+                  <circle r="55" cx="80" cy="80" fill="transparent" stroke="#E2E8F0" stroke-width="26"></circle>
+                  <!-- P1 Critical (20% - red) -->
+                  <circle r="55" cx="80" cy="80" fill="transparent" stroke="#DC2626" stroke-width="26" stroke-dasharray="69 276" stroke-dashoffset="0"></circle>
+                  <!-- P2 High (40% - amber) -->
+                  <circle r="55" cx="80" cy="80" fill="transparent" stroke="#D97706" stroke-width="26" stroke-dasharray="138 207" stroke-dashoffset="-69"></circle>
+                  <!-- P3 Medium (20% - yellow) -->
+                  <circle r="55" cx="80" cy="80" fill="transparent" stroke="#F59E0B" stroke-width="26" stroke-dasharray="69 276" stroke-dashoffset="-207"></circle>
+                  <!-- P4 Low (20% - blue) -->
+                  <circle r="55" cx="80" cy="80" fill="transparent" stroke="#2563EB" stroke-width="26" stroke-dasharray="69 276" stroke-dashoffset="-276"></circle>
+                  <!-- Center text -->
+                  <g style="transform: rotate(90deg); transform-origin: 80px 80px;">
+                    <text x="80" y="76" text-anchor="middle" font-size="22" font-weight="900" fill="#0F172A">5</text>
+                    <text x="80" y="94" text-anchor="middle" font-size="9.5" font-weight="700" fill="#64748B">CASES</text>
+                  </g>
+                </svg>
+
+                <!-- Legend List -->
+                <div class="civix-legend-list">
+                  <div class="civix-legend-item">
+                    <div class="civix-legend-left">
+                      <span class="civix-legend-dot" style="background: #DC2626;"></span>
+                      <strong>P1 Critical (4h SLA)</strong>
+                    </div>
+                    <span class="civix-legend-val">1 Case (20%)</span>
+                  </div>
+                  <div class="civix-legend-item">
+                    <div class="civix-legend-left">
+                      <span class="civix-legend-dot" style="background: #D97706;"></span>
+                      <strong>P2 High (24h SLA)</strong>
+                    </div>
+                    <span class="civix-legend-val">2 Cases (40%)</span>
+                  </div>
+                  <div class="civix-legend-item">
+                    <div class="civix-legend-left">
+                      <span class="civix-legend-dot" style="background: #F59E0B;"></span>
+                      <strong>P3 Medium (72h)</strong>
+                    </div>
+                    <span class="civix-legend-val">1 Case (20%)</span>
+                  </div>
+                  <div class="civix-legend-item">
+                    <div class="civix-legend-left">
+                      <span class="civix-legend-dot" style="background: #2563EB;"></span>
+                      <strong>P4 Low (168h)</strong>
+                    </div>
+                    <span class="civix-legend-val">1 Case (20%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3. VISUAL CHARTS ROW 2: AREA WAVE TREND & ZONE PROGRESS BARS -->
+        <div class="civix-charts-row">
+          
+          <!-- AREA WAVE TREND GRAPH (7-DAY TRIAGE VELOCITY) -->
+          <div class="civix-chart-card">
+            <div class="civix-chart-card-header">
+              <h3 class="civix-chart-title"><i class="fa fa-line-chart text-primary"></i> 7-Day Municipal Incident Velocity & Wave</h3>
+              <span class="civix-badge civix-badge-success">Peak Hour Triage Tracking</span>
+            </div>
+            <div class="civix-chart-card-body">
+              <svg viewBox="0 0 500 170" width="100%" height="170" style="overflow: visible;">
+                <defs>
+                  <linearGradient id="areaGradientBlue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2563EB" stop-opacity="0.35"></stop>
+                    <stop offset="100%" stop-color="#2563EB" stop-opacity="0.0"></stop>
+                  </linearGradient>
+                </defs>
+                <!-- Baseline Grid -->
+                <line x1="30" y1="30" x2="480" y2="30" stroke="#F1F5F9" stroke-width="1"></line>
+                <line x1="30" y1="75" x2="480" y2="75" stroke="#F1F5F9" stroke-width="1"></line>
+                <line x1="30" y1="120" x2="480" y2="120" stroke="#CBD5E1" stroke-width="1.5"></line>
+
+                <!-- Area Fill -->
+                <path d="M 40 100 Q 110 40, 180 85 T 320 35 T 460 50 L 460 120 L 40 120 Z" fill="url(#areaGradientBlue)"></path>
+                <!-- Curve Line -->
+                <path d="M 40 100 Q 110 40, 180 85 T 320 35 T 460 50" fill="none" stroke="#2563EB" stroke-width="3.5" stroke-linecap="round"></path>
+                
+                <!-- Data Points -->
+                <circle cx="40" cy="100" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+                <circle cx="110" cy="62" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+                <circle cx="180" cy="85" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+                <circle cx="250" cy="60" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+                <circle cx="320" cy="35" r="5" fill="#2563EB" stroke="#FFFFFF" stroke-width="2"><title>Peak Triage: 48 reports</title></circle>
+                <circle cx="390" cy="42" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+                <circle cx="460" cy="50" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+
+                <!-- Day Labels -->
+                <text x="40" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Mon</text>
+                <text x="110" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Tue</text>
+                <text x="180" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Wed</text>
+                <text x="250" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Thu</text>
+                <text x="320" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#1D4ED8">Fri (Peak)</text>
+                <text x="390" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Sat</text>
+                <text x="460" y="140" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Sun</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- HORIZONTAL ZONE PROGRESS BREAKDOWN -->
+          <div class="civix-chart-card">
+            <div class="civix-chart-card-header">
+              <h3 class="civix-chart-title"><i class="fa fa-map text-primary"></i> Corporation Zone Workload Distribution</h3>
+              <span class="civix-badge civix-badge-info">5 Active Zones</span>
+            </div>
+            <div class="civix-chart-card-body">
+              <div class="civix-progress-bar-wrap">
+                <div class="civix-progress-item">
+                  <div class="civix-progress-meta">
+                    <span>Zone 13 &bull; Adyar</span>
+                    <span style="color: #2563EB;">32% Load &bull; 2 Active</span>
+                  </div>
+                  <div class="civix-progress-track">
+                    <div class="civix-progress-fill" style="width: 32%; background: linear-gradient(90deg, #2563EB, #3B82F6);"></div>
+                  </div>
+                </div>
+
+                <div class="civix-progress-item">
+                  <div class="civix-progress-meta">
+                    <span>Zone 9 &bull; T. Nagar</span>
+                    <span style="color: #059669;">24% Load &bull; 1 Active</span>
+                  </div>
+                  <div class="civix-progress-track">
+                    <div class="civix-progress-fill" style="width: 24%; background: linear-gradient(90deg, #059669, #10B981);"></div>
+                  </div>
+                </div>
+
+                <div class="civix-progress-item">
+                  <div class="civix-progress-meta">
+                    <span>Zone 5 &bull; Royapuram</span>
+                    <span style="color: #D97706;">18% Load &bull; 1 Active</span>
+                  </div>
+                  <div class="civix-progress-track">
+                    <div class="civix-progress-fill" style="width: 18%; background: linear-gradient(90deg, #D97706, #F59E0B);"></div>
+                  </div>
+                </div>
+
+                <div class="civix-progress-item">
+                  <div class="civix-progress-meta">
+                    <span>Zone 8 &bull; Anna Nagar</span>
+                    <span style="color: #0284C7;">16% Load &bull; 1 Active</span>
+                  </div>
+                  <div class="civix-progress-track">
+                    <div class="civix-progress-fill" style="width: 16%; background: linear-gradient(90deg, #0284C7, #38BDF8);"></div>
+                  </div>
+                </div>
+
+                <div class="civix-progress-item">
+                  <div class="civix-progress-meta">
+                    <span>Zone 10 &bull; Kodambakkam</span>
+                    <span style="color: #6366F1;">10% Load &bull; 1 Active</span>
+                  </div>
+                  <div class="civix-progress-track">
+                    <div class="civix-progress-fill" style="width: 10%; background: linear-gradient(90deg, #6366F1, #818CF8);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 4. DRILL-DOWN DATA TABLES -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-bar-chart text-primary"></i> SLA Compliance by Severity</h3>
+              <h3 class="civix-panel-title"><i class="fa fa-bar-chart text-primary"></i> SLA Compliance by Severity Drill-Down</h3>
             </div>
             <div class="civix-panel-body">
               <table class="civix-table">
@@ -839,7 +1134,7 @@
 
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-building text-primary"></i> Zone Incident Load</h3>
+              <h3 class="civix-panel-title"><i class="fa fa-building text-primary"></i> Zone Incident Load Detailed Records</h3>
             </div>
             <div class="civix-panel-body">
               <table class="civix-table">
@@ -848,19 +1143,15 @@
                     <th>Zone Name</th>
                     <th>Code</th>
                     <th>Open Incidents</th>
-                    <th>Workload Factor</th>
+                    <th>Executive Contact</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr ng-repeat="z in c.data.zones | limitTo:5">
-                    <td>{{z.u_zone_name}}</td>
-                    <td><strong>{{z.u_zone_code}}</strong></td>
-                    <td>1 Active</td>
-                    <td>
-                      <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden; width: 80px;">
-                        <div style="height: 100%; background: var(--sn-primary-blue); width: 35%;"></div>
-                      </div>
-                    </td>
+                    <td><strong>{{z.u_zone_name}}</strong></td>
+                    <td>{{z.u_zone_code}}</td>
+                    <td>1 Active Case</td>
+                    <td>{{z.u_contact_phone}}</td>
                   </tr>
                 </tbody>
               </table>
