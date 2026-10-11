@@ -490,25 +490,26 @@
     var wardRec = data.wards[wLk];
     var wNum = wardRec.u_ward_code || '';
     var wName = wardRec.u_ward_name || '';
+    var wDigits = wNum.replace(/[^0-9]/g, '');
 
     var astCnt = 0;
     for (var astK = 0; astK < data.assets.length; astK++) {
       var aWd = data.assets[astK].u_ward || '';
-      if (aWd && (aWd.indexOf(wNum) !== -1 || aWd.indexOf(wName) !== -1)) astCnt++;
+      if (aWd && ((wDigits && aWd.indexOf(wDigits) !== -1) || aWd.indexOf(wNum) !== -1 || aWd.indexOf(wName) !== -1)) astCnt++;
     }
     wardRec.assetsCount = astCnt;
 
     var senCnt = 0;
     for (var senK = 0; senK < data.sensors.length; senK++) {
       var sWd = data.sensors[senK].u_ward || '';
-      if (sWd && (sWd.indexOf(wNum) !== -1 || sWd.indexOf(wName) !== -1)) senCnt++;
+      if (sWd && ((wDigits && sWd.indexOf(wDigits) !== -1) || sWd.indexOf(wNum) !== -1 || sWd.indexOf(wName) !== -1)) senCnt++;
     }
     wardRec.sensorsCount = senCnt;
 
     var csCnt = 0;
     for (var csK = 0; csK < data.cases.length; csK++) {
       var cWd = data.cases[csK].u_ward || '';
-      if (cWd && (cWd.indexOf(wNum) !== -1 || cWd.indexOf(wName) !== -1)) csCnt++;
+      if (cWd && ((wDigits && cWd.indexOf(wDigits) !== -1) || cWd.indexOf(wNum) !== -1 || cWd.indexOf(wName) !== -1)) csCnt++;
     }
     wardRec.casesCount = csCnt;
   }

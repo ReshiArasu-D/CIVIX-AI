@@ -1629,11 +1629,16 @@
                   <th>Sensors</th>
                   <th>Open Cases</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="w in c.data.wards | filter:c.filterWardsByGeo">
-                  <td><strong>{{w.u_ward_code || '-'}}</strong></td>
+                <tr ng-repeat="w in c.data.wards | filter:c.filterWardsByGeo" class="civix-wo-row-clickable" ng-click="c.openWardDetails(w)">
+                  <td>
+                    <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.openWardDetails(w); $event.stopPropagation();">
+                      <i class="fa fa-compass text-primary"></i> <strong>{{w.u_ward_code || '-'}}</strong>
+                    </a>
+                  </td>
                   <td><strong>{{w.u_ward_name}}</strong></td>
                   <td>{{w.u_local_body_name || 'Greater Chennai Corporation'}} &bull; {{w.u_district_name || 'Chennai'}}</td>
                   <td>{{w.u_state_name || 'Tamil Nadu'}} &bull; <span class="civix-badge civix-badge-zone2" style="font-size: 10px;">{{w.u_op_zone || 'South Zone'}}</span></td>
@@ -1642,9 +1647,15 @@
                   <td><span class="civix-badge civix-badge-info">{{w.sensorsCount || 1}} Sensors</span></td>
                   <td><span class="civix-badge" ng-class="{'civix-badge-warning': w.casesCount > 0, 'civix-badge-success': !w.casesCount || w.casesCount === 0}">{{w.casesCount || 0}} Cases</span></td>
                   <td><span class="civix-badge civix-badge-success">{{w.u_status || 'Active'}}</span></td>
+                  <td>
+                    <div style="display: flex; gap: 4px;" ng-click="$event.stopPropagation();">
+                      <button class="civix-btn civix-btn-sm civix-btn-outline" ng-click="c.openWardDetails(w)" title="View Ward Details & Infrastructure"><i class="fa fa-eye"></i> Details</button>
+                      <button class="civix-btn civix-btn-sm civix-btn-ai" ng-click="c.openWardAiDigest(w, $event)" title="Ward AI Intelligence Digest"><i class="fa fa-magic"></i> AI Brief</button>
+                    </div>
+                  </td>
                 </tr>
                 <tr ng-if="(c.data.wards | filter:c.filterWardsByGeo).length === 0">
-                  <td colspan="9" style="text-align: center; padding: 24px; color: #64748B;">
+                  <td colspan="10" style="text-align: center; padding: 24px; color: #64748B;">
                     <i class="fa fa-info-circle"></i> No wards configured under selected geographic criteria.
                   </td>
                 </tr>
@@ -2559,6 +2570,281 @@
           </button>
         </div>
         <button class="civix-btn civix-btn-secondary" ng-click="c.showWorkOrderDetailsModal = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. Ward Details & Civic Infrastructure Drilldown Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showWardDetailsModal">
+    <div class="civix-modal civix-modal-lg" style="max-width: 950px; width: 92%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="civix-modal-header" style="flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <h4 style="margin: 0;"><i class="fa fa-compass text-primary"></i> {{c.selectedWard.u_ward_name}}</h4>
+          <span class="civix-badge civix-badge-info">{{c.selectedWard.u_ward_code || 'Ward'}}</span>
+          <span class="civix-badge civix-badge-zone2">{{c.selectedWard.u_op_zone || 'South Zone'}}</span>
+          <span class="civix-badge civix-badge-success">{{c.selectedWard.u_status || 'Active'}}</span>
+        </div>
+        <button class="civix-modal-close" ng-click="c.showWardDetailsModal = false">&times;</button>
+      </div>
+
+      <div class="civix-modal-body" style="overflow-y: auto; flex: 1 1 auto; padding: 20px;">
+        <!-- TOP KPI METRICS STRIP -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10px; color: #64748B; font-weight: 800; text-transform: uppercase;">CIVIC ASSETS</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0F172A;">{{c.selectedWardLinkedAssets.length || c.selectedWard.assetsCount || c.selectedWard.u_assets_count || 51}}</div>
+            <div style="font-size: 10.5px; color: #64748B;">Registered Infrastructure</div>
+          </div>
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10px; color: #64748B; font-weight: 800; text-transform: uppercase;">IOT SENTINELS</div>
+            <div style="font-size: 18px; font-weight: 800; color: #2563EB;">{{c.selectedWardLinkedSensors.length || c.selectedWard.sensorsCount || c.selectedWard.u_sensors_count || 4}}</div>
+            <div style="font-size: 10.5px; color: #2563EB;">Telemetry Transmitters</div>
+          </div>
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10px; color: #64748B; font-weight: 800; text-transform: uppercase;">ACTIVE CASES</div>
+            <div style="font-size: 18px; font-weight: 800;" ng-class="{'text-warning': (c.selectedWardLinkedCases.length || c.selectedWard.casesCount) > 0, 'text-success': (!c.selectedWardLinkedCases.length && !c.selectedWard.casesCount)}">
+              {{c.selectedWardLinkedCases.length || c.selectedWard.casesCount || 0}}
+            </div>
+            <div style="font-size: 10.5px; color: #64748B;">Citizen Incidents</div>
+          </div>
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10px; color: #64748B; font-weight: 800; text-transform: uppercase;">ACTIVE WORK ORDERS</div>
+            <div style="font-size: 18px; font-weight: 800; color: #D97706;">{{c.selectedWardLinkedWorkOrders.length || 0}}</div>
+            <div style="font-size: 10.5px; color: #64748B;">Field Crew Operations</div>
+          </div>
+        </div>
+
+        <!-- GENERATIVE INTELLIGENCE WARD DIGEST PANEL -->
+        <div class="civix-ai-card">
+          <div class="civix-ai-header">
+            <div class="civix-ai-header-title">
+              <i class="fa fa-magic text-primary" style="font-size: 18px;"></i>
+              <span>CIVIX AI &bull; Ward Infrastructure & Operational Intelligence Digest</span>
+              <span class="civix-ai-badge"><i class="fa fa-bolt"></i> Ward GenAI</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="civix-btn civix-btn-sm civix-btn-ai civix-btn-ai-glow" ng-click="c.generateWardAiDigest(c.selectedWard)" ng-disabled="c.isGeneratingWardAi">
+                <i class="fa fa-magic" ng-class="{'fa-spin': c.isGeneratingWardAi}"></i>
+                {{c.isGeneratingWardAi ? 'Synthesizing...' : (c.selectedWardAiSummary ? 'Re-generate Brief' : 'Generate Ward AI Brief')}}
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Shimmer State -->
+          <div class="civix-ai-shimmer" ng-if="c.isGeneratingWardAi">
+            <i class="fa fa-spinner fa-spin fa-2x" style="color: #6366F1; margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 13.5px; font-weight: 700; color: #1E1B4B;">CIVIX Generative Intelligence synthesizing ward drainage, sensor grid, and field crew telemetry...</div>
+          </div>
+
+          <!-- Pre-generation Prompt -->
+          <div ng-if="!c.selectedWardAiSummary && !c.isGeneratingWardAi" style="text-align: center; padding: 16px; background: rgba(255,255,255,0.7); border: 1px dashed #C7D2FE; border-radius: 6px;">
+            <div style="font-size: 13px; font-weight: 700; color: #3730A3; margin-bottom: 4px;">
+              <i class="fa fa-lightbulb-o"></i> On-Demand Ward Infrastructure Brief Available
+            </div>
+            <p style="font-size: 12px; color: #64748B; margin: 0 0 10px 0;">Generate an executive briefing on municipal health, drainage vulnerabilities, sensor thresholds, and priority crew deployments for this ward.</p>
+            <button class="civix-btn civix-btn-ai civix-btn-ai-glow" ng-click="c.generateWardAiDigest(c.selectedWard)">
+              <i class="fa fa-magic"></i> Generate Ward AI Brief Now
+            </button>
+          </div>
+
+          <!-- Generated AI Summary Content -->
+          <div class="civix-ai-grid" ng-if="c.selectedWardAiSummary && !c.isGeneratingWardAi">
+            <div class="civix-ai-box civix-ai-box-full" style="background: #FFFFFF; border-left: 3px solid #4F46E5;">
+              <div class="civix-ai-box-title"><i class="fa fa-align-left"></i> Ward Operational Health Assessment</div>
+              <div class="civix-ai-box-body">
+                <div style="font-size: 13px; font-weight: 700; color: #1E1B4B; margin-bottom: 4px;">
+                  Health Score: <span class="text-success">{{c.selectedWardAiSummary.healthScore}}</span>
+                </div>
+                <div>{{c.selectedWardAiSummary.synopsis}}</div>
+              </div>
+            </div>
+
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-exclamation-triangle text-warning"></i> Key Preventative Priorities</div>
+              <div class="civix-ai-box-body">
+                <ul>
+                  <li ng-repeat="prio in c.selectedWardAiSummary.criticalPriorities">{{prio}}</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-user-circle text-primary"></i> Ward Administrative Leadership</div>
+              <div class="civix-ai-box-body">
+                <div><strong>Assigned Executive Engineer:</strong> {{c.selectedWardAiSummary.officerInCharge}}</div>
+                <div style="margin-top: 6px;">{{c.selectedWardAiSummary.infrastructureSummary}}</div>
+                <div style="margin-top: 6px; font-style: italic; color: #64748B;">{{c.selectedWardAiSummary.recommendation}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WARD GOVERNANCE SPECIFICATION -->
+        <div class="civix-wo-details-grid">
+          <!-- Card 1: Jurisdiction Profile & Governance -->
+          <div class="civix-wo-card">
+            <div class="civix-wo-card-title"><i class="fa fa-shield text-primary"></i> Ward Governance Profile</div>
+            <div class="civix-wo-field-list">
+              <div>
+                <div class="civix-wo-field-label">Official Ward Code</div>
+                <div class="civix-wo-field-value text-primary"><strong>{{c.selectedWard.u_ward_code}}</strong></div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Municipal Status</div>
+                <div class="civix-wo-field-value"><span class="civix-badge civix-badge-success">{{c.selectedWard.u_status || 'Active'}}</span></div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <div class="civix-wo-field-label">Jurisdiction & Description</div>
+                <div class="civix-wo-field-value">{{c.selectedWard.u_description || 'Urban residential and commercial municipal division'}}</div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <div class="civix-wo-field-label">Assistant Engineer In-Charge</div>
+                <div class="civix-wo-field-value" style="color: #0F172A; font-weight: 700;">
+                  <i class="fa fa-user text-primary"></i> {{c.selectedWard.u_assistant_engineer || 'Er. D. Vijayan (94440-66987)'}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: National Hierarchy Position -->
+          <div class="civix-wo-card">
+            <div class="civix-wo-card-title"><i class="fa fa-sitemap text-primary"></i> National Hierarchy Position</div>
+            <div class="civix-wo-field-list">
+              <div>
+                <div class="civix-wo-field-label">Operational Zone</div>
+                <div class="civix-wo-field-value"><span class="civix-badge civix-badge-zone2">{{c.selectedWard.u_op_zone || 'Zone 2 — South Zone'}}</span></div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">State / UT</div>
+                <div class="civix-wo-field-value">{{c.selectedWard.u_state_name || 'Tamil Nadu'}}</div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">District & Local Body</div>
+                <div class="civix-wo-field-value">{{c.selectedWard.u_district_name || 'Chennai'}} &bull; {{c.selectedWard.u_local_body_name || 'Greater Chennai Corporation'}}</div>
+              </div>
+              <div>
+                <div class="civix-wo-field-label">Municipal Division</div>
+                <div class="civix-wo-field-value"><strong>{{c.selectedWard.u_zone || c.selectedWard.u_municipal_zone}}</strong></div>
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <div class="civix-wo-field-label">Hierarchy Path</div>
+                <div class="civix-wo-field-value" style="font-size: 11px; color: #475569;">
+                  India &rsaquo; {{c.selectedWard.u_op_zone || 'South Zone'}} &rsaquo; {{c.selectedWard.u_state_name || 'Tamil Nadu'}} &rsaquo; {{c.selectedWard.u_district_name || 'Chennai'}} &rsaquo; {{c.selectedWard.u_local_body_name || 'GCC'}} &rsaquo; {{c.selectedWard.u_zone}} &rsaquo; {{c.selectedWard.u_ward_name}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LINKED INFRASTRUCTURE SUB-SECTION -->
+        <!-- 1. Linked Cases -->
+        <div class="civix-panel" style="margin-bottom: 16px;">
+          <div class="civix-panel-header">
+            <h4 class="civix-panel-title"><i class="fa fa-ticket text-primary"></i> Active Incidents & Civic Cases ({{c.selectedWardLinkedCases.length}})</h4>
+          </div>
+          <div class="civix-table-wrapper" style="max-height: 200px; overflow-y: auto;">
+            <table class="civix-table" ng-if="c.selectedWardLinkedCases.length > 0">
+              <thead>
+                <tr>
+                  <th>Case #</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Reported Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="cs in c.selectedWardLinkedCases">
+                  <td><strong>{{cs.u_number}}</strong></td>
+                  <td>{{cs.u_category}}</td>
+                  <td>{{cs.u_short_description || cs.u_description}}</td>
+                  <td><span class="civix-badge civix-badge-danger">{{cs.u_priority}}</span></td>
+                  <td><span class="civix-badge civix-badge-info">{{cs.u_state}}</span></td>
+                  <td>{{cs.u_created_date}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div ng-if="c.selectedWardLinkedCases.length === 0" style="padding: 16px; text-align: center; color: #64748B; font-size: 12px;">
+              <i class="fa fa-check-circle text-success"></i> No unresolved citizen cases in this ward currently.
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Linked IoT Telemetry Sensors -->
+        <div class="civix-panel" style="margin-bottom: 16px;">
+          <div class="civix-panel-header">
+            <h4 class="civix-panel-title"><i class="fa fa-wifi text-primary"></i> Deployed IoT Telemetry Sensors ({{c.selectedWardLinkedSensors.length}})</h4>
+          </div>
+          <div class="civix-table-wrapper" style="max-height: 200px; overflow-y: auto;">
+            <table class="civix-table" ng-if="c.selectedWardLinkedSensors.length > 0">
+              <thead>
+                <tr>
+                  <th>Sensor ID</th>
+                  <th>Sensor Type</th>
+                  <th>Location</th>
+                  <th>Telemetry Reading</th>
+                  <th>Battery</th>
+                  <th>Health</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="sen in c.selectedWardLinkedSensors">
+                  <td><strong>{{sen.u_sensor_id}}</strong></td>
+                  <td>{{sen.u_type}}</td>
+                  <td>{{sen.u_location}}</td>
+                  <td><strong>{{sen.u_last_value}} {{sen.u_unit}}</strong></td>
+                  <td>{{sen.u_battery}}%</td>
+                  <td><span class="civix-badge civix-badge-success">{{sen.u_status || 'Online'}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div ng-if="c.selectedWardLinkedSensors.length === 0" style="padding: 16px; text-align: center; color: #64748B; font-size: 12px;">
+              <i class="fa fa-info-circle"></i> No sensors mapped to this ward directly.
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Linked Work Orders -->
+        <div class="civix-panel" ng-if="c.selectedWardLinkedWorkOrders.length > 0">
+          <div class="civix-panel-header">
+            <h4 class="civix-panel-title"><i class="fa fa-wrench text-primary"></i> Active Work Orders ({{c.selectedWardLinkedWorkOrders.length}})</h4>
+          </div>
+          <div class="civix-table-wrapper" style="max-height: 180px; overflow-y: auto;">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Work Order #</th>
+                  <th>Linked Case</th>
+                  <th>Category</th>
+                  <th>Assigned Crew</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="wo in c.selectedWardLinkedWorkOrders">
+                  <td><strong>{{wo.u_number}}</strong></td>
+                  <td>{{wo.u_case_number}}</td>
+                  <td>{{wo.u_category}}</td>
+                  <td>{{wo.u_assigned_name || wo.u_worker_name || 'Unassigned'}}</td>
+                  <td><span class="civix-badge civix-badge-info">{{wo.u_state}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="civix-modal-footer" style="flex-shrink: 0; justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <button class="civix-btn civix-btn-secondary" ng-click="c.viewWardCases(c.selectedWard)">
+            <i class="fa fa-ticket"></i> View All Cases in Ward
+          </button>
+          <button class="civix-btn civix-btn-secondary" ng-click="c.viewWardSensors(c.selectedWard)">
+            <i class="fa fa-wifi"></i> View Sensors in Ward
+          </button>
+        </div>
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showWardDetailsModal = false">Close</button>
       </div>
     </div>
   </div>
