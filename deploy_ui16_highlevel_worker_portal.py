@@ -77,7 +77,7 @@ UI16_TEMPLATE = f"""
   <aside class="fsm-sidebar">
     
     <!-- Brand Box -->
-    <div class="sidebar-brand-box" ng-click="c.setTab('dashboard')">
+    <div class="sidebar-brand-box" ng-click="c.setTab(c.prevTab || 'jobs')">
       <div class="sidebar-logo-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5">
           <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -113,7 +113,7 @@ UI16_TEMPLATE = f"""
       </button>
 
       <!-- 2. Assigned Work Orders -->
-      <button type="button" class="sidebar-nav-link" ng-class="{{'active': c.currentTab === 'jobs'}}" ng-click="c.setTab('jobs')">
+      <button type="button" class="sidebar-nav-link" ng-class="{{'active': c.currentTab === 'jobs' || c.currentTab === 'detail'}}" ng-click="c.setTab('jobs')">
         <span class="nav-icon">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -126,16 +126,7 @@ UI16_TEMPLATE = f"""
         <span class="nav-badge-pill">{{{{c.data.workOrders.length}}}}</span>
       </button>
 
-      <!-- 3. Active Job Record -->
-      <button type="button" class="sidebar-nav-link" ng-class="{{'active': c.currentTab === 'detail'}}" ng-if="c.selectedWo" ng-click="c.setTab('detail')">
-        <span class="nav-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-        </span>
-        <span class="nav-title">Record: {{{{c.selectedWo.u_number}}}}</span>
-        <span class="nav-badge-pill teal">Active</span>
-      </button>
+      <!-- Active Job Record removed from sidebar to keep nav clean -->
 
       <!-- 4. Resolved History -->
       <button type="button" class="sidebar-nav-link" ng-class="{{'active': c.currentTab === 'history'}}" ng-click="c.setTab('history')">
@@ -212,7 +203,9 @@ UI16_TEMPLATE = f"""
         <span class="crumb-arrow">/</span>
         <span class="crumb-current" ng-if="c.currentTab === 'dashboard'">Operations Dashboard</span>
         <span class="crumb-current" ng-if="c.currentTab === 'jobs'">Assigned Work Orders</span>
-        <span class="crumb-current" ng-if="c.currentTab === 'detail'">Work Order &bull; {{{{c.selectedWo.u_number}}}}</span>
+        <span class="crumb-link" ng-if="c.currentTab === 'detail'" ng-click="c.setTab('jobs')">Assigned Work Orders</span>
+        <span class="crumb-arrow" ng-if="c.currentTab === 'detail'">/</span>
+        <span class="crumb-current font-mono" ng-if="c.currentTab === 'detail'">{{{{c.selectedWo.u_number}}}}</span>
         <span class="crumb-current" ng-if="c.currentTab === 'history'">Resolved History Archive</span>
         <span class="crumb-current" ng-if="c.currentTab === 'profile'">Technician Profile &amp; Ward Info</span>
       </div>
@@ -475,7 +468,7 @@ UI16_TEMPLATE = f"""
           <div class="record-header-main-row">
             <div class="record-title-group">
               <button type="button" class="btn btn-sm btn-default fsm-back-btn" ng-click="c.setTab('dashboard')">
-                &larr; Back to Dashboard
+                &larr; Back to Work Orders
               </button>
               <h2 class="record-h2 font-mono">Work Order: {{{{c.selectedWo.u_number}}}}</h2>
               <span class="badge-state ml-2" ng-class="c.getStateClass(c.selectedWo.u_state)">{{{{c.selectedWo.u_state}}}}</span>
@@ -1965,6 +1958,7 @@ function($scope, $location, $window, $timeout, spUtil) {
   };
 
   c.selectJob = function(wo) {
+    c.prevTab = c.currentTab;
     c.selectedWo = wo;
     c.currentTab = 'detail';
     c.otpInput = '';
