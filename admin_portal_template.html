@@ -1112,13 +1112,13 @@
        3. FLOATING CHAT ASSISTANT WIDGET (CIVIX OPERATIONS COPILOT)
        ========================================================================= -->
   <!-- Launcher Pill -->
-  <div class="civix-chat-launcher" ng-click="c.toggleChatAssistant()" ng-show="!c.showChatAssistant" title="Click to chat with CIVIX Operations Copilot">
+  <div class="civix-chat-launcher" ng-click="c.openChatAssistant()" ng-if="!c.showChatAssistant" title="Click to chat with CIVIX Operations Copilot">
     <div class="civix-chat-launcher-avatar"><i class="fa fa-bolt"></i></div>
     <span class="civix-chat-launcher-text">Ask CIVIX Copilot</span>
   </div>
 
   <!-- Interactive Chat Window -->
-  <div class="civix-chat-window" ng-show="c.showChatAssistant" role="dialog" aria-label="CIVIX Operations Copilot">
+  <div class="civix-chat-window" ng-if="c.showChatAssistant" role="dialog" aria-label="CIVIX Operations Copilot">
     <div class="civix-chat-header">
       <div class="civix-chat-header-title">
         <div class="civix-chat-launcher-avatar" style="width: 24px; height: 24px;"><i class="fa fa-bolt"></i></div>
@@ -1128,7 +1128,7 @@
         </div>
       </div>
       <div class="civix-chat-header-actions">
-        <button type="button" ng-click="c.toggleChatAssistant()" title="Minimize">&times;</button>
+        <button type="button" class="civix-chat-close-btn" ng-click="c.closeChatAssistant()" title="Close Chatbot">&times;</button>
       </div>
     </div>
 

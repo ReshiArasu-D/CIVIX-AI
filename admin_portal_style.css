@@ -1090,17 +1090,27 @@
   font-weight: 600 !important;
 }
 
-.civix-chat-header-actions button {
-  background: none !important;
-  border: none !important;
-  color: #CBD5E1 !important;
-  font-size: 18px !important;
+.civix-chat-close-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #FFFFFF !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer !important;
-  padding: 2px 6px !important;
+  transition: all 0.15s ease !important;
 }
 
-.civix-chat-header-actions button:hover {
+.civix-chat-close-btn:hover {
+  background: #DC2626 !important;
+  border-color: #EF4444 !important;
   color: #FFFFFF !important;
+  transform: scale(1.08) !important;
 }
 
 .civix-chat-quick-bar {

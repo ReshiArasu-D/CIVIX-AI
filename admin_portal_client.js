@@ -158,6 +158,14 @@ api.controller = function($scope, $http, $window, spUtil) {
     c.showChatAssistant = !c.showChatAssistant;
   };
 
+  c.openChatAssistant = function() {
+    c.showChatAssistant = true;
+  };
+
+  c.closeChatAssistant = function() {
+    c.showChatAssistant = false;
+  };
+
   c.sendQuickChat = function(query) {
     c.chatInput = query;
     c.sendChatMessage();
