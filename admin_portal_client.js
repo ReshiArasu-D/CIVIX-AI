@@ -7,6 +7,31 @@ api.controller = function($scope, $http, $window, spUtil) {
   c.caseSubTab = 'all';
   c.iotSubTab = 'overview';
   c.assetSubTab = 'assets';
+  c.zoneSubTab = 'op_zones'; // 'op_zones' | 'states' | 'districts' | 'municipal_zones'
+
+  // National Geographic Cascading Hierarchy Filter
+  c.geoFilter = {
+    opZone: '',
+    state: '',
+    district: '',
+    localBody: '',
+    municipalZone: '',
+    ward: ''
+  };
+
+  // Geographic Search & View Models
+  c.zoneSearch = '';
+  c.stateSearch = '';
+  c.stateZoneFilter = '';
+  c.stateTypeFilter = '';
+  c.districtSearch = '';
+  c.localBodySearch = '';
+  c.selectedOpZone = null;
+  c.showOpZoneDetailModal = false;
+  c.selectedState = null;
+  c.showReassignStateModal = false;
+  c.targetReassignZone = '';
+  c.reassignReason = '';
 
   // Header State
   c.showNotifDrawer = false;
@@ -445,11 +470,163 @@ api.controller = function($scope, $http, $window, spUtil) {
     });
   };
 
-  // --- ZONE MANAGEMENT ---
+  // --- NATIONAL GEOGRAPHIC HIERARCHY & ZONE MANAGEMENT ---
+  c.setZoneSubTab = function(sub) {
+    c.zoneSubTab = sub;
+  };
+
+  c.openOpZoneDetail = function(oz) {
+    c.selectedOpZone = oz;
+    c.showOpZoneDetailModal = true;
+  };
+
+  c.toggleOpZoneStatus = function(oz) {
+    c.server.get({
+      action: 'toggle_op_zone_status',
+      sys_id: oz.sys_id
+    }).then(function(r) {
+      oz.u_status = (oz.u_status === 'Active') ? 'Inactive' : 'Active';
+      showToast(r.data.actionResult.message || 'Operational Zone status updated.', 'success');
+    });
+  };
+
+  c.openReassignStateModal = function(st) {
+    c.selectedState = st;
+    c.targetReassignZone = st.u_op_zone_code;
+    c.reassignReason = '';
+    c.showReassignStateModal = true;
+  };
+
+  c.confirmReassignState = function() {
+    if (!c.selectedState || !c.targetReassignZone) return;
+    if (c.targetReassignZone === c.selectedState.u_op_zone_code) {
+      showToast('Target zone is identical to currently assigned zone.', 'info');
+      return;
+    }
+    c.server.get({
+      action: 'reassign_state_zone',
+      sys_id: c.selectedState.sys_id,
+      target_zone_code: c.targetReassignZone,
+      reason: c.reassignReason
+    }).then(function(r) {
+      if (r.data.actionResult && r.data.actionResult.status === 'error') {
+        showToast(r.data.actionResult.message, 'error');
+      } else {
+        showToast(r.data.actionResult.message || 'State reassigned successfully.', 'success');
+        c.showReassignStateModal = false;
+        c.server.refresh();
+      }
+    });
+  };
+
+  // Cascading Dropdown Filter Handlers
+  c.onGeoZoneChange = function() {
+    c.geoFilter.state = '';
+    c.geoFilter.district = '';
+    c.geoFilter.localBody = '';
+    c.geoFilter.municipalZone = '';
+    c.geoFilter.ward = '';
+  };
+
+  c.onGeoStateChange = function() {
+    c.geoFilter.district = '';
+    c.geoFilter.localBody = '';
+    c.geoFilter.municipalZone = '';
+    c.geoFilter.ward = '';
+  };
+
+  c.onGeoDistrictChange = function() {
+    c.geoFilter.localBody = '';
+    c.geoFilter.municipalZone = '';
+    c.geoFilter.ward = '';
+  };
+
+  c.onGeoLocalBodyChange = function() {
+    c.geoFilter.municipalZone = '';
+    c.geoFilter.ward = '';
+  };
+
+  c.resetGeoFilters = function() {
+    c.geoFilter = {
+      opZone: '',
+      state: '',
+      district: '',
+      localBody: '',
+      municipalZone: '',
+      ward: ''
+    };
+  };
+
+  c.getStatesForZone = function(zoneNameOrCode) {
+    if (!c.data.states) return [];
+    if (!zoneNameOrCode) return c.data.states;
+    return c.data.states.filter(function(s) {
+      return s.u_op_zone_code === zoneNameOrCode || s.u_op_zone_name === zoneNameOrCode;
+    });
+  };
+
+  c.getDistrictsForState = function(stateName) {
+    if (!c.data.districts) return [];
+    if (!stateName) return c.data.districts;
+    return c.data.districts.filter(function(d) {
+      return d.u_state_name === stateName;
+    });
+  };
+
+  c.getLocalBodiesForDistrict = function(distName) {
+    if (!c.data.localBodies) return [];
+    if (!distName) return c.data.localBodies;
+    return c.data.localBodies.filter(function(lb) {
+      return lb.u_district_name === distName;
+    });
+  };
+
+  c.getMunicipalZonesForLocalBody = function(lbName) {
+    if (!c.data.zones) return [];
+    if (!lbName) return c.data.zones;
+    return c.data.zones.filter(function(z) {
+      return z.u_local_body_name === lbName || z.u_local_body === lbName;
+    });
+  };
+
+  c.filterWardsByGeo = function(w) {
+    if (c.geoFilter.opZone && w.u_op_zone && w.u_op_zone !== c.geoFilter.opZone) return false;
+    if (c.geoFilter.state && w.u_state_name && w.u_state_name !== c.geoFilter.state) return false;
+    if (c.geoFilter.district && w.u_district_name && w.u_district_name !== c.geoFilter.district) return false;
+    if (c.geoFilter.localBody && w.u_local_body_name && w.u_local_body_name !== c.geoFilter.localBody) return false;
+    if (c.geoFilter.municipalZone && w.u_zone && w.u_zone !== c.geoFilter.municipalZone && w.u_municipal_zone !== c.geoFilter.municipalZone) return false;
+    if (c.search.citizenWard) {
+      var q = c.search.citizenWard.toLowerCase();
+      return (w.u_ward_name && w.u_ward_name.toLowerCase().indexOf(q) !== -1) ||
+             (w.u_ward_code && w.u_ward_code.toLowerCase().indexOf(q) !== -1);
+    }
+    return true;
+  };
+
+  c.filterCasesByGeo = function(k) {
+    if (c.geoFilter.opZone && k.u_op_zone && k.u_op_zone !== c.geoFilter.opZone) return false;
+    if (c.geoFilter.state && k.u_state_name && k.u_state_name !== c.geoFilter.state) return false;
+    if (c.geoFilter.district && k.u_district_name && k.u_district_name !== c.geoFilter.district) return false;
+    if (c.geoFilter.localBody && k.u_local_body_name && k.u_local_body_name !== c.geoFilter.localBody) return false;
+    if (c.geoFilter.municipalZone && k.u_zone && k.u_zone !== c.geoFilter.municipalZone) return false;
+    if (c.geoFilter.ward && k.u_ward && k.u_ward.indexOf(c.geoFilter.ward) === -1) return false;
+    return true;
+  };
+
+  c.filterIotByGeo = function(s) {
+    if (c.geoFilter.opZone && s.u_op_zone && s.u_op_zone !== c.geoFilter.opZone) return false;
+    if (c.geoFilter.state && s.u_state_name && s.u_state_name !== c.geoFilter.state) return false;
+    if (c.geoFilter.district && s.u_district_name && s.u_district_name !== c.geoFilter.district) return false;
+    if (c.geoFilter.localBody && s.u_local_body_name && s.u_local_body_name !== c.geoFilter.localBody) return false;
+    if (c.geoFilter.ward && s.u_ward && s.u_ward.indexOf(c.geoFilter.ward) === -1) return false;
+    return true;
+  };
+
+  // --- MUNICIPAL ZONE ACTIONS ---
   c.openAddZoneModal = function() {
     c.zoneModalData = {
       isNew: true,
-      code: 'ZONE-' + (c.data.zones.length + 1),
+      code: 'Z-' + (c.data.zones.length + 1),
       name: '',
       description: '',
       engineer: '',

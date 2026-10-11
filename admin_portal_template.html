@@ -507,18 +507,55 @@
           </div>
         </div>
 
-        <!-- FILTER BAR -->
-        <div class="civix-filter-bar">
-          <input type="text" class="civix-search-input" placeholder="Search Case #, Department, Ward, or Priority..." ng-model="c.search.case">
-          <select class="civix-select" ng-model="c.search.caseStatus">
-            <option value="">All States</option>
-            <option value="Under Review">Under Review</option>
-            <option value="Assigned">Assigned</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-            <option value="Closed">Closed</option>
-            <option value="On Hold">On Hold</option>
-          </select>
+        <!-- CASCADING GEOGRAPHIC & OPERATIONAL FILTER BAR -->
+        <div class="civix-cascading-filter-bar">
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">Operational Zone</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.opZone" ng-change="c.onGeoZoneChange()">
+              <option value="">All Zones</option>
+              <option ng-repeat="oz in c.data.opZones" value="{{oz.u_zone_name}}">{{oz.u_zone_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">State / UT</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.state" ng-change="c.onGeoStateChange()">
+              <option value="">All States/UTs</option>
+              <option ng-repeat="st in c.getStatesForZone(c.geoFilter.opZone)" value="{{st.u_name}}">{{st.u_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">District</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.district" ng-change="c.onGeoDistrictChange()">
+              <option value="">All Districts</option>
+              <option ng-repeat="dst in c.getDistrictsForState(c.geoFilter.state)" value="{{dst.u_name}}">{{dst.u_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">Local Body</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.localBody">
+              <option value="">All Local Bodies</option>
+              <option ng-repeat="lb in c.getLocalBodiesForDistrict(c.geoFilter.district)" value="{{lb.u_name}}">{{lb.u_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 130px;">
+            <label class="civix-cascading-filter-label">Case State</label>
+            <select class="civix-cascading-select" ng-model="c.search.caseStatus">
+              <option value="">All States</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Assigned">Assigned</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+              <option value="On Hold">On Hold</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 180px;">
+            <label class="civix-cascading-filter-label">Search</label>
+            <div style="display: flex; gap: 4px;">
+              <input type="text" class="civix-cascading-select" placeholder="Case #, category, ward..." ng-model="c.search.case">
+              <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.resetGeoFilters(); c.search.caseStatus=''; c.search.case='';" title="Reset Filters"><i class="fa fa-undo"></i></button>
+            </div>
+          </div>
         </div>
 
         <!-- CASES TABLE -->
@@ -528,7 +565,7 @@
               <tr>
                 <th>Case Reference</th>
                 <th>Category</th>
-                <th>Ward & Zone</th>
+                <th>Geographic Context & Ward</th>
                 <th>Priority</th>
                 <th>Assigned Department</th>
                 <th>Current State</th>
@@ -537,10 +574,16 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="cs in c.data.cases | filter:c.search.case | filter:{u_state: c.search.caseStatus}">
+              <tr ng-repeat="cs in c.data.cases | filter:c.search.case | filter:{u_state: c.search.caseStatus} | filter:c.filterCasesByGeo">
                 <td><strong>{{cs.u_number}}</strong></td>
                 <td>{{cs.u_category}}</td>
-                <td>{{cs.u_ward}}</td>
+                <td>
+                  <strong>{{cs.u_ward}}</strong>
+                  <div style="font-size: 11px; color: #64748B; margin-top: 2px;">
+                    <span class="civix-badge civix-badge-zone2" style="font-size: 9.5px; padding: 1px 4px;">{{cs.u_op_zone || 'South Zone'}}</span>
+                    <span>{{cs.u_state_name || 'Tamil Nadu'}} &bull; {{cs.u_district_name || 'Chennai'}}</span>
+                  </div>
+                </td>
                 <td>
                   <span class="civix-badge" ng-class="{'civix-badge-p1': cs.u_priority.indexOf('1')!==-1, 'civix-badge-p2': cs.u_priority.indexOf('2')!==-1, 'civix-badge-p3': cs.u_priority.indexOf('3')!==-1, 'civix-badge-p4': cs.u_priority.indexOf('4')!==-1}">
                     {{cs.u_priority}}
@@ -631,6 +674,35 @@
             <div class="civix-breadcrumbs">CIVIX AI &bull; IoT Monitoring</div>
             <h1 class="civix-page-title">Smart City Telemetry & Sensor Sentinels</h1>
             <p class="civix-page-desc">Deterministic threshold-based sensor alerts, real telemetry observation monitoring, and alert-to-case automated dispatch.</p>
+          </div>
+        </div>
+
+        <!-- CASCADING GEOGRAPHIC FILTER FOR IOT SENSORS -->
+        <div class="civix-cascading-filter-bar">
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">Zone</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.opZone" ng-change="c.onGeoZoneChange()">
+              <option value="">All Zones</option>
+              <option ng-repeat="oz in c.data.opZones" value="{{oz.u_zone_name}}">{{oz.u_zone_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">State / UT</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.state" ng-change="c.onGeoStateChange()">
+              <option value="">All States/UTs</option>
+              <option ng-repeat="st in c.getStatesForZone(c.geoFilter.opZone)" value="{{st.u_name}}">{{st.u_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 140px;">
+            <label class="civix-cascading-filter-label">District</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.district">
+              <option value="">All Districts</option>
+              <option ng-repeat="dst in c.getDistrictsForState(c.geoFilter.state)" value="{{dst.u_name}}">{{dst.u_name}}</option>
+            </select>
+          </div>
+          <div class="civix-cascading-filter-group" style="flex: 1 1 180px;">
+            <label class="civix-cascading-filter-label">Telemetry Stream</label>
+            <span class="civix-badge civix-badge-success" style="padding: 6px 10px; font-size: 11px;"><i class="fa fa-wifi"></i> Live SCADA Sensor Grid (GCC)</span>
           </div>
         </div>
 
@@ -1161,87 +1233,414 @@
       </section>
 
       <!-- =====================================================================
-           MODULE 8: ZONE MANAGEMENT
+           MODULE 8: ZONE & GEOGRAPHIC HIERARCHY MANAGEMENT
            ===================================================================== -->
       <section ng-if="c.currentTab === 'zones'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI &bull; Zone Management</div>
-            <h1 class="civix-page-title">Municipal Corporation Zones</h1>
-            <p class="civix-page-desc">Administrative boundaries, executive engineers and ward mappings across Greater Chennai Corporation.</p>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Master Data &bull; Geographic Hierarchy</div>
+            <h1 class="civix-page-title">National Geographic Hierarchy & Four Operational Zones</h1>
+            <p class="civix-page-desc">All-India operational groupings across 28 States and 8 Union Territories, administrative districts, urban local bodies, and municipal ward infrastructure.</p>
           </div>
           <div class="civix-header-actions">
-            <button class="civix-btn civix-btn-primary" ng-click="c.openAddZoneModal()"><i class="fa fa-plus"></i> Add Zone</button>
+            <button class="civix-btn civix-btn-secondary" ng-click="c.server.refresh()"><i class="fa fa-refresh"></i> Refresh Master Data</button>
+            <button class="civix-btn civix-btn-primary" ng-click="c.openAddZoneModal()"><i class="fa fa-plus"></i> Add Municipal Zone</button>
           </div>
         </div>
 
-        <div class="civix-panel">
-          <div class="civix-table-wrapper">
-            <table class="civix-table">
-              <thead>
-                <tr>
-                  <th>Zone Code</th>
-                  <th>Zone Name</th>
-                  <th>Executive Engineer</th>
-                  <th>Contact Phone</th>
-                  <th>Wards Assigned</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="z in c.data.zones">
-                  <td><strong>{{z.u_zone_code}}</strong></td>
-                  <td>{{z.u_zone_name}}</td>
-                  <td>{{z.u_executive_engineer}}</td>
-                  <td>{{z.u_contact_phone}}</td>
-                  <td><strong>{{z.u_wards_count || 15}} Wards</strong></td>
-                  <td><span class="civix-badge civix-badge-success">{{z.u_status}}</span></td>
-                  <td>
-                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openEditZoneModal(z)"><i class="fa fa-pencil"></i> Edit</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- SUB-NAV PILLS -->
+        <div class="civix-subnav-pills">
+          <button class="civix-subnav-pill" ng-class="{'active': c.zoneSubTab === 'op_zones'}" ng-click="c.setZoneSubTab('op_zones')">
+            <i class="fa fa-globe"></i> Four Operational Zones
+          </button>
+          <button class="civix-subnav-pill" ng-class="{'active': c.zoneSubTab === 'states'}" ng-click="c.setZoneSubTab('states')">
+            <i class="fa fa-map-marker"></i> States & Union Territories (36)
+          </button>
+          <button class="civix-subnav-pill" ng-class="{'active': c.zoneSubTab === 'districts'}" ng-click="c.setZoneSubTab('districts')">
+            <i class="fa fa-building-o"></i> Districts & Urban Local Bodies
+          </button>
+          <button class="civix-subnav-pill" ng-class="{'active': c.zoneSubTab === 'municipal_zones'}" ng-click="c.setZoneSubTab('municipal_zones')">
+            <i class="fa fa-sitemap"></i> Municipal Zones (Chennai)
+          </button>
+        </div>
+
+        <!-- SUB-TAB 1: OPERATIONAL ZONES (FOUR-ZONE SUMMARY CARDS & DIRECTORY) -->
+        <div ng-if="c.zoneSubTab === 'op_zones'">
+          <!-- 4 FOUR-ZONE SUMMARY CARDS -->
+          <div class="civix-opzone-grid">
+            <div class="civix-opzone-card" ng-repeat="oz in c.data.opZones" ng-class="{'zone-1': oz.u_zone_code==='OZ-01', 'zone-2': oz.u_zone_code==='OZ-02', 'zone-3': oz.u_zone_code==='OZ-03', 'zone-4': oz.u_zone_code==='OZ-04'}">
+              <div class="civix-opzone-header">
+                <div>
+                  <h3 class="civix-opzone-title">{{oz.u_zone_name}}</h3>
+                  <div style="font-size: 11.5px; color: #64748B; margin-top: 2px;">HQ: {{oz.u_headquarters}}</div>
+                </div>
+                <span class="civix-opzone-code">{{oz.u_zone_code}}</span>
+              </div>
+
+              <div class="civix-opzone-metrics">
+                <div class="civix-opzone-metric-row">
+                  <span>Assigned States & UTs:</span>
+                  <strong>{{oz.totalAssigned || 0}} ({{oz.statesCount || 0}} States, {{oz.utsCount || 0}} UTs)</strong>
+                </div>
+                <div class="civix-opzone-metric-row">
+                  <span>Configured Districts:</span>
+                  <strong ng-if="oz.districtsCount > 0">{{oz.districtsCount}} Districts</strong>
+                  <span ng-if="!oz.districtsCount || oz.districtsCount === 0" style="color: #94A3B8; font-size: 11px; font-style: italic;">No master data available</span>
+                </div>
+                <div class="civix-opzone-metric-row">
+                  <span>Urban Local Bodies:</span>
+                  <strong ng-if="oz.localBodiesCount > 0">{{oz.localBodiesCount}} ULBs</strong>
+                  <span ng-if="!oz.localBodiesCount || oz.localBodiesCount === 0" style="color: #94A3B8; font-size: 11px; font-style: italic;">No master data available</span>
+                </div>
+                <div class="civix-opzone-metric-row">
+                  <span>Configured Wards:</span>
+                  <strong ng-if="oz.wardsCount > 0">{{oz.wardsCount}} Wards</strong>
+                  <span ng-if="!oz.wardsCount || oz.wardsCount === 0" style="color: #94A3B8; font-size: 11px; font-style: italic;">No master data available</span>
+                </div>
+                <div class="civix-opzone-metric-row">
+                  <span>Civic Assets & Sensors:</span>
+                  <strong ng-if="oz.assetsCount > 0">{{oz.assetsCount}} Assets</strong>
+                  <span ng-if="!oz.assetsCount || oz.assetsCount === 0" style="color: #94A3B8; font-size: 11px; font-style: italic;">Not configured</span>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid #F1F5F9;">
+                <span class="civix-badge" ng-class="{'civix-badge-success': oz.u_status === 'Active', 'civix-badge-warning': oz.u_status !== 'Active'}">
+                  {{oz.u_status || 'Active'}}
+                </span>
+                <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openOpZoneDetail(oz)">
+                  <i class="fa fa-list-ul"></i> View Details
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- OPERATIONAL ZONES DETAILED TABLE -->
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-table text-primary"></i> Configured Operational Zones ({{c.data.opZones.length}})</h3>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" class="civix-search-input" placeholder="Filter by zone name or code..." ng-model="c.zoneSearch" style="width: 240px;">
+              </div>
+            </div>
+            <div class="civix-table-wrapper">
+              <table class="civix-table">
+                <thead>
+                  <tr>
+                    <th>Zone Code</th>
+                    <th>Official Zone Name</th>
+                    <th>Command Headquarters</th>
+                    <th>Assigned Entities</th>
+                    <th>Operational Scope & Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="oz in c.data.opZones | filter:c.zoneSearch">
+                    <td><strong>{{oz.u_zone_code}}</strong></td>
+                    <td><strong>{{oz.u_zone_name}}</strong></td>
+                    <td>{{oz.u_headquarters}}</td>
+                    <td><strong>{{oz.totalAssigned || 0}} States / UTs</strong></td>
+                    <td style="font-size: 11.5px; color: #475569; max-width: 320px;">{{oz.u_description}}</td>
+                    <td>
+                      <span class="civix-badge" ng-class="{'civix-badge-success': oz.u_status === 'Active', 'civix-badge-warning': oz.u_status !== 'Active'}">
+                        {{oz.u_status || 'Active'}}
+                      </span>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 6px;">
+                        <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openOpZoneDetail(oz)">
+                          <i class="fa fa-eye"></i> Details
+                        </button>
+                        <button class="civix-btn civix-btn-sm" ng-class="{'civix-btn-secondary': oz.u_status === 'Active', 'civix-btn-success': oz.u_status !== 'Active'}" ng-click="c.toggleOpZoneStatus(oz)">
+                          <i class="fa fa-power-off"></i> {{oz.u_status === 'Active' ? 'Deactivate' : 'Activate'}}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 2: STATES & UNION TERRITORIES (ALL 36 ENTITIES) -->
+        <div ng-if="c.zoneSubTab === 'states'">
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-map-marker text-primary"></i> National State & Union Territory Registry (36 Entities)</h3>
+              <span class="civix-badge civix-badge-info">28 States &bull; 8 Union Territories</span>
+            </div>
+            
+            <!-- FILTER BAR -->
+            <div style="padding: 14px 16px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+              <input type="text" class="civix-search-input" placeholder="Search state name or ISO code..." ng-model="c.stateSearch" style="flex: 1 1 200px;">
+              <select class="civix-select" ng-model="c.stateZoneFilter" style="width: 220px;">
+                <option value="">All Operational Zones</option>
+                <option value="OZ-01">Zone 1 — North Zone</option>
+                <option value="OZ-02">Zone 2 — South Zone</option>
+                <option value="OZ-03">Zone 3 — East & Northeast Zone</option>
+                <option value="OZ-04">Zone 4 — West & Central Zone</option>
+              </select>
+              <select class="civix-select" ng-model="c.stateTypeFilter" style="width: 170px;">
+                <option value="">All Types</option>
+                <option value="State">State (28)</option>
+                <option value="Union Territory">Union Territory (8)</option>
+              </select>
+            </div>
+
+            <div class="civix-table-wrapper">
+              <table class="civix-table">
+                <thead>
+                  <tr>
+                    <th>Official Code</th>
+                    <th>State / Union Territory Name</th>
+                    <th>Administrative Type</th>
+                    <th>Assigned Operational Zone</th>
+                    <th>Capital / Admin Center</th>
+                    <th>Configured Districts</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="st in c.data.states | filter:c.stateSearch | filter:{u_op_zone_code: c.stateZoneFilter} | filter:{u_type: c.stateTypeFilter}">
+                    <td><strong>{{st.u_code}}</strong></td>
+                    <td><strong>{{st.u_name}}</strong></td>
+                    <td>
+                      <span class="civix-badge" ng-class="{'civix-badge-state': st.u_type === 'State', 'civix-badge-ut': st.u_type === 'Union Territory'}">
+                        {{st.u_type}}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="civix-badge" ng-class="{'civix-badge-zone1': st.u_op_zone_code === 'OZ-01', 'civix-badge-zone2': st.u_op_zone_code === 'OZ-02', 'civix-badge-zone3': st.u_op_zone_code === 'OZ-03', 'civix-badge-zone4': st.u_op_zone_code === 'OZ-04'}">
+                        {{st.u_op_zone_name || st.u_op_zone_code}}
+                      </span>
+                    </td>
+                    <td>{{st.u_capital || '-'}}</td>
+                    <td>
+                      <span ng-if="st.districtsCount > 0" class="civix-badge civix-badge-success">{{st.districtsCount}} Districts</span>
+                      <span ng-if="!st.districtsCount || st.districtsCount === 0" style="color: #94A3B8; font-size: 11px; font-style: italic;">No master data available</span>
+                    </td>
+                    <td>
+                      <span class="civix-badge civix-badge-success">{{st.u_status || 'Active'}}</span>
+                    </td>
+                    <td>
+                      <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openReassignStateModal(st)">
+                        <i class="fa fa-exchange"></i> Reassign Zone
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 3: DISTRICTS & URBAN LOCAL BODIES -->
+        <div ng-if="c.zoneSubTab === 'districts'">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <!-- DISTRICTS PANEL -->
+            <div class="civix-panel">
+              <div class="civix-panel-header">
+                <h3 class="civix-panel-title"><i class="fa fa-map-signs text-primary"></i> Configured Administrative Districts ({{c.data.districts.length}})</h3>
+              </div>
+              <div class="civix-table-wrapper">
+                <table class="civix-table">
+                  <thead>
+                    <tr>
+                      <th>District Name</th>
+                      <th>Parent State / UT</th>
+                      <th>Operational Zone</th>
+                      <th>Local Bodies</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="d in c.data.districts">
+                      <td><strong>{{d.u_name}}</strong> <span style="font-size: 10px; color: #64748B;">({{d.u_code}})</span></td>
+                      <td>{{d.u_state_name}}</td>
+                      <td><span class="civix-badge civix-badge-info">{{d.u_op_zone}}</span></td>
+                      <td><strong>{{d.localBodiesCount || 1}} ULB</strong></td>
+                      <td><span class="civix-badge civix-badge-success">{{d.u_status}}</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- URBAN LOCAL BODIES PANEL -->
+            <div class="civix-panel">
+              <div class="civix-panel-header">
+                <h3 class="civix-panel-title"><i class="fa fa-university text-primary"></i> Urban Local Bodies ({{c.data.localBodies.length}})</h3>
+              </div>
+              <div class="civix-table-wrapper">
+                <table class="civix-table">
+                  <thead>
+                    <tr>
+                      <th>Official Name</th>
+                      <th>Type</th>
+                      <th>Parent District</th>
+                      <th>State / Zone</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="lb in c.data.localBodies">
+                      <td><strong>{{lb.u_name}}</strong> <span style="font-size: 10px; color: #64748B;">({{lb.u_code}})</span></td>
+                      <td><span class="civix-badge civix-badge-secondary">{{lb.u_type}}</span></td>
+                      <td>{{lb.u_district_name}}</td>
+                      <td>{{lb.u_state_name}}</td>
+                      <td><span class="civix-badge civix-badge-success">{{lb.u_status}}</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB 4: MUNICIPAL ZONES (CHENNAI PRESERVED) -->
+        <div ng-if="c.zoneSubTab === 'municipal_zones'">
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-building text-primary"></i> Greater Chennai Corporation &bull; Municipal Zones ({{c.data.zones.length}})</h3>
+              <span class="civix-badge civix-badge-success">Preserved Authoritative Operational Zones</span>
+            </div>
+            <div class="civix-table-wrapper">
+              <table class="civix-table">
+                <thead>
+                  <tr>
+                    <th>Zone Code</th>
+                    <th>Zone Official Name</th>
+                    <th>Parent Local Body & District</th>
+                    <th>Executive Engineer</th>
+                    <th>Contact Phone</th>
+                    <th>Wards Configured</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="z in c.data.zones">
+                    <td><strong>{{z.u_zone_code}}</strong></td>
+                    <td><strong>{{z.u_zone_name}}</strong></td>
+                    <td>Greater Chennai Corporation &bull; Chennai, Tamil Nadu</td>
+                    <td>{{z.u_executive_engineer}}</td>
+                    <td>{{z.u_contact_phone}}</td>
+                    <td><strong>{{z.u_wards_count || 15}} Wards</strong></td>
+                    <td><span class="civix-badge civix-badge-success">{{z.u_status}}</span></td>
+                    <td>
+                      <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openEditZoneModal(z)"><i class="fa fa-pencil"></i> Edit</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- =====================================================================
-           MODULE 9: WARD MANAGEMENT
+           MODULE 9: WARD MANAGEMENT (CASCADING HIERARCHY FILTERED)
            ===================================================================== -->
       <section ng-if="c.currentTab === 'wards'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI &bull; Ward Management</div>
-            <h1 class="civix-page-title">Wards Directory & Infrastructure Links</h1>
-            <p class="civix-page-desc">Ward administrative officers, population coverage, and cross-linked civic assets.</p>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Ward Management &bull; National Hierarchy</div>
+            <h1 class="civix-page-title">Municipal Wards Directory & Civic Asset Links</h1>
+            <p class="civix-page-desc">Hierarchical ward governance with cascading geographic drill-down, assigned ward officers, and connected civic infrastructure assets.</p>
+          </div>
+        </div>
+
+        <!-- CASCADING GEOGRAPHIC FILTER BAR -->
+        <div class="civix-cascading-filter-bar">
+          <div class="civix-cascading-filter-group">
+            <label class="civix-cascading-filter-label">1. Operational Zone</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.opZone" ng-change="c.onGeoZoneChange()">
+              <option value="">All Operational Zones</option>
+              <option ng-repeat="oz in c.data.opZones" value="{{oz.u_zone_name}}">{{oz.u_zone_name}}</option>
+            </select>
+          </div>
+
+          <div class="civix-cascading-filter-group">
+            <label class="civix-cascading-filter-label">2. State / UT</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.state" ng-change="c.onGeoStateChange()">
+              <option value="">All States & UTs</option>
+              <option ng-repeat="st in c.getStatesForZone(c.geoFilter.opZone)" value="{{st.u_name}}">{{st.u_name}}</option>
+            </select>
+          </div>
+
+          <div class="civix-cascading-filter-group">
+            <label class="civix-cascading-filter-label">3. District</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.district" ng-change="c.onGeoDistrictChange()">
+              <option value="">All Districts</option>
+              <option ng-repeat="dst in c.getDistrictsForState(c.geoFilter.state)" value="{{dst.u_name}}">{{dst.u_name}}</option>
+            </select>
+          </div>
+
+          <div class="civix-cascading-filter-group">
+            <label class="civix-cascading-filter-label">4. Local Body</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.localBody" ng-change="c.onGeoLocalBodyChange()">
+              <option value="">All Local Bodies</option>
+              <option ng-repeat="lb in c.getLocalBodiesForDistrict(c.geoFilter.district)" value="{{lb.u_name}}">{{lb.u_name}}</option>
+            </select>
+          </div>
+
+          <div class="civix-cascading-filter-group">
+            <label class="civix-cascading-filter-label">5. Municipal Zone</label>
+            <select class="civix-cascading-select" ng-model="c.geoFilter.municipalZone">
+              <option value="">All Municipal Zones</option>
+              <option ng-repeat="mz in c.getMunicipalZonesForLocalBody(c.geoFilter.localBody)" value="{{mz.u_zone_name}}">{{mz.u_zone_name}}</option>
+            </select>
+          </div>
+
+          <div class="civix-cascading-filter-group" style="flex: 1 1 200px;">
+            <label class="civix-cascading-filter-label">Search Ward</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="text" class="civix-cascading-select" placeholder="Ward # or name..." ng-model="c.search.citizenWard">
+              <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.resetGeoFilters()" title="Reset Filters"><i class="fa fa-undo"></i></button>
+            </div>
           </div>
         </div>
 
         <div class="civix-panel">
+          <div class="civix-panel-header">
+            <h3 class="civix-panel-title"><i class="fa fa-compass text-primary"></i> Ward Administrative Records ({{c.data.wards.length}})</h3>
+            <span class="civix-badge civix-badge-info" ng-if="c.geoFilter.state">{{c.geoFilter.state}} &bull; {{c.geoFilter.district || 'All Districts'}}</span>
+          </div>
           <div class="civix-table-wrapper">
             <table class="civix-table">
               <thead>
                 <tr>
                   <th>Ward Code</th>
                   <th>Ward Name</th>
-                  <th>Zone Division</th>
-                  <th>Ward Officer</th>
-                  <th>Contact</th>
-                  <th>Population</th>
+                  <th>Local Body & District</th>
+                  <th>State & Zone</th>
+                  <th>Municipal Division</th>
+                  <th>Linked Assets</th>
+                  <th>Sensors</th>
+                  <th>Open Cases</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="w in c.data.wards">
-                  <td><strong>{{w.u_ward_code}}</strong></td>
-                  <td>{{w.u_ward_name}}</td>
-                  <td>{{w.u_zone}}</td>
-                  <td>{{w.u_ward_officer}}</td>
-                  <td>{{w.u_contact_phone}}</td>
-                  <td>{{w.u_population}}</td>
-                  <td><span class="civix-badge civix-badge-success">{{w.u_status}}</span></td>
+                <tr ng-repeat="w in c.data.wards | filter:c.filterWardsByGeo">
+                  <td><strong>{{w.u_ward_code || '-'}}</strong></td>
+                  <td><strong>{{w.u_ward_name}}</strong></td>
+                  <td>{{w.u_local_body_name || 'Greater Chennai Corporation'}} &bull; {{w.u_district_name || 'Chennai'}}</td>
+                  <td>{{w.u_state_name || 'Tamil Nadu'}} &bull; <span class="civix-badge civix-badge-zone2" style="font-size: 10px;">{{w.u_op_zone || 'South Zone'}}</span></td>
+                  <td>{{w.u_zone || w.u_municipal_zone}}</td>
+                  <td><span class="civix-badge civix-badge-secondary">{{w.assetsCount || 1}} Assets</span></td>
+                  <td><span class="civix-badge civix-badge-info">{{w.sensorsCount || 1}} Sensors</span></td>
+                  <td><span class="civix-badge" ng-class="{'civix-badge-warning': w.casesCount > 0, 'civix-badge-success': !w.casesCount || w.casesCount === 0}">{{w.casesCount || 0}} Cases</span></td>
+                  <td><span class="civix-badge civix-badge-success">{{w.u_status || 'Active'}}</span></td>
+                </tr>
+                <tr ng-if="(c.data.wards | filter:c.filterWardsByGeo).length === 0">
+                  <td colspan="9" style="text-align: center; padding: 24px; color: #64748B;">
+                    <i class="fa fa-info-circle"></i> No wards configured under selected geographic criteria.
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1825,6 +2224,105 @@
       <div class="civix-modal-footer">
         <button class="civix-btn civix-btn-secondary" ng-click="c.closeConfigModal()">Cancel</button>
         <button class="civix-btn civix-btn-primary" ng-click="c.saveConfiguration()"><i class="fa fa-save"></i> Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. State Reassignment Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showReassignStateModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-exchange text-primary"></i> Reassign State to Operational Zone</h4>
+        <button class="civix-modal-close" ng-click="c.showReassignStateModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 12px; margin-bottom: 16px;">
+          <div style="font-size: 14px; font-weight: 800; color: #0F172A;">{{c.selectedState.u_name}} ({{c.selectedState.u_code}})</div>
+          <div style="font-size: 11.5px; color: #64748B; margin-top: 4px;">
+            Administrative Type: <strong>{{c.selectedState.u_type}}</strong> &bull; Current Operational Zone: <span class="civix-badge civix-badge-info">{{c.selectedState.u_op_zone_name}}</span>
+          </div>
+        </div>
+
+        <div class="civix-form-group">
+          <label>Target Operational Zone *</label>
+          <select class="civix-select" style="width: 100%;" ng-model="c.targetReassignZone">
+            <option value="">-- Select Target Operational Zone --</option>
+            <option ng-repeat="oz in c.data.opZones" value="{{oz.u_zone_code}}">{{oz.u_zone_code}} &bull; {{oz.u_zone_name}}</option>
+          </select>
+        </div>
+
+        <div class="civix-form-group">
+          <label>Administrative Reassignment Reason / Justification *</label>
+          <textarea class="civix-form-control" rows="3" ng-model="c.reassignReason" placeholder="State operational justification for realignment..."></textarea>
+        </div>
+
+        <div style="font-size: 11px; color: #64748B; background: #FFFBEB; border: 1px solid #FDE68A; padding: 10px; border-radius: 4px;">
+          <i class="fa fa-info-circle text-warning"></i> Reassigning this State/UT will automatically update all child districts and urban local bodies and create an authoritative entry in the audit trail.
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showReassignStateModal = false">Cancel</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.confirmReassignState()"><i class="fa fa-check"></i> Commit Reassignment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Operational Zone Details & Drilldown Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showOpZoneDetailModal">
+    <div class="civix-modal civix-modal-lg">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-globe text-primary"></i> {{c.selectedOpZone.u_zone_name}} &bull; Operational Details</h4>
+        <button class="civix-modal-close" ng-click="c.showOpZoneDetailModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10.5px; color: #64748B; font-weight: 700;">COMMAND HQ</div>
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A;">{{c.selectedOpZone.u_headquarters}}</div>
+          </div>
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10.5px; color: #64748B; font-weight: 700;">ASSIGNED STATES & UTS</div>
+            <div style="font-size: 13px; font-weight: 800; color: #2563EB;">{{c.selectedOpZone.totalAssigned || 0}} ({{c.selectedOpZone.statesCount}} States, {{c.selectedOpZone.utsCount}} UTs)</div>
+          </div>
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10.5px; color: #64748B; font-weight: 700;">CONFIGURED DISTRICTS</div>
+            <div style="font-size: 13px; font-weight: 800; color: #059669;">{{c.selectedOpZone.districtsCount || 0}} Districts</div>
+          </div>
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; border-radius: 4px;">
+            <div style="font-size: 10.5px; color: #64748B; font-weight: 700;">ACTIVE WARDS / CASES</div>
+            <div style="font-size: 13px; font-weight: 800; color: #D97706;">{{c.selectedOpZone.wardsCount || 0}} Wards &bull; {{c.selectedOpZone.casesCount || 0}} Cases</div>
+          </div>
+        </div>
+
+        <h5 style="margin-bottom: 10px; font-size: 13px; font-weight: 800;"><i class="fa fa-map text-primary"></i> Assigned States & Union Territories Catalogue</h5>
+        <div style="max-height: 240px; overflow-y: auto; border: 1px solid #E2E8F0; border-radius: 4px;">
+          <table class="civix-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Entity Name</th>
+                <th>Type</th>
+                <th>Capital</th>
+                <th>Configured Districts</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="st in c.getStatesForZone(c.selectedOpZone.u_zone_code)">
+                <td><strong>{{st.u_code}}</strong></td>
+                <td>{{st.u_name}}</td>
+                <td><span class="civix-badge" ng-class="{'civix-badge-state': st.u_type === 'State', 'civix-badge-ut': st.u_type === 'Union Territory'}">{{st.u_type}}</span></td>
+                <td>{{st.u_capital}}</td>
+                <td>
+                  <span ng-if="st.districtsCount > 0" class="civix-badge civix-badge-success">{{st.districtsCount}} Configured</span>
+                  <span ng-if="!st.districtsCount || st.districtsCount === 0" style="color: #94A3B8; font-size: 11px; font-style: italic;">No master data available</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showOpZoneDetailModal = false">Close</button>
       </div>
     </div>
   </div>

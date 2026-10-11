@@ -179,7 +179,7 @@
       }
     }
 
-    // D. ZONE & WARD ACTIONS
+    // D. ZONE & GEOGRAPHIC HIERARCHY ACTIONS
     if (input.action === 'save_zone') {
       var grZ = new GlideRecord('u_x_civic_ai_zone');
       var isNew = true;
@@ -202,6 +202,123 @@
         logAuditEvent('Zone Updated', input.code, 'Zone Management', 'Modified', input.name, 'Zone profile details updated');
       }
       data.actionResult.message = 'Zone ' + input.name + ' saved successfully.';
+    }
+
+    if (input.action === 'reassign_state_zone') {
+      var grStRe = new GlideRecord('u_x_civic_ai_state');
+      if (grStRe.get(input.sys_id)) {
+        var oldZCode = grStRe.getValue('u_op_zone_code');
+        var oldZName = grStRe.getValue('u_op_zone_name');
+        var targetZCode = input.target_zone_code;
+
+        // Verify target zone exists
+        var grTz = new GlideRecord('u_x_civic_ai_op_zone');
+        grTz.addQuery('u_zone_code', targetZCode);
+        grTz.query();
+        if (grTz.next()) {
+          var targetZName = grTz.getValue('u_zone_name');
+          grStRe.setValue('u_op_zone_code', targetZCode);
+          grStRe.setValue('u_op_zone_name', targetZName);
+          grStRe.update();
+
+          // Cascade update to child districts if any
+          var grDistUpdate = new GlideRecord('u_x_civic_ai_district');
+          grDistUpdate.addQuery('u_state_name', grStRe.getValue('u_name'));
+          grDistUpdate.query();
+          while (grDistUpdate.next()) {
+            grDistUpdate.setValue('u_op_zone', targetZName);
+            grDistUpdate.update();
+          }
+
+          // Cascade update to child local bodies if any
+          var grLbUpdate = new GlideRecord('u_x_civic_ai_local_body');
+          grLbUpdate.addQuery('u_state_name', grStRe.getValue('u_name'));
+          grLbUpdate.query();
+          while (grLbUpdate.next()) {
+            grLbUpdate.setValue('u_op_zone', targetZName);
+            grLbUpdate.update();
+          }
+
+          logAuditEvent('State Reassigned to Operational Zone', grStRe.getValue('u_name') + ' (' + grStRe.getValue('u_code') + ')', 'Geographic Hierarchy', oldZName + ' (' + oldZCode + ')', targetZName + ' (' + targetZCode + ')', input.reason || 'Operational zone realignment approved by ' + data.currentUser.name);
+          data.actionResult.message = grStRe.getValue('u_name') + ' successfully reassigned to ' + targetZName;
+        } else {
+          data.actionResult.status = 'error';
+          data.actionResult.message = 'Invalid target operational zone code: ' + targetZCode;
+        }
+      }
+    }
+
+    if (input.action === 'save_state') {
+      var grStSave = new GlideRecord('u_x_civic_ai_state');
+      var isStNew = true;
+      if (input.sys_id && grStSave.get(input.sys_id)) {
+        isStNew = false;
+      } else {
+        grStSave.initialize();
+      }
+      grStSave.setValue('u_name', input.name);
+      grStSave.setValue('u_code', input.code);
+      grStSave.setValue('u_type', input.type || 'State');
+      grStSave.setValue('u_op_zone_code', input.op_zone_code);
+      grStSave.setValue('u_op_zone_name', input.op_zone_name);
+      grStSave.setValue('u_capital', input.capital || '');
+      grStSave.setValue('u_status', input.status || 'Active');
+      if (isStNew) {
+        grStSave.insert();
+        logAuditEvent('State/UT Master Created', input.code, 'Geographic Hierarchy', '', input.name, 'National master record created');
+      } else {
+        grStSave.update();
+        logAuditEvent('State/UT Master Updated', input.code, 'Geographic Hierarchy', 'Modified', input.name, 'National master record updated');
+      }
+      data.actionResult.message = input.name + ' master record saved successfully.';
+    }
+
+    if (input.action === 'save_district') {
+      var grDst = new GlideRecord('u_x_civic_ai_district');
+      var isDstNew = true;
+      if (input.sys_id && grDst.get(input.sys_id)) {
+        isDstNew = false;
+      } else {
+        grDst.initialize();
+      }
+      grDst.setValue('u_name', input.name);
+      grDst.setValue('u_code', input.code);
+      grDst.setValue('u_state_name', input.state_name);
+      grDst.setValue('u_op_zone', input.op_zone || 'Zone 2 — South Zone');
+      grDst.setValue('u_status', input.status || 'Active');
+      if (isDstNew) grDst.insert(); else grDst.update();
+      data.actionResult.message = 'District ' + input.name + ' saved successfully.';
+    }
+
+    if (input.action === 'save_local_body') {
+      var grLb = new GlideRecord('u_x_civic_ai_local_body');
+      var isLbNew = true;
+      if (input.sys_id && grLb.get(input.sys_id)) {
+        isLbNew = false;
+      } else {
+        grLb.initialize();
+      }
+      grLb.setValue('u_name', input.name);
+      grLb.setValue('u_code', input.code);
+      grLb.setValue('u_type', input.type || 'Municipal Corporation');
+      grLb.setValue('u_district_name', input.district_name);
+      grLb.setValue('u_state_name', input.state_name);
+      grLb.setValue('u_op_zone', input.op_zone || 'Zone 2 — South Zone');
+      grLb.setValue('u_status', input.status || 'Active');
+      if (isLbNew) grLb.insert(); else grLb.update();
+      data.actionResult.message = 'Urban Local Body ' + input.name + ' saved successfully.';
+    }
+
+    if (input.action === 'toggle_op_zone_status') {
+      var grOzT = new GlideRecord('u_x_civic_ai_op_zone');
+      if (grOzT.get(input.sys_id)) {
+        var oldSt = grOzT.getValue('u_status');
+        var newSt = (oldSt === 'Active') ? 'Inactive' : 'Active';
+        grOzT.setValue('u_status', newSt);
+        grOzT.update();
+        logAuditEvent('Operational Zone Status Changed', grOzT.getValue('u_zone_name'), 'Zone Management', oldSt, newSt, 'Administrative status adjustment');
+        data.actionResult.message = grOzT.getValue('u_zone_name') + ' status changed to ' + newSt;
+      }
     }
 
     // E. CONFIGURATION ACTIONS
@@ -242,7 +359,11 @@
     }
   }
 
-  // --- 2. LOAD DATA FOR ALL 11 MODULES ---
+  // --- 2. LOAD DATA FOR ALL 11 MODULES & NATIONAL HIERARCHY ---
+  data.opZones = getRecords('u_x_civic_ai_op_zone', 'ORDERBYu_zone_code', 10);
+  data.states = getRecords('u_x_civic_ai_state', 'ORDERBYu_name', 100);
+  data.districts = getRecords('u_x_civic_ai_district', 'ORDERBYu_name', 100);
+  data.localBodies = getRecords('u_x_civic_ai_local_body', 'ORDERBYu_name', 100);
   data.cases = getRecords('u_x_civic_ai_case', '', 100);
   data.workOrders = getRecords('u_x_civic_ai_work_order', '', 100);
   data.citizens = getRecords('u_x_civic_ai_citizen', '', 100);
@@ -257,6 +378,135 @@
   data.auditLogs = getRecords('u_x_civic_ai_audit', '', 50);
   data.notifications = getRecords('u_x_civic_ai_notification', '', 20);
   data.configs = getRecords('u_x_civic_ai_config', '', 50);
+
+  // --- 2.1 REAL DATABASE HIERARCHY AGGREGATIONS (ZERO MOCKING) ---
+  for (var ozI = 0; ozI < data.opZones.length; ozI++) {
+    var ozRec = data.opZones[ozI];
+    var stCount = 0;
+    var utCount = 0;
+    for (var sI = 0; sI < data.states.length; sI++) {
+      var stItm = data.states[sI];
+      if (stItm.u_op_zone_code === ozRec.u_zone_code || stItm.u_op_zone_name === ozRec.u_zone_name) {
+        if (stItm.u_type === 'Union Territory') utCount++;
+        else stCount++;
+      }
+    }
+    ozRec.statesCount = stCount;
+    ozRec.utsCount = utCount;
+    ozRec.totalAssigned = stCount + utCount;
+
+    var dstCount = 0;
+    for (var dI = 0; dI < data.districts.length; dI++) {
+      if (data.districts[dI].u_op_zone === ozRec.u_zone_name || data.districts[dI].u_op_zone === ozRec.u_zone_code) {
+        dstCount++;
+      }
+    }
+    ozRec.districtsCount = dstCount;
+
+    var lbCount = 0;
+    for (var lbI = 0; lbI < data.localBodies.length; lbI++) {
+      if (data.localBodies[lbI].u_op_zone === ozRec.u_zone_name || data.localBodies[lbI].u_op_zone === ozRec.u_zone_code) {
+        lbCount++;
+      }
+    }
+    ozRec.localBodiesCount = lbCount;
+
+    var wCount = 0;
+    for (var wI = 0; wI < data.wards.length; wI++) {
+      if (data.wards[wI].u_op_zone === ozRec.u_zone_name || data.wards[wI].u_op_zone === ozRec.u_zone_code) {
+        wCount++;
+      }
+    }
+    ozRec.wardsCount = wCount;
+
+    var aCount = 0;
+    for (var aI = 0; aI < data.assets.length; aI++) {
+      if (data.assets[aI].u_op_zone === ozRec.u_zone_name || data.assets[aI].u_op_zone === ozRec.u_zone_code) {
+        aCount++;
+      }
+    }
+    ozRec.assetsCount = aCount;
+
+    var cCount = 0;
+    for (var cI = 0; cI < data.cases.length; cI++) {
+      if (data.cases[cI].u_op_zone === ozRec.u_zone_name || data.cases[cI].u_op_zone === ozRec.u_zone_code) {
+        cCount++;
+      }
+    }
+    ozRec.casesCount = cCount;
+  }
+
+  // State real district counts
+  for (var stJ = 0; stJ < data.states.length; stJ++) {
+    var stateRec = data.states[stJ];
+    var dCount = 0;
+    for (var dJ = 0; dJ < data.districts.length; dJ++) {
+      if (data.districts[dJ].u_state_name === stateRec.u_name || data.districts[dJ].u_state_code === stateRec.u_code) {
+        dCount++;
+      }
+    }
+    stateRec.districtsCount = dCount;
+  }
+
+  // District real local body counts
+  for (var dstJ = 0; dstJ < data.districts.length; dstJ++) {
+    var distRec = data.districts[dstJ];
+    var lbCnt = 0;
+    for (var lbJ = 0; lbJ < data.localBodies.length; lbJ++) {
+      if (data.localBodies[lbJ].u_district_name === distRec.u_name) {
+        lbCnt++;
+      }
+    }
+    distRec.localBodiesCount = lbCnt;
+  }
+
+  // Local body real municipal zone & ward counts
+  for (var lbK = 0; lbK < data.localBodies.length; lbK++) {
+    var lbRec = data.localBodies[lbK];
+    var mzCnt = 0;
+    for (var mzK = 0; mzK < data.zones.length; mzK++) {
+      if (data.zones[mzK].u_local_body_name === lbRec.u_name || data.zones[mzK].u_local_body === lbRec.u_name) {
+        mzCnt++;
+      }
+    }
+    lbRec.municipalZonesCount = mzCnt;
+
+    var wCnt = 0;
+    for (var wK = 0; wK < data.wards.length; wK++) {
+      if (data.wards[wK].u_local_body_name === lbRec.u_name || data.wards[wK].u_local_body === lbRec.u_name) {
+        wCnt++;
+      }
+    }
+    lbRec.wardsCount = wCnt;
+  }
+
+  // Ward real asset, sensor, and case linkages
+  for (var wLk = 0; wLk < data.wards.length; wLk++) {
+    var wardRec = data.wards[wLk];
+    var wNum = wardRec.u_ward_code || '';
+    var wName = wardRec.u_ward_name || '';
+
+    var astCnt = 0;
+    for (var astK = 0; astK < data.assets.length; astK++) {
+      var aWd = data.assets[astK].u_ward || '';
+      if (aWd && (aWd.indexOf(wNum) !== -1 || aWd.indexOf(wName) !== -1)) astCnt++;
+    }
+    wardRec.assetsCount = astCnt;
+
+    var senCnt = 0;
+    for (var senK = 0; senK < data.sensors.length; senK++) {
+      var sWd = data.sensors[senK].u_ward || '';
+      if (sWd && (sWd.indexOf(wNum) !== -1 || sWd.indexOf(wName) !== -1)) senCnt++;
+    }
+    wardRec.sensorsCount = senCnt;
+
+    var csCnt = 0;
+    for (var csK = 0; csK < data.cases.length; csK++) {
+      var cWd = data.cases[csK].u_ward || '';
+      if (cWd && (cWd.indexOf(wNum) !== -1 || cWd.indexOf(wName) !== -1)) csCnt++;
+    }
+    wardRec.casesCount = csCnt;
+  }
 
   // --- 3. CALCULATE DASHBOARD KPIS (REAL AGGREGATIONS) ---
   var totalTickets = data.cases.length;
