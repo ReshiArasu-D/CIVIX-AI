@@ -863,14 +863,14 @@ UI16_TEMPLATE = f"""
   <!-- =========================================================================
        IN-APP CASE TRACKING MODAL (SOLVES "GOING TO NEW PAGE" ISSUE)
        ========================================================================= -->
-  <div class="fsm-modal-backdrop" ng-if="c.showCaseTrackingModal" ng-click="c.closeCaseTrackingModal($event)">
+  <div class="fsm-modal-backdrop" ng-if="c.showCaseTrackingModal" ng-click="c.showCaseTrackingModal = false; c.closeCaseTrackingModal($event)">
     <div class="fsm-modal-dialog modal-lg" ng-click="$event.stopPropagation()">
       <div class="fsm-modal-head bg-info-subtle">
         <div class="d-flex align-items-center gap-2">
           <span class="badge badge-info">LIVE CROSS-TRACKING</span>
           <h4 class="fsm-modal-h">Citizen Complaint &bull; {{{{c.trackingModalData.case_number}}}}</h4>
         </div>
-        <button type="button" class="fsm-modal-close-btn" ng-click="c.closeCaseTrackingModal($event)" title="Close">&times;</button>
+        <button type="button" class="fsm-modal-close-btn" id="btnXCloseCaseTracker" ng-click="c.showCaseTrackingModal = false; c.closeCaseTrackingModal($event)" title="Close">&times;</button>
       </div>
       <div class="fsm-modal-body p-4">
         
@@ -968,7 +968,7 @@ UI16_TEMPLATE = f"""
 
       </div>
       <div class="fsm-modal-foot">
-        <button type="button" class="btn btn-default" ng-click="c.closeCaseTrackingModal($event)">Close Tracker</button>
+        <button type="button" class="btn btn-default" id="btnCloseCaseTracker" ng-click="c.showCaseTrackingModal = false; c.closeCaseTrackingModal($event)">Close Tracker</button>
       </div>
     </div>
   </div>
@@ -2010,9 +2010,16 @@ function($scope, $location, $window, $timeout, spUtil) {
     c.showCaseTrackingModal = true;
   };
 
-  c.closeCaseTrackingModal = function(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
+  $scope.closeCaseTrackingModal = c.closeCaseTrackingModal = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     c.showCaseTrackingModal = false;
+    $scope.showCaseTrackingModal = false;
+    $timeout(function() {
+      c.showCaseTrackingModal = false;
+      $scope.showCaseTrackingModal = false;
+      try { if (!$scope.$$phase) $scope.$apply(); } catch(err) {}
+    }, 0);
   };
 
   // ============================================================================
