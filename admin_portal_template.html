@@ -281,9 +281,9 @@
             <div class="civix-panel-body">
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div ng-repeat="cat in c.data.categories | limitTo:5">
-                  <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px;">
-                    <span>{{cat.u_category_name}}</span>
-                    <span style="color: var(--sn-primary-blue);">Active: 1</span>
+                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 5px;">
+                    <span style="color: #0F172A !important; font-weight: 800;">{{cat.u_category_name}}</span>
+                    <span style="color: #2563EB !important; font-weight: 700;">Active: 1</span>
                   </div>
                   <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
                     <div style="height: 100%; background: var(--sn-primary-blue); width: 25%; border-radius: 3px;"></div>
@@ -635,9 +635,10 @@
                     </span>
                   </td>
                   <td>
-                    <div style="display: flex; gap: 4px;">
-                      <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.acknowledgeAlert(al)" ng-if="al.u_state.indexOf('Unacknowledged')!==-1"><i class="fa fa-check"></i> Acknowledge</button>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                      <button class="civix-btn civix-btn-sm civix-btn-success" ng-click="c.acknowledgeAlert(al)" ng-if="al.u_state.indexOf('Unacknowledged')!==-1"><i class="fa fa-check"></i> Acknowledge</button>
                       <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.convertAlertToCase(al)" ng-if="al.u_state !== 'Dispatched'"><i class="fa fa-share"></i> Dispatch Case</button>
+                      <span ng-if="al.u_state === 'Dispatched'" class="civix-badge civix-badge-info"><i class="fa fa-check-circle"></i> Case Dispatched</span>
                     </div>
                   </td>
                 </tr>
