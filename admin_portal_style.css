@@ -1,83 +1,83 @@
 /* ==========================================================================
-   CIVIX AI - ADMIN & OPERATIONS PORTAL (SERVICENOW UI16 ADVANCED BLUE THEME)
-   Vibrant Deep Blue Sidebar, Executive Navy Header, and Modern Animations
+   CIVIX AI - ADMIN & OPERATIONS COMMAND PORTAL
+   ServiceNow UI16 & Next Experience Modern Enterprise Theme
+   Typography: Google Font Plus Jakarta Sans & JetBrains Mono
    ========================================================================== */
 
-/* Animation Keyframes */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* Animations */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulseGlow {
-  0% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-  }
+  0%   { box-shadow: 0 0 0 0 rgba(0, 114, 206, 0.45); }
+  70%  { box-shadow: 0 0 0 8px rgba(0, 114, 206, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 114, 206, 0); }
 }
 
 @keyframes floatAction {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes radarPulse {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
 }
 
 @keyframes civixSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(12px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes civixFadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-* {
+/* 0. GLOBAL RESET & SERVICENOW PORTAL FULL-WIDTH OVERRIDES */
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
+html, body, .container, .container-fluid, .sp-page-container, .v187180, [widget="civix_admin_portal_widget"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body, .civix-admin-wrapper, button, input, select, textarea, optgroup {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  letter-spacing: -0.012em !important;
+}
+
+code, pre, .civix-mono, .civix-badge-mono {
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, Menlo, monospace !important;
+}
+
 .civix-admin-wrapper {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  background-color: #F1F5F9 !important;
+  background-color: #F8FAFC !important;
   color: #0F172A !important;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  position: relative !important;
+  left: 50% !important;
+  right: 50% !important;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+.civix-admin-body {
+  display: flex !important;
+  flex: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* ==========================================================================
@@ -94,8 +94,8 @@
   position: sticky !important;
   top: 0 !important;
   z-index: 1000 !important;
-  border-bottom: 3px solid #2563EB !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  border-bottom: 2px solid #0072CE !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18) !important;
 }
 
 .civix-header-left {
@@ -115,16 +115,15 @@
 .civix-logo-icon {
   width: 36px !important;
   height: 36px !important;
-  background: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%) !important;
-  border-radius: 6px !important;
+  background: linear-gradient(135deg, #0072CE 0%, #38BDF8 100%) !important;
+  border-radius: 8px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   font-size: 18px !important;
   font-weight: 900 !important;
   color: #FFFFFF !important;
-  letter-spacing: -0.5px !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(0, 114, 206, 0.4) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
@@ -134,55 +133,58 @@
 }
 
 .civix-brand-title {
-  font-size: 17px !important;
+  font-size: 16.5px !important;
   font-weight: 800 !important;
-  letter-spacing: 0.6px !important;
+  letter-spacing: -0.02em !important;
   line-height: 1.1 !important;
   color: #FFFFFF !important;
 }
 
 .civix-brand-subtitle {
   font-size: 11px !important;
-  color: #93C5FD !important;
-  letter-spacing: 0.2px !important;
+  color: #94A3B8 !important;
+  letter-spacing: 0.02em !important;
   font-weight: 500 !important;
 }
 
 .civix-workspace-badge {
-  background-color: rgba(37, 99, 235, 0.35) !important;
-  border: 1px solid #60A5FA !important;
-  color: #DBEAFE !important;
-  font-size: 11px !important;
+  background-color: rgba(0, 114, 206, 0.28) !important;
+  border: 1px solid #38BDF8 !important;
+  color: #E0F2FE !important;
+  font-size: 10.5px !important;
   font-weight: 700 !important;
   padding: 4px 10px !important;
-  border-radius: 4px !important;
-  letter-spacing: 0.6px !important;
+  border-radius: 9999px !important;
+  letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
 }
 
 .civix-header-right {
   display: flex !important;
   align-items: center !important;
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .civix-header-btn {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
   color: #FFFFFF !important;
   position: relative !important;
   cursor: pointer !important;
   padding: 7px 12px !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
   transition: all 0.2s ease !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  gap: 6px !important;
 }
 
 .civix-header-btn:hover {
-  background-color: rgba(255, 255, 255, 0.22) !important;
-  border-color: #60A5FA !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: #38BDF8 !important;
   transform: translateY(-1px) !important;
 }
 
@@ -196,7 +198,7 @@
   font-weight: 800 !important;
   height: 18px !important;
   min-width: 18px !important;
-  border-radius: 9px !important;
+  border-radius: 9999px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -211,29 +213,29 @@
   gap: 10px !important;
   cursor: pointer !important;
   padding: 5px 12px !important;
-  border-radius: 5px !important;
+  border-radius: 8px !important;
   transition: all 0.2s ease !important;
   position: relative !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
 }
 
 .civix-user-profile-menu:hover {
-  background-color: rgba(255, 255, 255, 0.22) !important;
-  border-color: #60A5FA !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: #38BDF8 !important;
 }
 
 .civix-avatar {
   width: 32px !important;
   height: 32px !important;
-  border-radius: 4px !important;
-  background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+  border-radius: 6px !important;
+  background: linear-gradient(135deg, #0072CE, #1D4ED8) !important;
   color: #FFFFFF !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   font-weight: 800 !important;
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
@@ -261,8 +263,8 @@
   right: 0 !important;
   width: 250px !important;
   background: #FFFFFF !important;
-  border-radius: 6px !important;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.15) !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
   overflow: hidden !important;
@@ -308,7 +310,7 @@
 
 .civix-dropdown-item:hover {
   background-color: #EFF6FF !important;
-  color: #1D4ED8 !important;
+  color: #0072CE !important;
   padding-left: 20px !important;
 }
 
@@ -335,8 +337,8 @@
   width: 380px !important;
   max-height: 480px !important;
   background: #FFFFFF !important;
-  border-radius: 6px !important;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2) !important;
   border: 1px solid #CBD5E1 !important;
   color: #0F172A !important;
   overflow: hidden !important;
@@ -348,11 +350,11 @@
 
 .civix-notif-header {
   padding: 12px 16px !important;
+  background: #F8FAFC !important;
   border-bottom: 1px solid #E2E8F0 !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  background: #F8FAFC !important;
 }
 
 .civix-notif-header h5 {
@@ -363,8 +365,8 @@
 }
 
 .civix-notif-list {
-  max-height: 360px !important;
   overflow-y: auto !important;
+  flex: 1 !important;
 }
 
 .civix-notif-item {
@@ -383,7 +385,7 @@
 
 .civix-notif-item.unread {
   background: #EFF6FF !important;
-  border-left: 4px solid #2563EB !important;
+  border-left: 3.5px solid #0072CE !important;
 }
 
 .civix-notif-title {
@@ -411,8 +413,8 @@
 
 .civix-sidebar {
   width: 250px !important;
-  background: linear-gradient(180deg, #091E3A 0%, #0D2C53 35%, #113D72 70%, #0B2547 100%) !important;
-  border-right: 1px solid #1D4ED8 !important;
+  background: linear-gradient(180deg, #081B34 0%, #0B2547 50%, #07172B 100%) !important;
+  border-right: 1px solid #16365C !important;
   display: flex !important;
   flex-direction: column !important;
   flex-shrink: 0 !important;
@@ -421,13 +423,13 @@
 }
 
 .civix-sidebar-header {
-  padding: 12px 16px !important;
+  padding: 12px 18px !important;
   background: #061528 !important;
-  border-bottom: 1px solid #1E3A8A !important;
-  font-size: 11px !important;
+  border-bottom: 1px solid #16365C !important;
+  font-size: 10px !important;
   font-weight: 800 !important;
-  color: #60A5FA !important;
-  letter-spacing: 1px !important;
+  color: #38BDF8 !important;
+  letter-spacing: 1.2px !important;
   text-transform: uppercase !important;
   display: flex !important;
   align-items: center !important;
@@ -447,30 +449,28 @@
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  padding: 11px 18px !important;
+  padding: 10px 18px !important;
   font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #FFFFFF !important;
+  font-weight: 500 !important;
+  color: #CBD5E1 !important;
   cursor: pointer !important;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   text-decoration: none !important;
-  border-left: 4px solid transparent !important;
+  border-left: 3.5px solid transparent !important;
   position: relative !important;
 }
 
 .civix-sidebar-link:hover {
-  background: rgba(37, 99, 235, 0.28) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   color: #FFFFFF !important;
-  border-left-color: #60A5FA !important;
-  transform: translateX(5px) !important;
+  padding-left: 22px !important;
 }
 
 .civix-sidebar-link.active {
-  background: linear-gradient(90deg, #1D4ED8 0%, #2563EB 100%) !important;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0.03) 100%) !important;
   color: #FFFFFF !important;
   border-left-color: #38BDF8 !important;
   font-weight: 700 !important;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45) !important;
 }
 
 .civix-sidebar-icon {
@@ -479,22 +479,22 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 15px !important;
-  color: #93C5FD !important;
+  font-size: 14.5px !important;
+  color: #94A3B8 !important;
   transition: color 0.2s ease !important;
 }
 
 .civix-sidebar-link.active .civix-sidebar-icon,
 .civix-sidebar-link:hover .civix-sidebar-icon {
-  color: #FFFFFF !important;
+  color: #38BDF8 !important;
 }
 
 .civix-sidebar-footer {
   margin-top: auto !important;
-  padding: 16px !important;
-  border-top: 1px solid #1E3A8A !important;
+  padding: 14px !important;
+  border-top: 1px solid #16365C !important;
   font-size: 11px !important;
-  color: #93C5FD !important;
+  color: #94A3B8 !important;
   text-align: center !important;
   background: #061528 !important;
 }
@@ -503,42 +503,46 @@
    3. MAIN CONTENT (CANVAS, KPI TILES & SECTIONS)
    ========================================================================== */
 .civix-main-content {
-  flex: 1 !important;
-  padding: 24px 28px !important;
+  flex: 1 1 0% !important;
+  padding: 24px 32px !important;
   overflow-y: auto !important;
   max-width: calc(100vw - 250px) !important;
-  animation: fadeInUp 0.3s ease-out both !important;
+  width: calc(100vw - 250px) !important;
+  background: #F8FAFC !important;
+  animation: fadeInUp 0.25s ease-out both !important;
 }
 
 .civix-page-header {
-  margin-bottom: 20px !important;
+  margin-bottom: 22px !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: flex-start !important;
-  padding-bottom: 14px !important;
-  border-bottom: 1px solid #CBD5E1 !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #E2E8F0 !important;
 }
 
 .civix-breadcrumbs {
-  font-size: 11.5px !important;
-  font-weight: 600 !important;
-  color: #2563EB !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #0072CE !important;
   margin-bottom: 4px !important;
-  letter-spacing: 0.3px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
 }
 
 .civix-page-title {
-  font-size: 22px !important;
+  font-size: 24px !important;
   font-weight: 800 !important;
-  color: #0F2D54 !important;
+  color: #0F172A !important;
   margin: 0 0 4px 0 !important;
-  letter-spacing: -0.3px !important;
+  letter-spacing: -0.025em !important;
 }
 
 .civix-page-desc {
-  font-size: 12.5px !important;
-  color: #475569 !important;
+  font-size: 13px !important;
+  color: #64748B !important;
   margin: 0 !important;
+  font-weight: 400 !important;
 }
 
 .civix-header-actions {
@@ -552,38 +556,39 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  padding: 7px 16px !important;
-  border-radius: 4px !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
   border: 1px solid transparent !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  line-height: 1.4 !important;
+  transition: all 0.18s ease !important;
+  line-height: 1 !important;
   text-decoration: none !important;
 }
 
 .civix-btn:hover {
-  transform: translateY(-2px) !important;
+  transform: translateY(-1px) !important;
 }
 
 .civix-btn-primary {
   background: #0072CE !important;
   color: #FFFFFF !important;
   border-color: #005A9E !important;
-  box-shadow: 0 2px 6px rgba(0, 114, 206, 0.3) !important;
+  box-shadow: 0 1px 2px rgba(0, 114, 206, 0.2) !important;
 }
 
 .civix-btn-primary:hover {
   background: #005A9E !important;
-  box-shadow: 0 4px 10px rgba(0, 114, 206, 0.45) !important;
+  box-shadow: 0 4px 10px rgba(0, 114, 206, 0.35) !important;
 }
 
 .civix-btn-secondary {
   background: #FFFFFF !important;
   border-color: #CBD5E1 !important;
-  color: #1E293B !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
 }
 
 .civix-btn-secondary:hover {
@@ -596,7 +601,7 @@
   background: #DC2626 !important;
   color: #FFFFFF !important;
   border-color: #B91C1C !important;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3) !important;
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.2) !important;
 }
 
 .civix-btn-danger:hover {
@@ -607,7 +612,7 @@
   background: #059669 !important;
   color: #FFFFFF !important;
   border-color: #047857 !important;
-  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3) !important;
+  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2) !important;
 }
 
 .civix-btn-success:hover {
@@ -615,12 +620,15 @@
 }
 
 .civix-btn-sm {
-  padding: 4px 10px !important;
-  font-size: 11.5px !important;
-  border-radius: 4px !important;
+  height: 30px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border-radius: 5px !important;
 }
 
-/* KPI Cards Grid (Vibrant UI16 Metric Cards with Smooth Hover Animation) */
+/* ==========================================================================
+   UPGRADED KPI CARDS GRID (SERVICENOW UI16 EXECUTIVE METRICS SUITE)
+   ========================================================================== */
 .civix-kpi-grid {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
@@ -630,73 +638,107 @@
 
 .civix-kpi-card {
   background: #FFFFFF !important;
-  border: 1px solid #CBD5E1 !important;
-  border-radius: 6px !important;
-  padding: 16px 18px !important;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 10px !important;
+  padding: 18px 20px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02) !important;
   display: flex !important;
   flex-direction: column !important;
+  justify-content: space-between !important;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   cursor: pointer !important;
-  border-top: 4px solid #2563EB !important;
   position: relative !important;
+  overflow: hidden !important;
+}
+
+.civix-kpi-card::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 3px !important;
+  background: #0072CE !important;
+  transition: height 0.2s ease !important;
 }
 
 .civix-kpi-card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 10px 20px -3px rgba(37, 99, 235, 0.15), 0 4px 6px -2px rgba(37, 99, 235, 0.05) !important;
-  border-color: #93C5FD !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04) !important;
+  border-color: #CBD5E1 !important;
 }
 
-.civix-kpi-card.kpi-danger {
-  border-top-color: #DC2626 !important;
+.civix-kpi-card:hover::before {
+  height: 4px !important;
 }
 
-.civix-kpi-card.kpi-warning {
-  border-top-color: #D97706 !important;
-}
-
-.civix-kpi-card.kpi-success {
-  border-top-color: #059669 !important;
-}
+.civix-kpi-card.kpi-danger::before  { background: #DC2626 !important; }
+.civix-kpi-card.kpi-warning::before { background: #D97706 !important; }
+.civix-kpi-card.kpi-success::before { background: #059669 !important; }
 
 .civix-kpi-header {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 12px !important;
 }
 
 .civix-kpi-label {
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
-  color: #475569 !important;
+  color: #64748B !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.6px !important;
+  letter-spacing: 0.06em !important;
 }
 
 .civix-kpi-icon {
-  width: 30px !important;
-  height: 30px !important;
-  border-radius: 6px !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 9px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   background: #EFF6FF !important;
-  color: #2563EB !important;
+  color: #0072CE !important;
+  border: 1px solid #DBEAFE !important;
+  transition: transform 0.2s ease !important;
+}
+
+.civix-kpi-card:hover .civix-kpi-icon {
+  transform: scale(1.08) !important;
+}
+
+.civix-kpi-card.kpi-warning .civix-kpi-icon {
+  background: #FFFBEB !important;
+  color: #D97706 !important;
+  border-color: #FEF3C7 !important;
+}
+
+.civix-kpi-card.kpi-success .civix-kpi-icon {
+  background: #ECFDF5 !important;
+  color: #059669 !important;
+  border-color: #D1FAE5 !important;
+}
+
+.civix-kpi-card.kpi-danger .civix-kpi-icon {
+  background: #FEF2F2 !important;
+  color: #DC2626 !important;
+  border-color: #FEE2E2 !important;
 }
 
 .civix-kpi-value {
-  font-size: 26px !important;
+  font-size: 30px !important;
   font-weight: 800 !important;
   color: #0F172A !important;
-  line-height: 1.1 !important;
-  margin-bottom: 6px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.03em !important;
+  margin-bottom: 8px !important;
 }
 
 .civix-kpi-sub {
   font-size: 11.5px !important;
+  font-weight: 500 !important;
   color: #64748B !important;
   display: flex !important;
   align-items: center !important;
@@ -704,26 +746,26 @@
 }
 
 .civix-kpi-sub.text-success { color: #059669 !important; }
-.civix-kpi-sub.text-danger { color: #DC2626 !important; }
+.civix-kpi-sub.text-danger  { color: #DC2626 !important; }
 .civix-kpi-sub.text-warning { color: #D97706 !important; }
 
 /* Panels */
 .civix-panel {
   background: #FFFFFF !important;
-  border: 1px solid #CBD5E1 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
   margin-bottom: 24px !important;
   overflow: hidden !important;
-  transition: box-shadow 0.2s ease !important;
+  transition: all 0.2s ease !important;
 }
 
 .civix-panel:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
 }
 
 .civix-panel-header {
-  padding: 12px 18px !important;
+  padding: 14px 20px !important;
   border-bottom: 1px solid #E2E8F0 !important;
   display: flex !important;
   justify-content: space-between !important;
@@ -733,160 +775,191 @@
 
 .civix-panel-title {
   font-size: 13.5px !important;
-  font-weight: 800 !important;
-  color: #0F2D54 !important;
+  font-weight: 700 !important;
+  color: #0F172A !important;
   margin: 0 !important;
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
+  letter-spacing: -0.01em !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
 }
 
 .civix-panel-body {
-  padding: 18px !important;
+  padding: 20px !important;
 }
 
 /* ==========================================================================
    4. DATA TABLES (HIGH-CONTRAST SERVICENOW UI16 LISTS)
    ========================================================================== */
-.civix-filter-bar {
+.civix-filter-bar, .civix-cascading-filter-bar {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  padding: 14px 18px !important;
+  margin-bottom: 18px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
   display: flex !important;
-  gap: 12px !important;
-  margin-bottom: 14px !important;
   flex-wrap: wrap !important;
-  align-items: center !important;
+  gap: 12px !important;
+  align-items: flex-end !important;
 }
 
-.civix-search-input {
-  flex: 1 !important;
-  min-width: 240px !important;
-  padding: 8px 12px !important;
+.civix-cascading-filter-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  flex: 1 1 150px !important;
+}
+
+.civix-cascading-filter-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin: 0 !important;
+}
+
+.civix-search-input, .civix-select, .civix-cascading-select {
+  height: 38px !important;
+  padding: 0 12px !important;
   border: 1px solid #CBD5E1 !important;
-  border-radius: 4px !important;
-  font-size: 12.5px !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
   outline: none !important;
   background: #FFFFFF !important;
   color: #0F172A !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.18s ease !important;
+  width: 100% !important;
 }
 
-.civix-search-input:focus {
-  border-color: #2563EB !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
-}
-
-.civix-select {
-  padding: 8px 12px !important;
-  border: 1px solid #CBD5E1 !important;
-  border-radius: 4px !important;
-  font-size: 12.5px !important;
-  outline: none !important;
-  background: #FFFFFF !important;
-  color: #0F172A !important;
-  min-width: 150px !important;
-}
-
-.civix-select:focus {
-  border-color: #2563EB !important;
+.civix-search-input:focus, .civix-select:focus, .civix-cascading-select:focus {
+  border-color: #0072CE !important;
+  box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.12) !important;
 }
 
 .civix-table-wrapper {
   overflow-x: auto !important;
-  border: 1px solid #CBD5E1 !important;
-  border-radius: 4px !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
   background: #FFFFFF !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
 
 .civix-table {
   width: 100% !important;
-  border-collapse: collapse !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
   text-align: left !important;
-  font-size: 12.5px !important;
+  font-size: 13px !important;
 }
 
 .civix-table th {
-  background-color: #F1F5F9 !important;
-  color: #334155 !important;
-  font-weight: 800 !important;
-  padding: 11px 14px !important;
-  border-bottom: 1px solid #CBD5E1 !important;
+  background-color: #F8FAFC !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
+  padding: 12px 16px !important;
+  border-bottom: 1.5px solid #E2E8F0 !important;
   white-space: nowrap !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0.05em !important;
 }
 
 .civix-table td {
-  padding: 12px 14px !important;
-  border-bottom: 1px solid #E2E8F0 !important;
-  color: #0F172A !important;
+  padding: 13px 16px !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+  color: #1E293B !important;
   vertical-align: middle !important;
+  font-weight: 500 !important;
 }
 
-.civix-table tr:nth-child(even) td {
-  background-color: #F8FAFC !important;
+.civix-table tr:last-child td {
+  border-bottom: none !important;
 }
 
 .civix-table tr:hover td {
-  background-color: #EFF6FF !important;
+  background-color: #F8FAFC !important;
 }
 
 /* Badges */
 .civix-badge {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 4px !important;
-  padding: 3px 8px !important;
-  border-radius: 4px !important;
-  font-size: 11px !important;
+  gap: 5px !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 11.5px !important;
   font-weight: 700 !important;
   line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
 }
 
-.civix-badge-p1 { background: #FEE2E2 !important; color: #DC2626 !important; border: 1px solid #FCA5A5 !important; }
-.civix-badge-p2 { background: #FEF3C7 !important; color: #D97706 !important; border: 1px solid #FDE68A !important; }
-.civix-badge-p3 { background: #FEF9C3 !important; color: #A16207 !important; border: 1px solid #FEF08A !important; }
-.civix-badge-p4 { background: #F1F5F9 !important; color: #475569 !important; border: 1px solid #CBD5E1 !important; }
+.civix-badge-p1 { background: #FEF2F2 !important; color: #DC2626 !important; border: 1px solid #FECACA !important; }
+.civix-badge-p2 { background: #FFF7ED !important; color: #EA580C !important; border: 1px solid #FFEDD5 !important; }
+.civix-badge-p3 { background: #FEFCE8 !important; color: #CA8A04 !important; border: 1px solid #FEF08A !important; }
+.civix-badge-p4 { background: #F0FDF4 !important; color: #16A34A !important; border: 1px solid #BBF7D0 !important; }
 
-.civix-badge-success { background: #D1FAE5 !important; color: #059669 !important; border: 1px solid #6EE7B7 !important; }
-.civix-badge-info { background: #DBEAFE !important; color: #1D4ED8 !important; border: 1px solid #93C5FD !important; }
-.civix-badge-warning { background: #FEF3C7 !important; color: #D97706 !important; border: 1px solid #FDE68A !important; }
-.civix-badge-danger { background: #FEE2E2 !important; color: #DC2626 !important; border: 1px solid #FCA5A5 !important; }
-.civix-badge-neutral { background: #F1F5F9 !important; color: #475569 !important; border: 1px solid #CBD5E1 !important; }
+.civix-badge-success { background: #ECFDF5 !important; color: #059669 !important; border: 1px solid #A7F3D0 !important; }
+.civix-badge-info    { background: #EFF6FF !important; color: #0072CE !important; border: 1px solid #BFDBFE !important; }
+.civix-badge-warning { background: #FFFBEB !important; color: #D97706 !important; border: 1px solid #FDE68A !important; }
+.civix-badge-danger  { background: #FEF2F2 !important; color: #DC2626 !important; border: 1px solid #FECACA !important; }
+.civix-badge-secondary { background: #F1F5F9 !important; color: #475569 !important; border: 1px solid #CBD5E1 !important; }
 
-/* Sub Tabs */
+/* Interactive Link Pill */
+.civix-wo-link {
+  color: #0072CE !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  background: #EFF6FF !important;
+  border: 1px solid #DBEAFE !important;
+  transition: all 0.15s ease !important;
+}
+
+.civix-wo-link:hover {
+  background: #0072CE !important;
+  color: #FFFFFF !important;
+  border-color: #005A9E !important;
+  text-decoration: none !important;
+}
+
+/* Tabs */
 .civix-tabs {
   display: flex !important;
-  gap: 6px !important;
-  border-bottom: 2px solid #CBD5E1 !important;
-  margin-bottom: 18px !important;
+  gap: 4px !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+  margin-bottom: 20px !important;
 }
 
 .civix-tab {
-  padding: 9px 16px !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
-  color: #64748B !important;
-  cursor: pointer !important;
-  border-bottom: 3px solid transparent !important;
-  margin-bottom: -2px !important;
-  transition: all 0.2s ease !important;
+  padding: 10px 18px !important;
   background: none !important;
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+  color: #64748B !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  margin-bottom: -2px !important;
 }
 
 .civix-tab:hover {
-  color: #2563EB !important;
+  color: #0F172A !important;
 }
 
 .civix-tab.active {
-  color: #2563EB !important;
-  border-bottom-color: #2563EB !important;
-  background: #FFFFFF !important;
+  color: #0072CE !important;
+  border-bottom-color: #0072CE !important;
+  font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -898,355 +971,151 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  background: rgba(7, 23, 43, 0.65) !important;
-  backdrop-filter: blur(3px) !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(4px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   z-index: 2000 !important;
-  animation: civixFadeIn 0.15s ease-out !important;
+  animation: civixFadeIn 0.2s ease-out !important;
 }
 
 .civix-modal {
   background: #FFFFFF !important;
-  border-radius: 6px !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35) !important;
   border: 1px solid #CBD5E1 !important;
+  overflow: hidden !important;
+  max-width: 780px !important;
   width: 90% !important;
-  max-width: 640px !important;
   max-height: 90vh !important;
+  animation: civixSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
   display: flex !important;
   flex-direction: column !important;
-  overflow: hidden !important;
-  animation: civixSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .civix-modal-lg {
-  max-width: 860px !important;
+  max-width: 980px !important;
+  width: 94% !important;
+  max-height: 92vh !important;
 }
 
 .civix-modal-header {
-  padding: 14px 20px !important;
-  border-bottom: 1px solid #E2E8F0 !important;
+  padding: 16px 24px !important;
+  background: #F8FAFC !important;
+  border-bottom: 2px solid #0072CE !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  background: #F8FAFC !important;
-  border-top: 4px solid #2563EB !important;
+  flex-shrink: 0 !important;
 }
 
 .civix-modal-header h4 {
   margin: 0 !important;
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 800 !important;
-  color: #0F2D54 !important;
+  color: #0F172A !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 
 .civix-modal-close {
   background: none !important;
   border: none !important;
-  font-size: 20px !important;
-  cursor: pointer !important;
+  font-size: 22px !important;
   color: #64748B !important;
+  cursor: pointer !important;
+  transition: color 0.15s !important;
+  line-height: 1 !important;
 }
 
 .civix-modal-close:hover {
-  color: #0F172A !important;
+  color: #DC2626 !important;
 }
 
 .civix-modal-body {
-  padding: 20px !important;
+  padding: 24px !important;
   overflow-y: auto !important;
+  flex: 1 1 auto !important;
 }
 
 .civix-modal-footer {
-  padding: 14px 20px !important;
+  padding: 14px 24px !important;
+  background: #F8FAFC !important;
   border-top: 1px solid #E2E8F0 !important;
   display: flex !important;
   justify-content: flex-end !important;
   gap: 10px !important;
-  background: #F8FAFC !important;
+  flex-shrink: 0 !important;
 }
 
+/* Form Groups in Modals */
 .civix-form-group {
   margin-bottom: 16px !important;
 }
 
-.civix-form-group label {
+.civix-form-label {
   display: block !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
-  color: #334155 !important;
-  margin-bottom: 6px !important;
+  color: #475569 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.4px !important;
+  letter-spacing: 0.04em !important;
+  margin-bottom: 6px !important;
 }
 
 .civix-form-control {
-  width: 100 !important;
-  padding: 8px 12px !important;
+  width: 100% !important;
+  height: 38px !important;
+  padding: 0 12px !important;
   border: 1px solid #CBD5E1 !important;
-  border-radius: 4px !important;
-  font-size: 12.5px !important;
-  background: #FFFFFF !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
   color: #0F172A !important;
+  outline: none !important;
+  background: #FFFFFF !important;
+  transition: border-color 0.15s ease !important;
 }
 
 .civix-form-control:focus {
-  border-color: #2563EB !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
-  outline: none !important;
+  border-color: #0072CE !important;
+  box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.12) !important;
+}
+
+textarea.civix-form-control {
+  height: auto !important;
+  padding: 10px 12px !important;
 }
 
 /* ==========================================================================
    6. FLOATING CHAT ASSISTANT WIDGET (ANIMATED VIBRANT BLUE COPILOT)
    ========================================================================== */
-.civix-chat-launcher {
+.civix-copilot-pill {
   position: fixed !important;
   bottom: 24px !important;
-  right: 24px !important;
-  z-index: 1500 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 10px 18px !important;
-  background: linear-gradient(135deg, #1D4ED8 0%, #0284C7 100%) !important;
-  border: 2px solid #67E8F9 !important;
-  color: #FFFFFF !important;
-  border-radius: 30px !important;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.45) !important;
-  cursor: pointer !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  animation: floatAction 3s ease-in-out infinite, pulseGlow 2.5s infinite !important;
-}
-
-.civix-chat-launcher:hover {
-  transform: translateY(-4px) scale(1.03) !important;
-  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.6) !important;
-}
-
-.civix-chat-launcher-avatar {
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 50% !important;
-  background: #FFFFFF !important;
-  color: #1D4ED8 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-weight: 800 !important;
-  font-size: 13px !important;
-}
-
-.civix-chat-launcher-text {
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.4px !important;
-}
-
-.civix-chat-window {
-  position: fixed !important;
-  bottom: 28px !important;
   right: 28px !important;
-  width: 390px !important;
-  height: 530px !important;
-  background: #FFFFFF !important;
-  border: 1px solid #94A3B8 !important;
-  border-radius: 10px !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28) !important;
-  z-index: 1600 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  animation: civixSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.civix-chat-header {
-  padding: 14px 18px !important;
-  background: linear-gradient(90deg, #07172B 0%, #0F2D54 60%, #174276 100%) !important;
+  background: linear-gradient(135deg, #0072CE 0%, #2563EB 50%, #4F46E5 100%) !important;
   color: #FFFFFF !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  border-bottom: 2px solid #2563EB !important;
-}
-
-.civix-chat-header-title {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-
-.civix-chat-header-title h5 {
-  margin: 0 !important;
-  font-size: 13.5px !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-}
-
-.civix-chat-header-title span {
-  font-size: 10.5px !important;
-  color: #38BDF8 !important;
-  font-weight: 600 !important;
-}
-
-.civix-chat-close-btn {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: #FFFFFF !important;
-  font-size: 20px !important;
-  line-height: 1 !important;
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 4px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-}
-
-.civix-chat-close-btn:hover {
-  background: #DC2626 !important;
-  border-color: #EF4444 !important;
-  color: #FFFFFF !important;
-  transform: scale(1.08) !important;
-}
-
-.civix-chat-quick-bar {
-  padding: 9px 12px !important;
-  background: #F1F5F9 !important;
-  border-bottom: 1px solid #E2E8F0 !important;
-  display: flex !important;
-  gap: 6px !important;
-  overflow-x: auto !important;
-  white-space: nowrap !important;
-}
-
-.civix-chat-pill {
-  background: #FFFFFF !important;
-  border: 1px solid #CBD5E1 !important;
-  padding: 4px 10px !important;
-  border-radius: 14px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  color: #2563EB !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-}
-
-.civix-chat-pill:hover {
-  background: #2563EB !important;
-  color: #FFFFFF !important;
-  border-color: #2563EB !important;
-  transform: translateY(-1px) !important;
-}
-
-.civix-chat-feed {
-  flex: 1 !important;
-  padding: 16px !important;
-  overflow-y: auto !important;
-  background: #F8FAFC !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
-}
-
-.civix-chat-msg {
-  display: flex !important;
-  flex-direction: column !important;
-  max-width: 84% !important;
-}
-
-.civix-chat-msg.bot {
-  align-self: flex-start !important;
-}
-
-.civix-chat-msg.user {
-  align-self: flex-end !important;
-}
-
-.civix-chat-bubble {
-  padding: 10px 14px !important;
-  border-radius: 8px !important;
-  font-size: 12.5px !important;
-  line-height: 1.45 !important;
-}
-
-.civix-chat-msg.bot .civix-chat-bubble {
-  background: #FFFFFF !important;
-  border: 1px solid #CBD5E1 !important;
-  color: #0F172A !important;
-  border-bottom-left-radius: 2px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
-
-.civix-chat-msg.user .civix-chat-bubble {
-  background: #2563EB !important;
-  color: #FFFFFF !important;
-  border-bottom-right-radius: 2px !important;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
-}
-
-.civix-chat-time {
-  font-size: 10px !important;
-  color: #64748B !important;
-  margin-top: 3px !important;
-}
-
-.civix-chat-msg.user .civix-chat-time {
-  text-align: right !important;
-}
-
-.civix-chat-input-bar {
-  padding: 12px 14px !important;
-  background: #FFFFFF !important;
-  border-top: 1px solid #CBD5E1 !important;
-  display: flex !important;
-  gap: 8px !important;
-}
-
-.civix-chat-input {
-  flex: 1 !important;
-  padding: 8px 12px !important;
-  border: 1px solid #CBD5E1 !important;
-  border-radius: 4px !important;
-  font-size: 12.5px !important;
-  outline: none !important;
-}
-
-.civix-chat-input:focus {
-  border-color: #2563EB !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
-}
-
-.civix-chat-send-btn {
-  background: #2563EB !important;
-  color: #FFFFFF !important;
-  border: none !important;
-  padding: 0 16px !important;
-  border-radius: 4px !important;
+  height: 42px !important;
+  padding: 0 18px !important;
+  border-radius: 9999px !important;
   font-size: 13px !important;
   font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  box-shadow: 0 10px 25px -3px rgba(0, 114, 206, 0.4), 0 4px 6px -2px rgba(0, 114, 206, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 1040 !important;
 }
 
-.civix-chat-send-btn:hover {
-  background: #1D4ED8 !important;
-  transform: translateY(-1px) !important;
-}
-
-/* Suppress stray floating back-to-top or accessibility buttons from SP theme */
-#btn-back-to-top,
-.sp-back-to-top,
-.sp-accessibility,
-[id*="back-to-top"],
-.btn-back-to-top {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+.civix-copilot-pill:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 16px 32px -4px rgba(0, 114, 206, 0.5) !important;
 }
 
 /* ==========================================================================

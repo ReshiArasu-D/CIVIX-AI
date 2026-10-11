@@ -227,9 +227,9 @@
           <div class="civix-kpi-card kpi-danger" ng-click="c.setTab('cases')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Overdue Cases</span>
-              <span class="civix-kpi-icon" style="background: var(--sn-bg-danger); color: var(--sn-color-danger);"><i class="fa fa-exclamation-circle"></i></span>
+              <span class="civix-kpi-icon"><i class="fa fa-exclamation-circle"></i></span>
             </div>
-            <div class="civix-kpi-value" style="color: var(--sn-color-danger);">{{c.data.kpis.overdueCases}}</div>
+            <div class="civix-kpi-value" style="color: #DC2626;">{{c.data.kpis.overdueCases}}</div>
             <div class="civix-kpi-sub text-danger"><i class="fa fa-warning"></i> Breached configured SLA target</div>
           </div>
 
@@ -254,9 +254,9 @@
           <div class="civix-kpi-card kpi-warning" ng-click="c.setTab('iot')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Unack Sensor Alerts</span>
-              <span class="civix-kpi-icon" style="background: var(--sn-bg-warning); color: var(--sn-color-warning);"><i class="fa fa-bell-o"></i></span>
+              <span class="civix-kpi-icon"><i class="fa fa-bell-o"></i></span>
             </div>
-            <div class="civix-kpi-value" style="color: var(--sn-color-warning);">{{c.data.kpis.unackAlerts}}</div>
+            <div class="civix-kpi-value" style="color: #D97706;">{{c.data.kpis.unackAlerts}}</div>
             <div class="civix-kpi-sub text-warning"><i class="fa fa-warning"></i> Requires officer review</div>
           </div>
 
@@ -378,7 +378,7 @@
               </thead>
               <tbody>
                 <tr ng-repeat="k in c.data.cases | limitTo:6">
-                  <td><strong>{{k.u_number}}</strong></td>
+                  <td><a class="civix-wo-link" ng-click="c.openCaseWorkspace(k)"><i class="fa fa-folder-open-o"></i> {{k.u_number}}</a></td>
                   <td>{{k.u_category}}</td>
                   <td>{{k.u_ward}} ({{k.u_location}})</td>
                   <td>
@@ -393,7 +393,7 @@
                   </td>
                   <td>{{k.u_created_date}}</td>
                   <td>
-                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(k)">Details</button>
+                    <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openCaseWorkspace(k)"><i class="fa fa-eye"></i> Workspace</button>
                   </td>
                 </tr>
               </tbody>

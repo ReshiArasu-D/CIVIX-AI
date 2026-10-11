@@ -1,6 +1,25 @@
 api.controller = function($scope, $http, $window, spUtil) {
   var c = this;
 
+  // Enforce 100% fluid edge-to-edge layout in ServiceNow Service Portal
+  if ($window && $window.setTimeout) {
+    $window.setTimeout(function() {
+      try {
+        var wrapper = document.querySelector('.civix-admin-wrapper');
+        if (wrapper) {
+          var p = wrapper.parentElement;
+          while (p && p.tagName !== 'BODY') {
+            p.style.width = '100%';
+            p.style.maxWidth = '100%';
+            p.style.padding = '0';
+            p.style.margin = '0';
+            p = p.parentElement;
+          }
+        }
+      } catch (e) {}
+    }, 60);
+  }
+
   // Active module navigation (default: Operations Dashboard)
   c.currentTab = 'dashboard';
   c.ticketSubTab = 'all';

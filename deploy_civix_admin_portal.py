@@ -41,13 +41,29 @@ def api_put(table: str, sys_id: str, data: dict):
     return resp.json().get("result", {})
 
 def ensure_sp_page(page_id: str, title: str):
+    page_css = """
+html, body, #page_root, .sp-page-root, .page, main, 
+.container, .container-fluid, .row, [class*="col-"],
+.repeated-row-container, .sp-row-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+body { background-color: #F8FAFC !important; }
+"""
     existing = api_get("sp_page", query=f"id={page_id}", limit=1)
     if existing:
-        print(f"  [PAGE EXISTS] {page_id} ({existing[0]['sys_id']})")
-        return existing[0]["sys_id"]
+        sys_id = existing[0]["sys_id"]
+        api_put("sp_page", sys_id, {"css": page_css})
+        print(f"  [PAGE EXISTS] {page_id} ({sys_id}) - Page CSS updated")
+        return sys_id
     payload = {
         "id": page_id,
         "title": title,
+        "css": page_css,
         "sys_scope": APP_SYS_ID
     }
     res = api_post("sp_page", payload)
@@ -80,8 +96,9 @@ def ensure_page_layout(page_id: str, page_sys_id: str, widget_sys_id: str):
     containers = api_get("sp_container", query=f"sp_page={page_sys_id}", limit=1)
     if containers:
         container_sys_id = containers[0]["sys_id"]
+        api_put("sp_container", container_sys_id, {"width": "container-fluid"})
     else:
-        c_res = api_post("sp_container", {"sp_page": page_sys_id, "order": 1, "sys_scope": APP_SYS_ID})
+        c_res = api_post("sp_container", {"sp_page": page_sys_id, "order": 1, "width": "container-fluid", "sys_scope": APP_SYS_ID})
         container_sys_id = c_res.get("sys_id")
     
     rows = api_get("sp_row", query=f"sp_container={container_sys_id}", limit=1)
