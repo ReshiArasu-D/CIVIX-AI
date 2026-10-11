@@ -14,6 +14,17 @@ api.controller = function($scope, $http, $window, spUtil) {
   c.showProfileModal = false;
   c.showConfigModal = false;
 
+  // Chat Assistant State
+  c.showChatAssistant = false;
+  c.chatInput = '';
+  c.chatMessages = [
+    {
+      sender: 'bot',
+      text: 'Hello Commissioner. I am your <strong>CIVIX Operations Copilot</strong>. How can I assist with municipal incidents, IoT telemetry, crew dispatches, or SLA metrics today?',
+      time: 'Just now'
+    }
+  ];
+
   // Search & Filter Models
   c.search = {
     ticket: '',
@@ -140,6 +151,69 @@ api.controller = function($scope, $http, $window, spUtil) {
       c.closeConfigModal();
       showToast('Municipal SLA & Threshold configurations saved and audited.', 'success');
     });
+  };
+
+  // --- CHAT ASSISTANT (CIVIX COPILOT) ---
+  c.toggleChatAssistant = function() {
+    c.showChatAssistant = !c.showChatAssistant;
+  };
+
+  c.sendQuickChat = function(query) {
+    c.chatInput = query;
+    c.sendChatMessage();
+  };
+
+  c.sendChatMessage = function() {
+    if (!c.chatInput || !c.chatInput.trim()) return;
+    var userText = c.chatInput.trim();
+    var nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    c.chatMessages.push({
+      sender: 'user',
+      text: userText,
+      time: nowStr
+    });
+    c.chatInput = '';
+
+    // Scroll chat feed
+    setTimeout(function() {
+      var feed = document.getElementById('civixChatFeed');
+      if (feed) feed.scrollTop = feed.scrollHeight;
+    }, 50);
+
+    // Intelligent Bot Response Parser
+    setTimeout(function() {
+      var botResponse = '';
+      var lower = userText.toLowerCase();
+
+      if (lower.indexOf('p1') !== -1 || lower.indexOf('critical') !== -1 || lower.indexOf('emergency') !== -1) {
+        botResponse = '<strong>Emergency P1 Incidents:</strong> Found <strong>1 Critical Incident</strong>:<br>&bull; <code>CIV-2026-00101</code>: Deep asphalt collapse on 1st Main Rd, Adyar (Ward 172). Target SLA: 4 Hours. Crew dispatch recommended immediately.';
+      } else if (lower.indexOf('flood') !== -1 || lower.indexOf('sensor') !== -1 || lower.indexOf('iot') !== -1) {
+        botResponse = '<strong>IoT Telemetry Status:</strong><br>&bull; <code>SEN-FL-179</code> (Thiruvanmiyur Sump): <strong>Water Level 850mm</strong> (Threshold: 600mm). Alert <code>ALT-2026-00041</code> is unacknowledged.<br>&bull; 4 other telemetry nodes (AQI, Waste Bins, Streetlights) are operating normally.';
+      } else if (lower.indexOf('crew') !== -1 || lower.indexOf('work order') !== -1 || lower.indexOf('recommend') !== -1) {
+        botResponse = '<strong>Crew Dispatch Recommendation:</strong><br>For <code>WO-2026-00105</code> (Adyar Roads):<br>&bull; <strong>Top Fit:</strong> Crew 1 - Rapid Pothole Patching Team (Fit Score: <strong>89/100</strong>, Lead: M. Kumar, Zone 13).<br>&bull; Skill Match: 95%, Proximity: High, Active Orders: 2.';
+      } else if (lower.indexOf('sla') !== -1 || lower.indexOf('compliance') !== -1) {
+        botResponse = '<strong>SLA Compliance Summary:</strong><br>&bull; Overall Corporation Compliance: <strong>' + (c.data.kpis ? c.data.kpis.slaCompliance : 80) + '%</strong>.<br>&bull; Total Incidents: ' + (c.data.kpis ? c.data.kpis.totalTickets : 5) + '<br>&bull; Overdue: 1 Case (<code>WO-2026-00105</code> breached 24-hr resolution window).';
+      } else if (lower.indexOf('audit') !== -1 || lower.indexOf('log') !== -1) {
+        botResponse = '<strong>Audit Trail Snapshot:</strong><br>Last recorded action: <em>Ticket Triage Approval</em> by Admin S. Ramanathan, IAS on <code>CIV-2026-00101</code>. All 6 administrative events are securely hashed and stored.';
+      } else if (lower.indexOf('zone') !== -1 || lower.indexOf('ward') !== -1) {
+        botResponse = '<strong>Administrative Division Status:</strong><br>Currently monitoring <strong>5 Corporation Zones</strong> (Adyar, T. Nagar, Royapuram, Anna Nagar, Kodambakkam) spanning 6 active administrative wards.';
+      } else {
+        botResponse = 'I can help you monitor live civic cases, query sensor breaches, check crew fitness rankings, and review SLA compliance. Try asking <em>"Show P1 critical cases"</em> or <em>"Check IoT flood sensor status"</em>.';
+      }
+
+      c.chatMessages.push({
+        sender: 'bot',
+        text: botResponse,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      $scope.$apply();
+
+      setTimeout(function() {
+        var feed = document.getElementById('civixChatFeed');
+        if (feed) feed.scrollTop = feed.scrollHeight;
+      }, 50);
+    }, 400);
   };
 
   // --- TICKET MANAGEMENT ACTIONS ---
@@ -294,7 +368,6 @@ api.controller = function($scope, $http, $window, spUtil) {
     c.server.get({ action: 'convert_alert_to_case', sys_id: alertItem.sys_id }).then(function(r) {
       alertItem.u_state = 'Dispatched';
       showToast(r.data.actionResult.message || 'Alert converted to Civic Case.', 'success');
-      // Refresh cases list
       c.server.refresh();
     });
   };
@@ -454,6 +527,7 @@ api.controller = function($scope, $http, $window, spUtil) {
       c.showConfigModal = false;
       c.showNotifDrawer = false;
       c.showUserMenu = false;
+      c.showChatAssistant = false;
       $scope.$apply();
     }
   });

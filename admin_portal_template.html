@@ -1,8 +1,8 @@
 <div class="civix-admin-wrapper">
 
-  <!-- ============================================================
-       GLOBAL TOP HEADER
-       ============================================================ -->
+  <!-- =========================================================================
+       1. GLOBAL TOP HEADER (SERVICENOW UI16 EXECUTIVE BLUE BANNER)
+       ========================================================================= -->
   <header class="civix-top-header">
     <div class="civix-header-left">
       <a href="javascript:void(0)" ng-click="c.setTab('dashboard')" class="civix-brand-logo">
@@ -16,10 +16,16 @@
     </div>
 
     <div class="civix-header-right">
+      <!-- Chat Assistant Shortcut in Header -->
+      <button class="civix-header-btn" ng-click="c.toggleChatAssistant()" title="Open CIVIX Operations Copilot">
+        <i class="fa fa-comments-o" style="font-size: 15px;"></i>
+        <span style="font-size: 11px; margin-left: 5px; font-weight: 600;">Copilot</span>
+      </button>
+
       <!-- Notification Bell -->
       <div style="position: relative;">
         <button class="civix-header-btn" ng-click="c.toggleNotifDrawer()" title="Operational Alerts & Notifications">
-          <i class="fa fa-bell" style="font-size: 16px;"></i>
+          <i class="fa fa-bell" style="font-size: 15px;"></i>
           <span class="civix-notif-badge" ng-if="c.data.unreadNotificationCount > 0">{{c.data.unreadNotificationCount}}</span>
         </button>
 
@@ -35,27 +41,27 @@
                 <span>{{n.u_title}}</span>
                 <span class="civix-badge civix-badge-info" style="font-size: 10px;">{{n.u_type}}</span>
               </div>
-              <div style="font-size: 12px; color: var(--civix-text);">{{n.u_message}}</div>
+              <div style="font-size: 11.5px; color: var(--sn-text-main);">{{n.u_message}}</div>
               <div class="civix-notif-meta">
                 <span>Target: <strong>{{n.u_record_ref}}</strong></span>
                 <span>{{n.u_timestamp}}</span>
               </div>
             </div>
-            <div ng-if="!c.data.notifications || c.data.notifications.length === 0" style="padding: 20px; text-align: center; color: var(--civix-secondary-text); font-size: 12px;">
+            <div ng-if="!c.data.notifications || c.data.notifications.length === 0" style="padding: 16px; text-align: center; color: var(--sn-text-muted); font-size: 11.5px;">
               No operational notifications recorded.
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Signed-in User Menu -->
+      <!-- Signed-in User Profile Dropdown -->
       <div class="civix-user-profile-menu" ng-click="c.toggleUserMenu()">
         <div class="civix-avatar">{{c.data.currentUser.avatar}}</div>
         <div class="civix-user-info">
           <span class="civix-user-name">{{c.data.currentUser.name}}</span>
           <span class="civix-user-role">{{c.data.currentUser.role}}</span>
         </div>
-        <i class="fa fa-chevron-down" style="font-size: 10px; color: rgba(255,255,255,0.7); margin-left: 4px;"></i>
+        <i class="fa fa-chevron-down" style="font-size: 10px; color: #CBD5E1; margin-left: 4px;"></i>
 
         <!-- User Profile Dropdown Menu -->
         <div class="civix-dropdown-menu" ng-if="c.showUserMenu" ng-click="$event.stopPropagation()">
@@ -79,20 +85,21 @@
   </header>
 
   <!-- Flash Toast Message -->
-  <div ng-if="c.toast.show" style="position: fixed; top: 76px; right: 24px; z-index: 3000; padding: 12px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; box-shadow: var(--civix-shadow-lg); transition: all 0.3s ease;"
+  <div ng-if="c.toast.show" style="position: fixed; top: 68px; right: 24px; z-index: 3000; padding: 10px 18px; border-radius: 4px; font-size: 12px; font-weight: 600; box-shadow: var(--sn-shadow-lg); transition: all 0.2s ease;"
        ng-class="{'bg-success text-white': c.toast.type === 'success', 'bg-warning text-dark': c.toast.type === 'warning', 'bg-danger text-white': c.toast.type === 'error', 'bg-info text-white': c.toast.type === 'info'}">
     <i class="fa fa-check-circle" ng-if="c.toast.type === 'success'"></i>
     <i class="fa fa-exclamation-triangle" ng-if="c.toast.type === 'warning' || c.toast.type === 'error'"></i>
-    <span style="margin-left: 8px;">{{c.toast.message}}</span>
+    <span style="margin-left: 6px;">{{c.toast.message}}</span>
   </div>
 
-  <!-- ============================================================
-       BODY LAYOUT (SIDEBAR + MAIN CONTENT)
-       ============================================================ -->
+  <!-- =========================================================================
+       2. BODY LAYOUT (SERVICENOW UI16 SIDEBAR + MAIN CONTENT CANVAS)
+       ========================================================================= -->
   <div class="civix-admin-body">
 
-    <!-- 11-MODULE SIDEBAR -->
+    <!-- 11-MODULE SIDEBAR (SERVICENOW NAVIGATOR SLATE STYLE) -->
     <aside class="civix-sidebar">
+      <div class="civix-sidebar-header">Application Navigator</div>
       <ul class="civix-sidebar-nav">
         <li>
           <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'dashboard'}" ng-click="c.setTab('dashboard')">
@@ -164,31 +171,31 @@
 
       <div class="civix-sidebar-footer">
         <div><strong>CIVIX AI Enterprise</strong></div>
-        <div>Greater Chennai Corporation</div>
-        <div style="font-size: 10px; margin-top: 4px; color: var(--civix-primary-teal);">Phase 2 Native Operational Mode</div>
+        <div>ServiceNow UI16 High Level</div>
+        <div style="font-size: 10px; margin-top: 4px; color: #38BDF8;">Blue & White Theme Active</div>
       </div>
     </aside>
 
     <!-- MAIN CONTENT AREA -->
     <main class="civix-main-content">
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 1: OPERATIONS DASHBOARD
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'dashboard'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Operations / Overview</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Operations Console &bull; Overview</div>
             <h1 class="civix-page-title">Operations Command Dashboard</h1>
-            <p class="civix-page-desc">Real-time municipal performance KPIs, active incident distribution and telemetry health across Corporation Zones.</p>
+            <p class="civix-page-desc">Municipal operational performance KPIs, active incident distribution and telemetry health across Corporation Zones.</p>
           </div>
           <div class="civix-header-actions">
-            <button class="civix-btn civix-btn-secondary" ng-click="c.server.refresh()"><i class="fa fa-refresh"></i> Refresh Records</button>
+            <button class="civix-btn civix-btn-secondary" ng-click="c.server.refresh()"><i class="fa fa-refresh"></i> Refresh</button>
             <button class="civix-btn civix-btn-primary" ng-click="c.setTab('tickets')"><i class="fa fa-plus"></i> Triage Queue</button>
           </div>
         </div>
 
-        <!-- 8 REAL KPI CARDS -->
+        <!-- 8 SERVICENOW UI16 KPI TILES (BLUE, RED, GREEN, AMBER) -->
         <div class="civix-kpi-grid">
           <div class="civix-kpi-card" ng-click="c.setTab('tickets')">
             <div class="civix-kpi-header">
@@ -199,7 +206,7 @@
             <div class="civix-kpi-sub text-success"><i class="fa fa-check"></i> Authoritative backend records</div>
           </div>
 
-          <div class="civix-kpi-card" ng-click="c.setTab('cases')">
+          <div class="civix-kpi-card kpi-warning" ng-click="c.setTab('cases')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Open Cases</span>
               <span class="civix-kpi-icon"><i class="fa fa-hourglass-half"></i></span>
@@ -208,7 +215,7 @@
             <div class="civix-kpi-sub text-warning"><i class="fa fa-clock-o"></i> Active investigation & triage</div>
           </div>
 
-          <div class="civix-kpi-card" ng-click="c.setTab('cases')">
+          <div class="civix-kpi-card kpi-success" ng-click="c.setTab('cases')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Resolved Cases</span>
               <span class="civix-kpi-icon"><i class="fa fa-check-square-o"></i></span>
@@ -217,12 +224,12 @@
             <div class="civix-kpi-sub text-success"><i class="fa fa-thumbs-up"></i> Field resolution confirmed</div>
           </div>
 
-          <div class="civix-kpi-card" ng-click="c.setTab('cases')">
+          <div class="civix-kpi-card kpi-danger" ng-click="c.setTab('cases')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Overdue Cases</span>
-              <span class="civix-kpi-icon" style="background: var(--civix-error-bg); color: var(--civix-error);"><i class="fa fa-exclamation-circle"></i></span>
+              <span class="civix-kpi-icon" style="background: var(--sn-bg-danger); color: var(--sn-color-danger);"><i class="fa fa-exclamation-circle"></i></span>
             </div>
-            <div class="civix-kpi-value" style="color: var(--civix-error);">{{c.data.kpis.overdueCases}}</div>
+            <div class="civix-kpi-value" style="color: var(--sn-color-danger);">{{c.data.kpis.overdueCases}}</div>
             <div class="civix-kpi-sub text-danger"><i class="fa fa-warning"></i> Breached configured SLA target</div>
           </div>
 
@@ -235,7 +242,7 @@
             <div class="civix-kpi-sub text-info"><i class="fa fa-truck"></i> Dispatched field crews</div>
           </div>
 
-          <div class="civix-kpi-card" ng-click="c.setTab('iot')">
+          <div class="civix-kpi-card kpi-success" ng-click="c.setTab('iot')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Active IoT Sensors</span>
               <span class="civix-kpi-icon"><i class="fa fa-wifi"></i></span>
@@ -244,16 +251,16 @@
             <div class="civix-kpi-sub text-success"><i class="fa fa-circle text-success"></i> Telemetry grid online</div>
           </div>
 
-          <div class="civix-kpi-card" ng-click="c.setTab('iot')">
+          <div class="civix-kpi-card kpi-warning" ng-click="c.setTab('iot')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">Unack Sensor Alerts</span>
-              <span class="civix-kpi-icon" style="background: var(--civix-warning-bg); color: var(--civix-warning);"><i class="fa fa-bell-o"></i></span>
+              <span class="civix-kpi-icon" style="background: var(--sn-bg-warning); color: var(--sn-color-warning);"><i class="fa fa-bell-o"></i></span>
             </div>
-            <div class="civix-kpi-value" style="color: var(--civix-warning);">{{c.data.kpis.unackAlerts}}</div>
+            <div class="civix-kpi-value" style="color: var(--sn-color-warning);">{{c.data.kpis.unackAlerts}}</div>
             <div class="civix-kpi-sub text-warning"><i class="fa fa-warning"></i> Requires officer review</div>
           </div>
 
-          <div class="civix-kpi-card" ng-click="c.setTab('analytics')">
+          <div class="civix-kpi-card kpi-success" ng-click="c.setTab('analytics')">
             <div class="civix-kpi-header">
               <span class="civix-kpi-label">SLA Compliance</span>
               <span class="civix-kpi-icon"><i class="fa fa-line-chart"></i></span>
@@ -264,48 +271,48 @@
         </div>
 
         <!-- OPERATIONAL VISUALIZATIONS -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
-          <!-- Categories & Zones Distribution Panel -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <!-- Category Distribution Panel -->
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-pie-chart text-teal"></i> Civic Incidents by Service Category</h3>
+              <h3 class="civix-panel-title"><i class="fa fa-pie-chart text-primary"></i> Incidents by Service Category</h3>
               <span class="civix-badge civix-badge-info">Deterministic Aggregation</span>
             </div>
             <div class="civix-panel-body">
-              <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div ng-repeat="cat in c.data.categories | limitTo:5">
-                  <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px;">
                     <span>{{cat.u_category_name}}</span>
-                    <span>Active Cases: 1</span>
+                    <span style="color: var(--sn-primary-blue);">Active: 1</span>
                   </div>
-                  <div style="height: 8px; background: #EEF4F5; border-radius: 4px; overflow: hidden;">
-                    <div style="height: 100%; background: var(--civix-primary-teal); width: 25%; border-radius: 4px;"></div>
+                  <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                    <div style="height: 100%; background: var(--sn-primary-blue); width: 25%; border-radius: 3px;"></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- IoT Sensor Health Status -->
+          <!-- Telemetry Grid Health Status -->
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-signal"></i> Telemetry Grid Health</h3>
-              <span class="civix-badge civix-badge-success">Live SCADA</span>
+              <h3 class="civix-panel-title"><i class="fa fa-signal text-primary"></i> Telemetry Grid Health</h3>
+              <span class="civix-badge civix-badge-success">SCADA Live</span>
             </div>
-            <div class="civix-panel-body" style="display: flex; flex-direction: column; gap: 12px;">
-              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+            <div class="civix-panel-body" style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
                 <span>Flood Depth Sentinels</span>
                 <span class="civix-badge civix-badge-success">2 Active</span>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
                 <span>Air Quality Monitors (AQI)</span>
                 <span class="civix-badge civix-badge-success">1 Active</span>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
                 <span>Solid Waste Bin Sensors</span>
                 <span class="civix-badge civix-badge-success">1 Active</span>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #F8FAFC; border-radius: 3px; font-size: 12px; border: 1px solid var(--sn-border-light);">
                 <span>Smart Streetlight Photocell</span>
                 <span class="civix-badge civix-badge-success">1 Active</span>
               </div>
@@ -316,7 +323,7 @@
         <!-- RECENT TICKETS & CASES TABLE -->
         <div class="civix-panel">
           <div class="civix-panel-header">
-            <h3 class="civix-panel-title"><i class="fa fa-list"></i> Authoritative Civic Incident Queue</h3>
+            <h3 class="civix-panel-title"><i class="fa fa-list text-primary"></i> Authoritative Civic Incident Queue</h3>
             <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.setTab('cases')">View All Cases</button>
           </div>
           <div class="civix-table-wrapper">
@@ -358,18 +365,18 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 2: TICKET MANAGEMENT
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'tickets'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Ticket Management</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Ticket Management</div>
             <h1 class="civix-page-title">Citizen Ticket Intake & Triage</h1>
             <p class="civix-page-desc">Administrative intake of citizen complaints, review of uploaded evidence, acceptance into the case workflow, rejection or duplicate linking.</p>
           </div>
           <div class="civix-header-actions">
-            <button class="civix-btn civix-btn-primary" ng-click="c.setTab('cases')"><i class="fa fa-folder"></i> Transition to Case Management</button>
+            <button class="civix-btn civix-btn-primary" ng-click="c.setTab('cases')"><i class="fa fa-folder"></i> Transition to Cases</button>
           </div>
         </div>
 
@@ -419,7 +426,7 @@
                 <td><strong>{{t.u_number}}</strong></td>
                 <td>
                   <div>{{t.u_citizen_name}}</div>
-                  <div style="font-size: 11px; color: var(--civix-secondary-text);">{{t.u_citizen_phone}}</div>
+                  <div style="font-size: 11px; color: var(--sn-text-muted);">{{t.u_citizen_phone}}</div>
                 </td>
                 <td>{{t.u_category}}</td>
                 <td>{{t.u_ward}}</td>
@@ -435,7 +442,7 @@
                 </td>
                 <td>{{t.u_created_date}}</td>
                 <td>
-                  <div style="display: flex; gap: 6px;">
+                  <div style="display: flex; gap: 4px;">
                     <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(t)" title="Inspect Ticket Details"><i class="fa fa-eye"></i></button>
                     <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openAcceptModal(t)" ng-if="t.u_state === 'Submitted' || t.u_state === 'Under Review'" title="Accept Ticket"><i class="fa fa-check"></i> Accept</button>
                     <button class="civix-btn civix-btn-sm civix-btn-danger" ng-click="c.openRejectModal(t)" ng-if="t.u_state === 'Submitted' || t.u_state === 'Under Review'" title="Reject with Mandatory Reason"><i class="fa fa-times"></i> Reject</button>
@@ -448,18 +455,18 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 3: CASE MANAGEMENT
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'cases'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Case Management</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Case Management</div>
             <h1 class="civix-page-title">Authoritative Case Investigation & Resolution</h1>
             <p class="civix-page-desc">Municipal case workflow with deterministic explainable priority scoring, SLA tracking, and interlocked work orders.</p>
           </div>
           <div class="civix-header-actions">
-            <button class="civix-btn civix-btn-primary" ng-click="c.openPriorityCalculator()"><i class="fa fa-calculator"></i> Deterministic Priority Calculator</button>
+            <button class="civix-btn civix-btn-primary" ng-click="c.openPriorityCalculator()"><i class="fa fa-calculator"></i> Priority Calculator</button>
           </div>
         </div>
 
@@ -510,10 +517,10 @@
                 </td>
                 <td>
                   <span ng-if="cs.u_work_order_number" class="civix-badge civix-badge-neutral">{{cs.u_work_order_number}}</span>
-                  <span ng-if="!cs.u_work_order_number" style="color: var(--civix-secondary-text); font-size: 11px;">None</span>
+                  <span ng-if="!cs.u_work_order_number" style="color: var(--sn-text-muted); font-size: 11px;">None</span>
                 </td>
                 <td>
-                  <div style="display: flex; gap: 6px;">
+                  <div style="display: flex; gap: 4px;">
                     <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(cs)">Dossier</button>
                     <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openPriorityCalculator(cs)" title="Calculate Priority Score"><i class="fa fa-calculator"></i> Score</button>
                   </div>
@@ -524,13 +531,13 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 4: CITIZEN MANAGEMENT
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'citizens'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Citizen Management</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Citizen Management</div>
             <h1 class="civix-page-title">Citizen Directory & Dossier</h1>
             <p class="civix-page-desc">Municipal citizen records, registered complaints, preferred language communication and strict data privacy compliance.</p>
           </div>
@@ -570,7 +577,7 @@
                 <td><strong>{{cz.u_cases_count || 1}}</strong></td>
                 <td><span class="civix-badge civix-badge-success">{{cz.u_status}}</span></td>
                 <td>
-                  <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCitizenDossier(cz)"><i class="fa fa-address-card-o"></i> View Dossier</button>
+                  <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCitizenDossier(cz)"><i class="fa fa-address-card-o"></i> Dossier</button>
                 </td>
               </tr>
             </tbody>
@@ -578,19 +585,19 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 5: IOT MONITORING
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'iot'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / IoT Monitoring</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; IoT Monitoring</div>
             <h1 class="civix-page-title">Smart City Telemetry & Sensor Sentinels</h1>
             <p class="civix-page-desc">Deterministic threshold-based sensor alerts, real telemetry observation monitoring, and alert-to-case automated dispatch.</p>
           </div>
         </div>
 
-        <!-- SENSOR ALERTS PANEL -->
+        <!-- ACTIVE ALERTS PANEL -->
         <div class="civix-panel">
           <div class="civix-panel-header">
             <h3 class="civix-panel-title"><i class="fa fa-exclamation-triangle text-warning"></i> Active Telemetry Alerts ({{c.data.alerts.length}})</h3>
@@ -628,7 +635,7 @@
                     </span>
                   </td>
                   <td>
-                    <div style="display: flex; gap: 6px;">
+                    <div style="display: flex; gap: 4px;">
                       <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.acknowledgeAlert(al)" ng-if="al.u_state.indexOf('Unacknowledged')!==-1"><i class="fa fa-check"></i> Acknowledge</button>
                       <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.convertAlertToCase(al)" ng-if="al.u_state !== 'Dispatched'"><i class="fa fa-share"></i> Dispatch Case</button>
                     </div>
@@ -642,7 +649,7 @@
         <!-- SENSORS REGISTRY -->
         <div class="civix-panel">
           <div class="civix-panel-header">
-            <h3 class="civix-panel-title"><i class="fa fa-microchip"></i> Telemetry Sensor Registry ({{c.data.sensors.length}})</h3>
+            <h3 class="civix-panel-title"><i class="fa fa-microchip text-primary"></i> Telemetry Sensor Registry ({{c.data.sensors.length}})</h3>
           </div>
           <div class="civix-table-wrapper">
             <table class="civix-table">
@@ -675,13 +682,13 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 6: WORK ORDERS & CREWS
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'workorders'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Work Orders & Crews</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Work Orders & Crews</div>
             <h1 class="civix-page-title">Field Crew Dispatch & Verification</h1>
             <p class="civix-page-desc">Deterministic crew recommendation calculation, progress monitoring and officer sign-off verification on physical repair evidence.</p>
           </div>
@@ -690,7 +697,7 @@
         <!-- WORK ORDERS TABLE -->
         <div class="civix-panel">
           <div class="civix-panel-header">
-            <h3 class="civix-panel-title"><i class="fa fa-wrench"></i> Operational Work Orders ({{c.data.workOrders.length}})</h3>
+            <h3 class="civix-panel-title"><i class="fa fa-wrench text-primary"></i> Operational Work Orders ({{c.data.workOrders.length}})</h3>
           </div>
           <div class="civix-table-wrapper">
             <table class="civix-table">
@@ -724,7 +731,7 @@
                     </span>
                   </td>
                   <td>
-                    <div style="display: flex; gap: 6px;">
+                    <div style="display: flex; gap: 4px;">
                       <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openCrewRecommendationModal(wo)" title="Calculate Crew Fit"><i class="fa fa-users"></i> Recommend Crew</button>
                       <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openVerifyModal(wo)"><i class="fa fa-check-square-o"></i> Verify</button>
                     </div>
@@ -738,7 +745,7 @@
         <!-- FIELD CREWS REGISTRY -->
         <div class="civix-panel">
           <div class="civix-panel-header">
-            <h3 class="civix-panel-title"><i class="fa fa-users"></i> Registered Field Crews ({{c.data.crews.length}})</h3>
+            <h3 class="civix-panel-title"><i class="fa fa-users text-primary"></i> Registered Field Crews ({{c.data.crews.length}})</h3>
           </div>
           <div class="civix-table-wrapper">
             <table class="civix-table">
@@ -769,25 +776,25 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 7: ANALYTICS & REPORTS
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'analytics'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Analytics & Reports</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Analytics & Reports</div>
             <h1 class="civix-page-title">Municipal Operational Analytics</h1>
             <p class="civix-page-desc">Deterministic operational reports, SLA breach aggregations and exportable administrative audit statistics.</p>
           </div>
           <div class="civix-header-actions">
-            <button class="civix-btn civix-btn-primary" ng-click="c.exportReportCSV()"><i class="fa fa-download"></i> Export Analytics CSV</button>
+            <button class="civix-btn civix-btn-primary" ng-click="c.exportReportCSV()"><i class="fa fa-download"></i> Export CSV</button>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-bar-chart"></i> SLA Compliance by Severity</h3>
+              <h3 class="civix-panel-title"><i class="fa fa-bar-chart text-primary"></i> SLA Compliance by Severity</h3>
             </div>
             <div class="civix-panel-body">
               <table class="civix-table">
@@ -831,7 +838,7 @@
 
           <div class="civix-panel">
             <div class="civix-panel-header">
-              <h3 class="civix-panel-title"><i class="fa fa-building"></i> Zone Incident Load</h3>
+              <h3 class="civix-panel-title"><i class="fa fa-building text-primary"></i> Zone Incident Load</h3>
             </div>
             <div class="civix-panel-body">
               <table class="civix-table">
@@ -849,8 +856,8 @@
                     <td><strong>{{z.u_zone_code}}</strong></td>
                     <td>1 Active</td>
                     <td>
-                      <div style="height: 6px; background: #EEF4F5; border-radius: 3px; overflow: hidden; width: 80px;">
-                        <div style="height: 100%; background: var(--civix-primary-teal); width: 35%;"></div>
+                      <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden; width: 80px;">
+                        <div style="height: 100%; background: var(--sn-primary-blue); width: 35%;"></div>
                       </div>
                     </td>
                   </tr>
@@ -861,13 +868,13 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 8: ZONE MANAGEMENT
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'zones'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Zone Management</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Zone Management</div>
             <h1 class="civix-page-title">Municipal Corporation Zones</h1>
             <p class="civix-page-desc">Administrative boundaries, executive engineers and ward mappings across Greater Chennai Corporation.</p>
           </div>
@@ -908,13 +915,13 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 9: WARD MANAGEMENT
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'wards'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Ward Management</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Ward Management</div>
             <h1 class="civix-page-title">Wards Directory & Infrastructure Links</h1>
             <p class="civix-page-desc">Ward administrative officers, population coverage, and cross-linked civic assets.</p>
           </div>
@@ -950,13 +957,13 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 10: ASSETS & CATEGORIES
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'assets'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Assets & Categories</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Assets & Categories</div>
             <h1 class="civix-page-title">Civic Assets & Service Categories</h1>
             <p class="civix-page-desc">Physical infrastructure registry, service classifications, and approved issue types.</p>
           </div>
@@ -1049,13 +1056,13 @@
         </div>
       </section>
 
-      <!-- ============================================================
+      <!-- =====================================================================
            MODULE 11: AUDIT LOGS
-           ============================================================ -->
+           ===================================================================== -->
       <section ng-if="c.currentTab === 'audit'">
         <div class="civix-page-header">
           <div>
-            <div class="civix-breadcrumbs">CIVIX AI / Audit Logs</div>
+            <div class="civix-breadcrumbs">CIVIX AI &bull; Audit Logs</div>
             <h1 class="civix-page-title">Immutable Administrative Audit Trail</h1>
             <p class="civix-page-desc">Complete immutable record of all ticket triage decisions, case state transitions, IoT alert dispatches, and verification approvals.</p>
           </div>
@@ -1100,9 +1107,57 @@
     </main>
   </div>
 
-  <!-- ============================================================
-       MODALS & DIALOGS
-       ============================================================ -->
+  <!-- =========================================================================
+       3. FLOATING CHAT ASSISTANT WIDGET (CIVIX OPERATIONS COPILOT)
+       ========================================================================= -->
+  <!-- Launcher Pill -->
+  <div class="civix-chat-launcher" ng-click="c.toggleChatAssistant()" ng-show="!c.showChatAssistant" title="Click to chat with CIVIX Operations Copilot">
+    <div class="civix-chat-launcher-avatar"><i class="fa fa-bolt"></i></div>
+    <span class="civix-chat-launcher-text">Ask CIVIX Copilot</span>
+  </div>
+
+  <!-- Interactive Chat Window -->
+  <div class="civix-chat-window" ng-show="c.showChatAssistant" role="dialog" aria-label="CIVIX Operations Copilot">
+    <div class="civix-chat-header">
+      <div class="civix-chat-header-title">
+        <div class="civix-chat-launcher-avatar" style="width: 24px; height: 24px;"><i class="fa fa-bolt"></i></div>
+        <div>
+          <h5>CIVIX Copilot</h5>
+          <span>Operations Intelligence</span>
+        </div>
+      </div>
+      <div class="civix-chat-header-actions">
+        <button type="button" ng-click="c.toggleChatAssistant()" title="Minimize">&times;</button>
+      </div>
+    </div>
+
+    <!-- Quick Suggestions Bar -->
+    <div class="civix-chat-quick-bar">
+      <span class="civix-chat-pill" ng-click="c.sendQuickChat('Show P1 Critical Cases')">P1 Cases</span>
+      <span class="civix-chat-pill" ng-click="c.sendQuickChat('Check IoT Flood Sensor Status')">IoT Sump Telemetry</span>
+      <span class="civix-chat-pill" ng-click="c.sendQuickChat('Recommend Crew for WO-2026-00105')">Crew Recommendations</span>
+      <span class="civix-chat-pill" ng-click="c.sendQuickChat('SLA Compliance Report')">SLA Report</span>
+      <span class="civix-chat-pill" ng-click="c.sendQuickChat('Audit Log Summary')">Audit Log</span>
+    </div>
+
+    <!-- Messages Feed -->
+    <div class="civix-chat-feed" id="civixChatFeed">
+      <div class="civix-chat-msg" ng-repeat="msg in c.chatMessages" ng-class="msg.sender">
+        <div class="civix-chat-bubble" ng-bind-html="msg.text"></div>
+        <span class="civix-chat-time">{{msg.time}}</span>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="civix-chat-input-bar">
+      <input type="text" class="civix-chat-input" placeholder="Ask about cases, crews, sensors, SLA..." ng-model="c.chatInput" ng-keydown="$event.keyCode === 13 && c.sendChatMessage()">
+      <button type="button" class="civix-chat-send-btn" ng-click="c.sendChatMessage()"><i class="fa fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       4. MODALS & DIALOGS (ACCEPT, REJECT, DUPLICATE, DOSSIER, SCORING, ETC.)
+       ========================================================================= -->
 
   <!-- 1. Accept Ticket Modal -->
   <div class="civix-modal-backdrop" ng-if="c.showAcceptModal">
@@ -1119,7 +1174,7 @@
         </div>
         <div class="civix-form-group">
           <label>Citizen Report Summary</label>
-          <div style="padding: 10px; background: #F8FAFB; border: 1px solid var(--civix-border); border-radius: 6px; font-size: 13px;">
+          <div style="padding: 10px; background: #F8FAFC; border: 1px solid var(--sn-border); border-radius: 3px; font-size: 12px;">
             {{c.selectedTicket.u_short_description}}
           </div>
         </div>
@@ -1135,7 +1190,7 @@
   <div class="civix-modal-backdrop" ng-if="c.showRejectModal">
     <div class="civix-modal">
       <div class="civix-modal-header">
-        <h4 style="color: var(--civix-error);"><i class="fa fa-times-circle"></i> Reject Citizen Ticket</h4>
+        <h4 style="color: var(--sn-color-danger);"><i class="fa fa-times-circle"></i> Reject Citizen Ticket</h4>
         <button class="civix-modal-close" ng-click="c.showRejectModal = false">&times;</button>
       </div>
       <div class="civix-modal-body">
@@ -1156,7 +1211,7 @@
   <div class="civix-modal-backdrop" ng-if="c.showDuplicateModal">
     <div class="civix-modal">
       <div class="civix-modal-header">
-        <h4><i class="fa fa-link"></i> Link as Duplicate Incident</h4>
+        <h4><i class="fa fa-link text-primary"></i> Link as Duplicate Incident</h4>
         <button class="civix-modal-close" ng-click="c.showDuplicateModal = false">&times;</button>
       </div>
       <div class="civix-modal-body">
@@ -1184,18 +1239,18 @@
         <button class="civix-modal-close" ng-click="c.showCaseModal = false">&times;</button>
       </div>
       <div class="civix-modal-body">
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
           <div>
-            <h5 style="margin: 0 0 8px 0; font-size: 14px; color: var(--civix-deep-teal);">Incident Description</h5>
-            <div style="padding: 12px; background: #F8FAFB; border: 1px solid var(--civix-border); border-radius: 6px; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--sn-primary-navy);">Incident Description</h5>
+            <div style="padding: 10px; background: #F8FAFC; border: 1px solid var(--sn-border); border-radius: 3px; font-size: 12px; line-height: 1.5; margin-bottom: 14px;">
               {{c.selectedCase.u_description || c.selectedCase.u_short_description}}
             </div>
 
-            <h5 style="margin: 0 0 8px 0; font-size: 14px; color: var(--civix-deep-teal);">Internal Investigation Notes</h5>
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--sn-primary-navy);">Internal Investigation Notes</h5>
             <textarea class="civix-form-control" rows="3" ng-model="c.caseNotes" placeholder="Add confidential notes (staff only, not visible to citizens)..."></textarea>
           </div>
 
-          <div style="background: #FAFDFD; padding: 14px; border-radius: 6px; border: 1px solid var(--civix-border); font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="background: #F8FAFC; padding: 12px; border-radius: 3px; border: 1px solid var(--sn-border); font-size: 12px; display: flex; flex-direction: column; gap: 7px;">
             <div><strong>Citizen:</strong> {{c.selectedCase.u_citizen_name}}</div>
             <div><strong>Phone:</strong> {{c.selectedCase.u_citizen_phone}}</div>
             <div><strong>Location:</strong> {{c.selectedCase.u_location}}</div>
@@ -1206,9 +1261,9 @@
           </div>
         </div>
 
-        <div style="margin-top: 20px; border-top: 1px solid var(--civix-border); padding-top: 16px;">
-          <h5 style="margin: 0 0 10px 0; font-size: 13px; color: var(--civix-secondary-text);">Authorized Lifecycle State Transitions:</h5>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <div style="margin-top: 16px; border-top: 1px solid var(--sn-border); padding-top: 14px;">
+          <h5 style="margin: 0 0 8px 0; font-size: 12px; color: var(--sn-text-muted);">Authorized Lifecycle State Transitions:</h5>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
             <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Under Review')">Set Under Review</button>
             <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Assigned')">Set Assigned</button>
             <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('In Progress')">Set In Progress</button>
@@ -1228,19 +1283,19 @@
   <div class="civix-modal-backdrop" ng-if="c.showPriorityCalcModal">
     <div class="civix-modal civix-modal-lg">
       <div class="civix-modal-header">
-        <h4><i class="fa fa-calculator text-teal"></i> Deterministic Explainable Priority Engine</h4>
+        <h4><i class="fa fa-calculator text-primary"></i> Deterministic Explainable Priority Engine</h4>
         <button class="civix-modal-close" ng-click="c.showPriorityCalcModal = false">&times;</button>
       </div>
       <div class="civix-modal-body">
-        <div style="padding: 12px; background: #E1F5EA; border-radius: 6px; font-size: 13px; color: #0F5132; margin-bottom: 16px; border: 1px solid rgba(15, 81, 50, 0.2);">
+        <div style="padding: 10px; background: #EBF5FB; border-radius: 4px; font-size: 12px; color: #1D68A7; margin-bottom: 14px; border: 1px solid #BEE3F8;">
           <strong>Approved Deterministic Formula:</strong><br>
           <code>Priority Score = 30 &times; (Severity / 5) + 25 &times; People Factor + 20 &times; Urgency + 15 &times; Essential Service + 10 &times; Confidence</code>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
           <div class="civix-form-group">
             <label>Physical Severity (1 to 5): <strong>{{c.priorityCalc.severity}}</strong></label>
-            <input type="range" min="1" max="5" step="1" class="form-range" style="width: 100%;" ng-model="c.priorityCalc.severity" ng-change="c.calculatePriority()">
+            <input type="range" min="1" max="5" step="1" style="width: 100%;" ng-model="c.priorityCalc.severity" ng-change="c.calculatePriority()">
           </div>
 
           <div class="civix-form-group">
@@ -1265,24 +1320,24 @@
         </div>
 
         <!-- Result Box -->
-        <div style="margin-top: 16px; padding: 16px; background: #F8FAFB; border: 2px dashed var(--civix-primary-teal); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="margin-top: 14px; padding: 14px; background: #F8FAFC; border: 2px dashed var(--sn-primary-blue); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="font-size: 13px; color: var(--civix-secondary-text);">Calculated Deterministic Score</div>
-            <div style="font-size: 32px; font-weight: 800; color: var(--civix-deep-teal);">{{c.priorityCalc.calculatedScore}} / 100</div>
+            <div style="font-size: 11px; color: var(--sn-text-muted);">Calculated Deterministic Score</div>
+            <div style="font-size: 26px; font-weight: 800; color: var(--sn-primary-navy);">{{c.priorityCalc.calculatedScore}} / 100</div>
           </div>
           <div>
-            <div style="font-size: 13px; color: var(--civix-secondary-text);">Mapped Priority Tier</div>
-            <div style="font-size: 20px; font-weight: 700;">{{c.priorityCalc.calculatedPriority}}</div>
+            <div style="font-size: 11px; color: var(--sn-text-muted);">Mapped Priority Tier</div>
+            <div style="font-size: 18px; font-weight: 700;">{{c.priorityCalc.calculatedPriority}}</div>
           </div>
           <div>
-            <div style="font-size: 13px; color: var(--civix-secondary-text);">Target SLA Window</div>
-            <div style="font-size: 16px; font-weight: 600; color: var(--civix-primary-teal);">{{c.priorityCalc.targetSLA}}</div>
+            <div style="font-size: 11px; color: var(--sn-text-muted);">Target SLA Window</div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--sn-primary-blue);">{{c.priorityCalc.targetSLA}}</div>
           </div>
         </div>
       </div>
       <div class="civix-modal-footer">
         <button class="civix-btn civix-btn-secondary" ng-click="c.showPriorityCalcModal = false">Cancel</button>
-        <button class="civix-btn civix-btn-primary" ng-click="c.applyCalculatedPriority()"><i class="fa fa-check"></i> Apply Score to Case</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.applyCalculatedPriority()"><i class="fa fa-check"></i> Apply Score</button>
       </div>
     </div>
   </div>
@@ -1295,15 +1350,15 @@
         <button class="civix-modal-close" ng-click="c.showCitizenModal = false">&times;</button>
       </div>
       <div class="civix-modal-body">
-        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-          <div class="civix-avatar" style="width: 52px; height: 52px; font-size: 20px;">{{c.selectedCitizen.u_full_name.slice(0,2).toUpperCase()}}</div>
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+          <div class="civix-avatar" style="width: 48px; height: 48px; font-size: 18px;">{{c.selectedCitizen.u_full_name.slice(0,2).toUpperCase()}}</div>
           <div>
-            <h4 style="margin: 0; font-size: 16px;">{{c.selectedCitizen.u_full_name}}</h4>
-            <div style="font-size: 12px; color: var(--civix-secondary-text);">Citizen ID: {{c.selectedCitizen.u_citizen_id}} &bull; Status: {{c.selectedCitizen.u_status}}</div>
+            <h4 style="margin: 0; font-size: 15px;">{{c.selectedCitizen.u_full_name}}</h4>
+            <div style="font-size: 11px; color: var(--sn-text-muted);">Citizen ID: {{c.selectedCitizen.u_citizen_id}} &bull; Status: {{c.selectedCitizen.u_status}}</div>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
           <div><strong>Masked Phone:</strong> {{c.selectedCitizen.u_phone}}</div>
           <div><strong>Email:</strong> {{c.selectedCitizen.u_email}}</div>
           <div><strong>Ward:</strong> {{c.selectedCitizen.u_ward}}</div>
@@ -1312,7 +1367,7 @@
           <div><strong>Associated Cases:</strong> {{c.selectedCitizen.u_cases_count || 1}}</div>
         </div>
 
-        <div style="margin-top: 16px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 6px; font-size: 11px; color: #92400E;">
+        <div style="margin-top: 14px; padding: 8px 12px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 4px; font-size: 11px; color: #92400E;">
           <i class="fa fa-shield"></i> <strong>Citizen Privacy Guaranteed:</strong> Aadhaar numbers and private cryptographic hashes are not stored or collected per municipal data governance guidelines.
         </div>
       </div>
@@ -1326,11 +1381,11 @@
   <div class="civix-modal-backdrop" ng-if="c.showCrewFitModal">
     <div class="civix-modal civix-modal-lg">
       <div class="civix-modal-header">
-        <h4><i class="fa fa-users text-teal"></i> Deterministic Crew-Fit Recommendation</h4>
+        <h4><i class="fa fa-users text-primary"></i> Deterministic Crew-Fit Recommendation</h4>
         <button class="civix-modal-close" ng-click="c.showCrewFitModal = false">&times;</button>
       </div>
       <div class="civix-modal-body">
-        <div style="padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 12px; color: var(--civix-text); margin-bottom: 14px;">
+        <div style="padding: 9px; background: #F8FAFC; border-radius: 4px; font-size: 11.5px; color: var(--sn-text-main); margin-bottom: 12px; border: 1px solid var(--sn-border-light);">
           <strong>Recommendation Model:</strong> <code>Crew Fit = 35 &times; SkillMatch + 25 &times; Availability + 20 &times; Proximity + 20 &times; (1 - Workload)</code>
         </div>
         <div class="civix-table-wrapper">
@@ -1355,7 +1410,7 @@
                 <td><span class="civix-badge civix-badge-info">{{rec.skills}}</span></td>
                 <td>{{rec.zone}}</td>
                 <td>{{rec.active_jobs}} Active</td>
-                <td><span class="civix-badge civix-badge-success" style="font-size: 13px;">{{rec.fitScore}} / 100</span></td>
+                <td><span class="civix-badge civix-badge-success" style="font-size: 12px;">{{rec.fitScore}} / 100</span></td>
                 <td>
                   <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.assignCrewToWo(rec)">Assign Crew</button>
                 </td>
@@ -1438,15 +1493,15 @@
         <button class="civix-modal-close" ng-click="c.closeProfileModal()">&times;</button>
       </div>
       <div class="civix-modal-body">
-        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-          <div class="civix-avatar" style="width: 56px; height: 56px; font-size: 20px;">{{c.data.currentUser.avatar}}</div>
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+          <div class="civix-avatar" style="width: 50px; height: 50px; font-size: 18px;">{{c.data.currentUser.avatar}}</div>
           <div>
-            <h4 style="margin: 0; font-size: 16px;">{{c.data.currentUser.name}}</h4>
-            <div style="font-size: 12px; color: var(--civix-secondary-text);">{{c.data.currentUser.role}}</div>
-            <div style="font-size: 11px; color: var(--civix-primary-teal);">{{c.data.currentUser.zone}}</div>
+            <h4 style="margin: 0; font-size: 15px;">{{c.data.currentUser.name}}</h4>
+            <div style="font-size: 11.5px; color: var(--sn-text-muted);">{{c.data.currentUser.role}}</div>
+            <div style="font-size: 11px; color: var(--sn-primary-blue);">{{c.data.currentUser.zone}}</div>
           </div>
         </div>
-        <div style="font-size: 13px; line-height: 1.6;">
+        <div style="font-size: 12px; line-height: 1.6;">
           <div><strong>Jurisdiction:</strong> Greater Chennai Corporation (Central Command)</div>
           <div><strong>Role Classification:</strong> Municipal Operations Commissioner</div>
           <div><strong>Authentication:</strong> Native ServiceNow Scoped Application Session</div>
@@ -1462,13 +1517,13 @@
   <div class="civix-modal-backdrop" ng-if="c.showConfigModal">
     <div class="civix-modal civix-modal-lg">
       <div class="civix-modal-header">
-        <h4><i class="fa fa-sliders text-teal"></i> Municipal SLA & System Configuration</h4>
+        <h4><i class="fa fa-sliders text-primary"></i> Municipal SLA & System Configuration</h4>
         <button class="civix-modal-close" ng-click="c.closeConfigModal()">&times;</button>
       </div>
       <div class="civix-modal-body">
-        <p style="font-size: 13px; color: var(--civix-secondary-text);">Configurable SLA response windows, deterministic priority score thresholds and sensor alerts.</p>
+        <p style="font-size: 12px; color: var(--sn-text-muted);">Configurable SLA response windows, deterministic priority score thresholds and sensor alerts.</p>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
           <div class="civix-form-group" ng-repeat="cfg in c.data.configs">
             <label>{{cfg.u_description || cfg.u_key}}</label>
             <input type="text" class="civix-form-control" ng-model="cfg.u_value">
