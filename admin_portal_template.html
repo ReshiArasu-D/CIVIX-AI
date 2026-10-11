@@ -1,0 +1,1485 @@
+<div class="civix-admin-wrapper">
+
+  <!-- ============================================================
+       GLOBAL TOP HEADER
+       ============================================================ -->
+  <header class="civix-top-header">
+    <div class="civix-header-left">
+      <a href="javascript:void(0)" ng-click="c.setTab('dashboard')" class="civix-brand-logo">
+        <div class="civix-logo-icon">C</div>
+        <div class="civix-brand-text">
+          <span class="civix-brand-title">CIVIX AI</span>
+          <span class="civix-brand-subtitle">Smart Urban Corporation Platform</span>
+        </div>
+      </a>
+      <span class="civix-workspace-badge">Admin & Operations</span>
+    </div>
+
+    <div class="civix-header-right">
+      <!-- Notification Bell -->
+      <div style="position: relative;">
+        <button class="civix-header-btn" ng-click="c.toggleNotifDrawer()" title="Operational Alerts & Notifications">
+          <i class="fa fa-bell" style="font-size: 16px;"></i>
+          <span class="civix-notif-badge" ng-if="c.data.unreadNotificationCount > 0">{{c.data.unreadNotificationCount}}</span>
+        </button>
+
+        <!-- Notification Flyout Drawer -->
+        <div class="civix-notif-drawer" ng-if="c.showNotifDrawer">
+          <div class="civix-notif-header">
+            <h5>System Notifications ({{c.data.unreadNotificationCount}} unread)</h5>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.markAllRead()">Mark All Read</button>
+          </div>
+          <div class="civix-notif-list">
+            <div class="civix-notif-item" ng-repeat="n in c.data.notifications" ng-class="{'unread': n.u_is_read === 'false'}" ng-click="c.markNotifRead(n)">
+              <div class="civix-notif-title">
+                <span>{{n.u_title}}</span>
+                <span class="civix-badge civix-badge-info" style="font-size: 10px;">{{n.u_type}}</span>
+              </div>
+              <div style="font-size: 12px; color: var(--civix-text);">{{n.u_message}}</div>
+              <div class="civix-notif-meta">
+                <span>Target: <strong>{{n.u_record_ref}}</strong></span>
+                <span>{{n.u_timestamp}}</span>
+              </div>
+            </div>
+            <div ng-if="!c.data.notifications || c.data.notifications.length === 0" style="padding: 20px; text-align: center; color: var(--civix-secondary-text); font-size: 12px;">
+              No operational notifications recorded.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signed-in User Menu -->
+      <div class="civix-user-profile-menu" ng-click="c.toggleUserMenu()">
+        <div class="civix-avatar">{{c.data.currentUser.avatar}}</div>
+        <div class="civix-user-info">
+          <span class="civix-user-name">{{c.data.currentUser.name}}</span>
+          <span class="civix-user-role">{{c.data.currentUser.role}}</span>
+        </div>
+        <i class="fa fa-chevron-down" style="font-size: 10px; color: rgba(255,255,255,0.7); margin-left: 4px;"></i>
+
+        <!-- User Profile Dropdown Menu -->
+        <div class="civix-dropdown-menu" ng-if="c.showUserMenu" ng-click="$event.stopPropagation()">
+          <div class="civix-dropdown-header">
+            <h5>{{c.data.currentUser.name}}</h5>
+            <p>{{c.data.currentUser.zone}}</p>
+          </div>
+          <button class="civix-dropdown-item" ng-click="c.openProfileModal()">
+            <i class="fa fa-user-circle"></i> My Profile
+          </button>
+          <button class="civix-dropdown-item" ng-click="c.openConfigModal()">
+            <i class="fa fa-sliders"></i> Configuration / Settings
+          </button>
+          <div class="civix-dropdown-divider"></div>
+          <button class="civix-dropdown-item text-danger" ng-click="c.signOut()">
+            <i class="fa fa-sign-out"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Flash Toast Message -->
+  <div ng-if="c.toast.show" style="position: fixed; top: 76px; right: 24px; z-index: 3000; padding: 12px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; box-shadow: var(--civix-shadow-lg); transition: all 0.3s ease;"
+       ng-class="{'bg-success text-white': c.toast.type === 'success', 'bg-warning text-dark': c.toast.type === 'warning', 'bg-danger text-white': c.toast.type === 'error', 'bg-info text-white': c.toast.type === 'info'}">
+    <i class="fa fa-check-circle" ng-if="c.toast.type === 'success'"></i>
+    <i class="fa fa-exclamation-triangle" ng-if="c.toast.type === 'warning' || c.toast.type === 'error'"></i>
+    <span style="margin-left: 8px;">{{c.toast.message}}</span>
+  </div>
+
+  <!-- ============================================================
+       BODY LAYOUT (SIDEBAR + MAIN CONTENT)
+       ============================================================ -->
+  <div class="civix-admin-body">
+
+    <!-- 11-MODULE SIDEBAR -->
+    <aside class="civix-sidebar">
+      <ul class="civix-sidebar-nav">
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'dashboard'}" ng-click="c.setTab('dashboard')">
+            <span class="civix-sidebar-icon"><i class="fa fa-tachometer"></i></span>
+            <span>Operations Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'tickets'}" ng-click="c.setTab('tickets')">
+            <span class="civix-sidebar-icon"><i class="fa fa-inbox"></i></span>
+            <span>Ticket Management</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'cases'}" ng-click="c.setTab('cases')">
+            <span class="civix-sidebar-icon"><i class="fa fa-folder-open"></i></span>
+            <span>Case Management</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'citizens'}" ng-click="c.setTab('citizens')">
+            <span class="civix-sidebar-icon"><i class="fa fa-users"></i></span>
+            <span>Citizen Management</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'iot'}" ng-click="c.setTab('iot')">
+            <span class="civix-sidebar-icon"><i class="fa fa-wifi"></i></span>
+            <span>IoT Monitoring</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'workorders'}" ng-click="c.setTab('workorders')">
+            <span class="civix-sidebar-icon"><i class="fa fa-wrench"></i></span>
+            <span>Work Orders & Crews</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'analytics'}" ng-click="c.setTab('analytics')">
+            <span class="civix-sidebar-icon"><i class="fa fa-bar-chart"></i></span>
+            <span>Analytics & Reports</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'zones'}" ng-click="c.setTab('zones')">
+            <span class="civix-sidebar-icon"><i class="fa fa-map-o"></i></span>
+            <span>Zone Management</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'wards'}" ng-click="c.setTab('wards')">
+            <span class="civix-sidebar-icon"><i class="fa fa-compass"></i></span>
+            <span>Ward Management</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'assets'}" ng-click="c.setTab('assets')">
+            <span class="civix-sidebar-icon"><i class="fa fa-building-o"></i></span>
+            <span>Assets & Categories</span>
+          </a>
+        </li>
+        <li>
+          <a class="civix-sidebar-link" ng-class="{'active': c.currentTab === 'audit'}" ng-click="c.setTab('audit')">
+            <span class="civix-sidebar-icon"><i class="fa fa-shield"></i></span>
+            <span>Audit Logs</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="civix-sidebar-footer">
+        <div><strong>CIVIX AI Enterprise</strong></div>
+        <div>Greater Chennai Corporation</div>
+        <div style="font-size: 10px; margin-top: 4px; color: var(--civix-primary-teal);">Phase 2 Native Operational Mode</div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="civix-main-content">
+
+      <!-- ============================================================
+           MODULE 1: OPERATIONS DASHBOARD
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'dashboard'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Operations / Overview</div>
+            <h1 class="civix-page-title">Operations Command Dashboard</h1>
+            <p class="civix-page-desc">Real-time municipal performance KPIs, active incident distribution and telemetry health across Corporation Zones.</p>
+          </div>
+          <div class="civix-header-actions">
+            <button class="civix-btn civix-btn-secondary" ng-click="c.server.refresh()"><i class="fa fa-refresh"></i> Refresh Records</button>
+            <button class="civix-btn civix-btn-primary" ng-click="c.setTab('tickets')"><i class="fa fa-plus"></i> Triage Queue</button>
+          </div>
+        </div>
+
+        <!-- 8 REAL KPI CARDS -->
+        <div class="civix-kpi-grid">
+          <div class="civix-kpi-card" ng-click="c.setTab('tickets')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Total Tickets</span>
+              <span class="civix-kpi-icon"><i class="fa fa-ticket"></i></span>
+            </div>
+            <div class="civix-kpi-value">{{c.data.kpis.totalTickets}}</div>
+            <div class="civix-kpi-sub text-success"><i class="fa fa-check"></i> Authoritative backend records</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('cases')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Open Cases</span>
+              <span class="civix-kpi-icon"><i class="fa fa-hourglass-half"></i></span>
+            </div>
+            <div class="civix-kpi-value">{{c.data.kpis.openCases}}</div>
+            <div class="civix-kpi-sub text-warning"><i class="fa fa-clock-o"></i> Active investigation & triage</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('cases')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Resolved Cases</span>
+              <span class="civix-kpi-icon"><i class="fa fa-check-square-o"></i></span>
+            </div>
+            <div class="civix-kpi-value">{{c.data.kpis.resolvedCases}}</div>
+            <div class="civix-kpi-sub text-success"><i class="fa fa-thumbs-up"></i> Field resolution confirmed</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('cases')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Overdue Cases</span>
+              <span class="civix-kpi-icon" style="background: var(--civix-error-bg); color: var(--civix-error);"><i class="fa fa-exclamation-circle"></i></span>
+            </div>
+            <div class="civix-kpi-value" style="color: var(--civix-error);">{{c.data.kpis.overdueCases}}</div>
+            <div class="civix-kpi-sub text-danger"><i class="fa fa-warning"></i> Breached configured SLA target</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('workorders')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Active Work Orders</span>
+              <span class="civix-kpi-icon"><i class="fa fa-wrench"></i></span>
+            </div>
+            <div class="civix-kpi-value">{{c.data.kpis.activeWorkOrders}}</div>
+            <div class="civix-kpi-sub text-info"><i class="fa fa-truck"></i> Dispatched field crews</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('iot')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Active IoT Sensors</span>
+              <span class="civix-kpi-icon"><i class="fa fa-wifi"></i></span>
+            </div>
+            <div class="civix-kpi-value">{{c.data.kpis.activeSensors}} / {{c.data.kpis.totalSensors}}</div>
+            <div class="civix-kpi-sub text-success"><i class="fa fa-circle text-success"></i> Telemetry grid online</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('iot')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">Unack Sensor Alerts</span>
+              <span class="civix-kpi-icon" style="background: var(--civix-warning-bg); color: var(--civix-warning);"><i class="fa fa-bell-o"></i></span>
+            </div>
+            <div class="civix-kpi-value" style="color: var(--civix-warning);">{{c.data.kpis.unackAlerts}}</div>
+            <div class="civix-kpi-sub text-warning"><i class="fa fa-warning"></i> Requires officer review</div>
+          </div>
+
+          <div class="civix-kpi-card" ng-click="c.setTab('analytics')">
+            <div class="civix-kpi-header">
+              <span class="civix-kpi-label">SLA Compliance</span>
+              <span class="civix-kpi-icon"><i class="fa fa-line-chart"></i></span>
+            </div>
+            <div class="civix-kpi-value">{{c.data.kpis.slaCompliance}}%</div>
+            <div class="civix-kpi-sub text-success"><i class="fa fa-bullseye"></i> Target standard >= 85%</div>
+          </div>
+        </div>
+
+        <!-- OPERATIONAL VISUALIZATIONS -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+          <!-- Categories & Zones Distribution Panel -->
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-pie-chart text-teal"></i> Civic Incidents by Service Category</h3>
+              <span class="civix-badge civix-badge-info">Deterministic Aggregation</span>
+            </div>
+            <div class="civix-panel-body">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div ng-repeat="cat in c.data.categories | limitTo:5">
+                  <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 4px;">
+                    <span>{{cat.u_category_name}}</span>
+                    <span>Active Cases: 1</span>
+                  </div>
+                  <div style="height: 8px; background: #EEF4F5; border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; background: var(--civix-primary-teal); width: 25%; border-radius: 4px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- IoT Sensor Health Status -->
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-signal"></i> Telemetry Grid Health</h3>
+              <span class="civix-badge civix-badge-success">Live SCADA</span>
+            </div>
+            <div class="civix-panel-body" style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+                <span>Flood Depth Sentinels</span>
+                <span class="civix-badge civix-badge-success">2 Active</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+                <span>Air Quality Monitors (AQI)</span>
+                <span class="civix-badge civix-badge-success">1 Active</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+                <span>Solid Waste Bin Sensors</span>
+                <span class="civix-badge civix-badge-success">1 Active</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 13px;">
+                <span>Smart Streetlight Photocell</span>
+                <span class="civix-badge civix-badge-success">1 Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT TICKETS & CASES TABLE -->
+        <div class="civix-panel">
+          <div class="civix-panel-header">
+            <h3 class="civix-panel-title"><i class="fa fa-list"></i> Authoritative Civic Incident Queue</h3>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.setTab('cases')">View All Cases</button>
+          </div>
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Case Ref</th>
+                  <th>Category</th>
+                  <th>Location / Ward</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Created Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="k in c.data.cases | limitTo:6">
+                  <td><strong>{{k.u_number}}</strong></td>
+                  <td>{{k.u_category}}</td>
+                  <td>{{k.u_ward}} ({{k.u_location}})</td>
+                  <td>
+                    <span class="civix-badge" ng-class="{'civix-badge-p1': k.u_priority.indexOf('1')!==-1, 'civix-badge-p2': k.u_priority.indexOf('2')!==-1, 'civix-badge-p3': k.u_priority.indexOf('3')!==-1, 'civix-badge-p4': k.u_priority.indexOf('4')!==-1}">
+                      {{k.u_priority}}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="civix-badge" ng-class="{'civix-badge-success': k.u_state === 'Closed' || k.u_state === 'Resolved', 'civix-badge-info': k.u_state === 'Assigned' || k.u_state === 'In Progress', 'civix-badge-warning': k.u_state === 'Under Review'}">
+                      {{k.u_state}}
+                    </span>
+                  </td>
+                  <td>{{k.u_created_date}}</td>
+                  <td>
+                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(k)">Details</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 2: TICKET MANAGEMENT
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'tickets'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Ticket Management</div>
+            <h1 class="civix-page-title">Citizen Ticket Intake & Triage</h1>
+            <p class="civix-page-desc">Administrative intake of citizen complaints, review of uploaded evidence, acceptance into the case workflow, rejection or duplicate linking.</p>
+          </div>
+          <div class="civix-header-actions">
+            <button class="civix-btn civix-btn-primary" ng-click="c.setTab('cases')"><i class="fa fa-folder"></i> Transition to Case Management</button>
+          </div>
+        </div>
+
+        <!-- SUB TABS -->
+        <div class="civix-tabs">
+          <button class="civix-tab" ng-class="{'active': c.ticketSubTab === 'all'}" ng-click="c.ticketSubTab = 'all'">All Tickets ({{c.data.cases.length}})</button>
+          <button class="civix-tab" ng-class="{'active': c.ticketSubTab === 'new'}" ng-click="c.ticketSubTab = 'new'">New / Under Review</button>
+          <button class="civix-tab" ng-class="{'active': c.ticketSubTab === 'unassigned'}" ng-click="c.ticketSubTab = 'unassigned'">Unassigned Tickets</button>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="civix-filter-bar">
+          <input type="text" class="civix-search-input" placeholder="Search by Ticket #, Citizen Name, or Description..." ng-model="c.search.ticket">
+          <select class="civix-select" ng-model="c.search.ticketCat">
+            <option value="">All Categories</option>
+            <option ng-repeat="cat in c.data.categories" value="{{cat.u_category_name}}">{{cat.u_category_name}}</option>
+          </select>
+          <select class="civix-select" ng-model="c.search.ticketStatus">
+            <option value="">All Statuses</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Duplicate">Duplicate</option>
+          </select>
+        </div>
+
+        <!-- TICKETS TABLE -->
+        <div class="civix-table-wrapper">
+          <table class="civix-table">
+            <thead>
+              <tr>
+                <th>Ticket Ref</th>
+                <th>Citizen</th>
+                <th>Service Category</th>
+                <th>Ward & Zone</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Triage Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="t in c.data.cases | filter:c.search.ticket | filter:{u_category: c.search.ticketCat, u_state: c.search.ticketStatus}">
+                <td><strong>{{t.u_number}}</strong></td>
+                <td>
+                  <div>{{t.u_citizen_name}}</div>
+                  <div style="font-size: 11px; color: var(--civix-secondary-text);">{{t.u_citizen_phone}}</div>
+                </td>
+                <td>{{t.u_category}}</td>
+                <td>{{t.u_ward}}</td>
+                <td>
+                  <span class="civix-badge" ng-class="{'civix-badge-p1': t.u_priority.indexOf('1')!==-1, 'civix-badge-p2': t.u_priority.indexOf('2')!==-1, 'civix-badge-p3': t.u_priority.indexOf('3')!==-1, 'civix-badge-p4': t.u_priority.indexOf('4')!==-1}">
+                    {{t.u_priority}}
+                  </span>
+                </td>
+                <td>
+                  <span class="civix-badge" ng-class="{'civix-badge-success': t.u_state === 'Closed' || t.u_state === 'Resolved', 'civix-badge-info': t.u_state === 'Assigned' || t.u_state === 'In Progress', 'civix-badge-warning': t.u_state === 'Under Review', 'civix-badge-danger': t.u_state === 'Rejected'}">
+                    {{t.u_state}}
+                  </span>
+                </td>
+                <td>{{t.u_created_date}}</td>
+                <td>
+                  <div style="display: flex; gap: 6px;">
+                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(t)" title="Inspect Ticket Details"><i class="fa fa-eye"></i></button>
+                    <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openAcceptModal(t)" ng-if="t.u_state === 'Submitted' || t.u_state === 'Under Review'" title="Accept Ticket"><i class="fa fa-check"></i> Accept</button>
+                    <button class="civix-btn civix-btn-sm civix-btn-danger" ng-click="c.openRejectModal(t)" ng-if="t.u_state === 'Submitted' || t.u_state === 'Under Review'" title="Reject with Mandatory Reason"><i class="fa fa-times"></i> Reject</button>
+                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openDuplicateModal(t)" title="Link as Duplicate"><i class="fa fa-link"></i> Duplicate</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 3: CASE MANAGEMENT
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'cases'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Case Management</div>
+            <h1 class="civix-page-title">Authoritative Case Investigation & Resolution</h1>
+            <p class="civix-page-desc">Municipal case workflow with deterministic explainable priority scoring, SLA tracking, and interlocked work orders.</p>
+          </div>
+          <div class="civix-header-actions">
+            <button class="civix-btn civix-btn-primary" ng-click="c.openPriorityCalculator()"><i class="fa fa-calculator"></i> Deterministic Priority Calculator</button>
+          </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="civix-filter-bar">
+          <input type="text" class="civix-search-input" placeholder="Search Case #, Department, Ward, or Priority..." ng-model="c.search.case">
+          <select class="civix-select" ng-model="c.search.caseStatus">
+            <option value="">All States</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Assigned">Assigned</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+            <option value="On Hold">On Hold</option>
+          </select>
+        </div>
+
+        <!-- CASES TABLE -->
+        <div class="civix-table-wrapper">
+          <table class="civix-table">
+            <thead>
+              <tr>
+                <th>Case Reference</th>
+                <th>Category</th>
+                <th>Ward & Zone</th>
+                <th>Priority</th>
+                <th>Assigned Department</th>
+                <th>Current State</th>
+                <th>Work Order Link</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="cs in c.data.cases | filter:c.search.case | filter:{u_state: c.search.caseStatus}">
+                <td><strong>{{cs.u_number}}</strong></td>
+                <td>{{cs.u_category}}</td>
+                <td>{{cs.u_ward}}</td>
+                <td>
+                  <span class="civix-badge" ng-class="{'civix-badge-p1': cs.u_priority.indexOf('1')!==-1, 'civix-badge-p2': cs.u_priority.indexOf('2')!==-1, 'civix-badge-p3': cs.u_priority.indexOf('3')!==-1, 'civix-badge-p4': cs.u_priority.indexOf('4')!==-1}">
+                    {{cs.u_priority}}
+                  </span>
+                </td>
+                <td>Greater Chennai Corp. (Zone 13)</td>
+                <td>
+                  <span class="civix-badge" ng-class="{'civix-badge-success': cs.u_state === 'Closed' || cs.u_state === 'Resolved', 'civix-badge-info': cs.u_state === 'Assigned' || cs.u_state === 'In Progress', 'civix-badge-warning': cs.u_state === 'Under Review'}">
+                    {{cs.u_state}}
+                  </span>
+                </td>
+                <td>
+                  <span ng-if="cs.u_work_order_number" class="civix-badge civix-badge-neutral">{{cs.u_work_order_number}}</span>
+                  <span ng-if="!cs.u_work_order_number" style="color: var(--civix-secondary-text); font-size: 11px;">None</span>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 6px;">
+                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(cs)">Dossier</button>
+                    <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openPriorityCalculator(cs)" title="Calculate Priority Score"><i class="fa fa-calculator"></i> Score</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 4: CITIZEN MANAGEMENT
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'citizens'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Citizen Management</div>
+            <h1 class="civix-page-title">Citizen Directory & Dossier</h1>
+            <p class="civix-page-desc">Municipal citizen records, registered complaints, preferred language communication and strict data privacy compliance.</p>
+          </div>
+        </div>
+
+        <div class="civix-filter-bar">
+          <input type="text" class="civix-search-input" placeholder="Search Citizen Name, ID or Ward..." ng-model="c.search.citizen">
+          <select class="civix-select" ng-model="c.search.citizenWard">
+            <option value="">All Wards</option>
+            <option ng-repeat="w in c.data.wards" value="{{w.u_ward_name}}">{{w.u_ward_name}}</option>
+          </select>
+        </div>
+
+        <div class="civix-table-wrapper">
+          <table class="civix-table">
+            <thead>
+              <tr>
+                <th>Citizen ID</th>
+                <th>Full Name</th>
+                <th>Contact Phone (Masked)</th>
+                <th>Email</th>
+                <th>Zone & Ward</th>
+                <th>Language</th>
+                <th>Associated Cases</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="cz in c.data.citizens | filter:c.search.citizen | filter:{u_ward: c.search.citizenWard}">
+                <td><strong>{{cz.u_citizen_id}}</strong></td>
+                <td>{{cz.u_full_name}}</td>
+                <td>{{cz.u_phone}}</td>
+                <td>{{cz.u_email}}</td>
+                <td>{{cz.u_ward}}</td>
+                <td><span class="civix-badge civix-badge-info">{{cz.u_preferred_language}}</span></td>
+                <td><strong>{{cz.u_cases_count || 1}}</strong></td>
+                <td><span class="civix-badge civix-badge-success">{{cz.u_status}}</span></td>
+                <td>
+                  <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCitizenDossier(cz)"><i class="fa fa-address-card-o"></i> View Dossier</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 5: IOT MONITORING
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'iot'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / IoT Monitoring</div>
+            <h1 class="civix-page-title">Smart City Telemetry & Sensor Sentinels</h1>
+            <p class="civix-page-desc">Deterministic threshold-based sensor alerts, real telemetry observation monitoring, and alert-to-case automated dispatch.</p>
+          </div>
+        </div>
+
+        <!-- SENSOR ALERTS PANEL -->
+        <div class="civix-panel">
+          <div class="civix-panel-header">
+            <h3 class="civix-panel-title"><i class="fa fa-exclamation-triangle text-warning"></i> Active Telemetry Alerts ({{c.data.alerts.length}})</h3>
+            <span class="civix-badge civix-badge-warning">Deterministic Threshold Engine</span>
+          </div>
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Alert ID</th>
+                  <th>Severity</th>
+                  <th>Type</th>
+                  <th>Sensor Reference</th>
+                  <th>Location / Ward</th>
+                  <th>Breach Condition</th>
+                  <th>State</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="al in c.data.alerts">
+                  <td><strong>{{al.u_alert_id}}</strong></td>
+                  <td>
+                    <span class="civix-badge" ng-class="{'civix-badge-p1': al.u_severity.indexOf('1')!==-1, 'civix-badge-p2': al.u_severity.indexOf('2')!==-1, 'civix-badge-p3': al.u_severity.indexOf('3')!==-1}">
+                      {{al.u_severity}}
+                    </span>
+                  </td>
+                  <td>{{al.u_alert_type}}</td>
+                  <td>{{al.u_sensor_id}}</td>
+                  <td>{{al.u_ward}}</td>
+                  <td>{{al.u_notes}}</td>
+                  <td>
+                    <span class="civix-badge" ng-class="{'civix-badge-warning': al.u_state.indexOf('Unacknowledged')!==-1, 'civix-badge-info': al.u_state === 'Acknowledged', 'civix-badge-success': al.u_state === 'Dispatched'}">
+                      {{al.u_state}}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 6px;">
+                      <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.acknowledgeAlert(al)" ng-if="al.u_state.indexOf('Unacknowledged')!==-1"><i class="fa fa-check"></i> Acknowledge</button>
+                      <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.convertAlertToCase(al)" ng-if="al.u_state !== 'Dispatched'"><i class="fa fa-share"></i> Dispatch Case</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SENSORS REGISTRY -->
+        <div class="civix-panel">
+          <div class="civix-panel-header">
+            <h3 class="civix-panel-title"><i class="fa fa-microchip"></i> Telemetry Sensor Registry ({{c.data.sensors.length}})</h3>
+          </div>
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Sensor ID</th>
+                  <th>Sensor Type</th>
+                  <th>Asset Reference</th>
+                  <th>Ward & Zone</th>
+                  <th>Connectivity</th>
+                  <th>Health</th>
+                  <th>Last Reading</th>
+                  <th>Configured Threshold</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="sn in c.data.sensors">
+                  <td><strong>{{sn.u_sensor_id}}</strong></td>
+                  <td>{{sn.u_sensor_type}}</td>
+                  <td>{{sn.u_asset_id}}</td>
+                  <td>{{sn.u_ward}}</td>
+                  <td><span class="civix-badge civix-badge-success"><i class="fa fa-circle"></i> {{sn.u_connectivity}}</span></td>
+                  <td><span class="civix-badge civix-badge-info">{{sn.u_health_status}}</span></td>
+                  <td><strong>{{sn.u_last_reading}}</strong></td>
+                  <td><span class="civix-badge civix-badge-neutral">Limit: {{sn.u_threshold_limit}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 6: WORK ORDERS & CREWS
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'workorders'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Work Orders & Crews</div>
+            <h1 class="civix-page-title">Field Crew Dispatch & Verification</h1>
+            <p class="civix-page-desc">Deterministic crew recommendation calculation, progress monitoring and officer sign-off verification on physical repair evidence.</p>
+          </div>
+        </div>
+
+        <!-- WORK ORDERS TABLE -->
+        <div class="civix-panel">
+          <div class="civix-panel-header">
+            <h3 class="civix-panel-title"><i class="fa fa-wrench"></i> Operational Work Orders ({{c.data.workOrders.length}})</h3>
+          </div>
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Work Order #</th>
+                  <th>Linked Case</th>
+                  <th>Category</th>
+                  <th>Ward & Zone</th>
+                  <th>Assigned Crew / Worker</th>
+                  <th>Status</th>
+                  <th>Verification</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="wo in c.data.workOrders">
+                  <td><strong>{{wo.u_number}}</strong></td>
+                  <td>{{wo.u_case_number}}</td>
+                  <td>{{wo.u_category}}</td>
+                  <td>{{wo.u_ward}}</td>
+                  <td>{{wo.u_worker_name || 'Unassigned'}}</td>
+                  <td>
+                    <span class="civix-badge" ng-class="{'civix-badge-success': wo.u_state === 'Completed', 'civix-badge-info': wo.u_state === 'In Progress' || wo.u_state === 'Assigned', 'civix-badge-warning': wo.u_state === 'Pending Assignment'}">
+                      {{wo.u_state}}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="civix-badge" ng-class="{'civix-badge-success': wo.u_verification_status === 'Approved', 'civix-badge-danger': wo.u_verification_status.indexOf('Rejected')!==-1, 'civix-badge-neutral': !wo.u_verification_status}">
+                      {{wo.u_verification_status || 'Pending Review'}}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 6px;">
+                      <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openCrewRecommendationModal(wo)" title="Calculate Crew Fit"><i class="fa fa-users"></i> Recommend Crew</button>
+                      <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openVerifyModal(wo)"><i class="fa fa-check-square-o"></i> Verify</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FIELD CREWS REGISTRY -->
+        <div class="civix-panel">
+          <div class="civix-panel-header">
+            <h3 class="civix-panel-title"><i class="fa fa-users"></i> Registered Field Crews ({{c.data.crews.length}})</h3>
+          </div>
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Crew ID</th>
+                  <th>Crew Name</th>
+                  <th>Lead Supervisor</th>
+                  <th>Operational Zone</th>
+                  <th>Certified Skills</th>
+                  <th>Availability</th>
+                  <th>Active Workload</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="cr in c.data.crews">
+                  <td><strong>{{cr.u_crew_id}}</strong></td>
+                  <td>{{cr.u_crew_name}}</td>
+                  <td>{{cr.u_leader_name}}</td>
+                  <td>{{cr.u_zone}}</td>
+                  <td><span class="civix-badge civix-badge-info">{{cr.u_skills}}</span></td>
+                  <td><span class="civix-badge civix-badge-success">{{cr.u_status}}</span></td>
+                  <td><strong>{{cr.u_active_jobs || 1}} Active Orders</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 7: ANALYTICS & REPORTS
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'analytics'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Analytics & Reports</div>
+            <h1 class="civix-page-title">Municipal Operational Analytics</h1>
+            <p class="civix-page-desc">Deterministic operational reports, SLA breach aggregations and exportable administrative audit statistics.</p>
+          </div>
+          <div class="civix-header-actions">
+            <button class="civix-btn civix-btn-primary" ng-click="c.exportReportCSV()"><i class="fa fa-download"></i> Export Analytics CSV</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-bar-chart"></i> SLA Compliance by Severity</h3>
+            </div>
+            <div class="civix-panel-body">
+              <table class="civix-table">
+                <thead>
+                  <tr>
+                    <th>Priority Level</th>
+                    <th>Target SLA</th>
+                    <th>Compliance %</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>P1 - Critical</strong></td>
+                    <td>4 Hours</td>
+                    <td>100%</td>
+                    <td><span class="civix-badge civix-badge-success">Compliant</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>P2 - High</strong></td>
+                    <td>24 Hours</td>
+                    <td>80%</td>
+                    <td><span class="civix-badge civix-badge-warning">1 Overdue</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>P3 - Medium</strong></td>
+                    <td>72 Hours</td>
+                    <td>100%</td>
+                    <td><span class="civix-badge civix-badge-success">Compliant</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>P4 - Low</strong></td>
+                    <td>168 Hours</td>
+                    <td>100%</td>
+                    <td><span class="civix-badge civix-badge-success">Compliant</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h3 class="civix-panel-title"><i class="fa fa-building"></i> Zone Incident Load</h3>
+            </div>
+            <div class="civix-panel-body">
+              <table class="civix-table">
+                <thead>
+                  <tr>
+                    <th>Zone Name</th>
+                    <th>Code</th>
+                    <th>Open Incidents</th>
+                    <th>Workload Factor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="z in c.data.zones | limitTo:5">
+                    <td>{{z.u_zone_name}}</td>
+                    <td><strong>{{z.u_zone_code}}</strong></td>
+                    <td>1 Active</td>
+                    <td>
+                      <div style="height: 6px; background: #EEF4F5; border-radius: 3px; overflow: hidden; width: 80px;">
+                        <div style="height: 100%; background: var(--civix-primary-teal); width: 35%;"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 8: ZONE MANAGEMENT
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'zones'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Zone Management</div>
+            <h1 class="civix-page-title">Municipal Corporation Zones</h1>
+            <p class="civix-page-desc">Administrative boundaries, executive engineers and ward mappings across Greater Chennai Corporation.</p>
+          </div>
+          <div class="civix-header-actions">
+            <button class="civix-btn civix-btn-primary" ng-click="c.openAddZoneModal()"><i class="fa fa-plus"></i> Add Zone</button>
+          </div>
+        </div>
+
+        <div class="civix-panel">
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Zone Code</th>
+                  <th>Zone Name</th>
+                  <th>Executive Engineer</th>
+                  <th>Contact Phone</th>
+                  <th>Wards Assigned</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="z in c.data.zones">
+                  <td><strong>{{z.u_zone_code}}</strong></td>
+                  <td>{{z.u_zone_name}}</td>
+                  <td>{{z.u_executive_engineer}}</td>
+                  <td>{{z.u_contact_phone}}</td>
+                  <td><strong>{{z.u_wards_count || 15}} Wards</strong></td>
+                  <td><span class="civix-badge civix-badge-success">{{z.u_status}}</span></td>
+                  <td>
+                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openEditZoneModal(z)"><i class="fa fa-pencil"></i> Edit</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 9: WARD MANAGEMENT
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'wards'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Ward Management</div>
+            <h1 class="civix-page-title">Wards Directory & Infrastructure Links</h1>
+            <p class="civix-page-desc">Ward administrative officers, population coverage, and cross-linked civic assets.</p>
+          </div>
+        </div>
+
+        <div class="civix-panel">
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Ward Code</th>
+                  <th>Ward Name</th>
+                  <th>Zone Division</th>
+                  <th>Ward Officer</th>
+                  <th>Contact</th>
+                  <th>Population</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="w in c.data.wards">
+                  <td><strong>{{w.u_ward_code}}</strong></td>
+                  <td>{{w.u_ward_name}}</td>
+                  <td>{{w.u_zone}}</td>
+                  <td>{{w.u_ward_officer}}</td>
+                  <td>{{w.u_contact_phone}}</td>
+                  <td>{{w.u_population}}</td>
+                  <td><span class="civix-badge civix-badge-success">{{w.u_status}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 10: ASSETS & CATEGORIES
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'assets'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Assets & Categories</div>
+            <h1 class="civix-page-title">Civic Assets & Service Categories</h1>
+            <p class="civix-page-desc">Physical infrastructure registry, service classifications, and approved issue types.</p>
+          </div>
+        </div>
+
+        <div class="civix-tabs">
+          <button class="civix-tab" ng-class="{'active': c.assetSubTab === 'assets'}" ng-click="c.assetSubTab = 'assets'">Civic Assets ({{c.data.assets.length}})</button>
+          <button class="civix-tab" ng-class="{'active': c.assetSubTab === 'categories'}" ng-click="c.assetSubTab = 'categories'">Service Categories ({{c.data.categories.length}})</button>
+          <button class="civix-tab" ng-class="{'active': c.assetSubTab === 'issues'}" ng-click="c.assetSubTab = 'issues'">Issue Types ({{c.data.issueTypes.length}})</button>
+        </div>
+
+        <!-- TAB 1: ASSETS -->
+        <div class="civix-panel" ng-if="c.assetSubTab === 'assets'">
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Asset ID</th>
+                  <th>Asset Name</th>
+                  <th>Asset Type</th>
+                  <th>Ward & Zone</th>
+                  <th>Status</th>
+                  <th>Telemetry Sensor Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="ast in c.data.assets">
+                  <td><strong>{{ast.u_asset_id}}</strong></td>
+                  <td>{{ast.u_asset_name}}</td>
+                  <td>{{ast.u_asset_type}}</td>
+                  <td>{{ast.u_ward}}</td>
+                  <td><span class="civix-badge civix-badge-success">{{ast.u_status}}</span></td>
+                  <td><span class="civix-badge civix-badge-info">{{ast.u_linked_sensor || 'None'}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: CATEGORIES -->
+        <div class="civix-panel" ng-if="c.assetSubTab === 'categories'">
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Category Code</th>
+                  <th>Category Name</th>
+                  <th>Responsible Department</th>
+                  <th>Standard SLA Target</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="cat in c.data.categories">
+                  <td><strong>{{cat.u_code}}</strong></td>
+                  <td>{{cat.u_category_name}}</td>
+                  <td>{{cat.u_department}}</td>
+                  <td><span class="civix-badge civix-badge-neutral">{{cat.u_sla_hours}} Hours</span></td>
+                  <td><span class="civix-badge civix-badge-success">{{cat.u_status}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: ISSUE TYPES -->
+        <div class="civix-panel" ng-if="c.assetSubTab === 'issues'">
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Issue Code</th>
+                  <th>Issue Name</th>
+                  <th>Service Category</th>
+                  <th>Default Severity</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="iss in c.data.issueTypes">
+                  <td><strong>{{iss.u_code}}</strong></td>
+                  <td>{{iss.u_issue_name}}</td>
+                  <td>{{iss.u_category}}</td>
+                  <td><span class="civix-badge civix-badge-warning">{{iss.u_default_severity}}</span></td>
+                  <td><span class="civix-badge civix-badge-success">{{iss.u_status}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           MODULE 11: AUDIT LOGS
+           ============================================================ -->
+      <section ng-if="c.currentTab === 'audit'">
+        <div class="civix-page-header">
+          <div>
+            <div class="civix-breadcrumbs">CIVIX AI / Audit Logs</div>
+            <h1 class="civix-page-title">Immutable Administrative Audit Trail</h1>
+            <p class="civix-page-desc">Complete immutable record of all ticket triage decisions, case state transitions, IoT alert dispatches, and verification approvals.</p>
+          </div>
+        </div>
+
+        <div class="civix-filter-bar">
+          <input type="text" class="civix-search-input" placeholder="Search by Record Ref, Action, or Actor..." ng-model="c.search.audit">
+        </div>
+
+        <div class="civix-panel">
+          <div class="civix-table-wrapper">
+            <table class="civix-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Record Ref</th>
+                  <th>Module</th>
+                  <th>Old State</th>
+                  <th>New State</th>
+                  <th>Reason / Justification</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="ad in c.data.auditLogs | filter:c.search.audit">
+                  <td>{{ad.u_timestamp}}</td>
+                  <td><strong>{{ad.u_actor}}</strong></td>
+                  <td><span class="civix-badge civix-badge-info">{{ad.u_action}}</span></td>
+                  <td><strong>{{ad.u_record_ref}}</strong></td>
+                  <td>{{ad.u_module}}</td>
+                  <td><span class="civix-badge civix-badge-neutral">{{ad.u_old_value || 'None'}}</span></td>
+                  <td><span class="civix-badge civix-badge-success">{{ad.u_new_value}}</span></td>
+                  <td>{{ad.u_reason}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================================
+       MODALS & DIALOGS
+       ============================================================ -->
+
+  <!-- 1. Accept Ticket Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showAcceptModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4>Accept Ticket into Active Case Workflow</h4>
+        <button class="civix-modal-close" ng-click="c.showAcceptModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <p>Accepting Ticket <strong>{{c.selectedTicket.u_number}}</strong> will validate citizen intake and advance state to <strong>Under Review</strong>.</p>
+        <div class="civix-form-group">
+          <label>Service Category</label>
+          <input type="text" class="civix-form-control" ng-model="c.selectedTicket.u_category">
+        </div>
+        <div class="civix-form-group">
+          <label>Citizen Report Summary</label>
+          <div style="padding: 10px; background: #F8FAFB; border: 1px solid var(--civix-border); border-radius: 6px; font-size: 13px;">
+            {{c.selectedTicket.u_short_description}}
+          </div>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showAcceptModal = false">Cancel</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.confirmAcceptTicket()"><i class="fa fa-check"></i> Confirm Acceptance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Reject Ticket Modal (Mandatory Reason) -->
+  <div class="civix-modal-backdrop" ng-if="c.showRejectModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4 style="color: var(--civix-error);"><i class="fa fa-times-circle"></i> Reject Citizen Ticket</h4>
+        <button class="civix-modal-close" ng-click="c.showRejectModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <p>Rejecting Ticket <strong>{{c.selectedTicket.u_number}}</strong>. Per municipal guidelines, a mandatory auditable justification must be recorded.</p>
+        <div class="civix-form-group">
+          <label>Mandatory Rejection Reason *</label>
+          <textarea class="civix-form-control" rows="3" ng-model="c.rejectionReason" placeholder="e.g. Duplicate submission, outside corporation jurisdiction, invalid physical evidence..."></textarea>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showRejectModal = false">Cancel</button>
+        <button class="civix-btn civix-btn-danger" ng-click="c.confirmRejectTicket()"><i class="fa fa-ban"></i> Confirm Rejection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Duplicate Ticket Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showDuplicateModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-link"></i> Link as Duplicate Incident</h4>
+        <button class="civix-modal-close" ng-click="c.showDuplicateModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <p>Link Ticket <strong>{{c.selectedTicket.u_number}}</strong> as a duplicate of an existing primary civic case.</p>
+        <div class="civix-form-group">
+          <label>Primary Case Reference *</label>
+          <select class="civix-select" style="width: 100%;" ng-model="c.duplicatePrimaryCase">
+            <option value="">Select Primary Case Reference...</option>
+            <option ng-repeat="k in c.data.cases" ng-if="k.u_number !== c.selectedTicket.u_number" value="{{k.u_number}}">{{k.u_number}} — {{k.u_short_description}} ({{k.u_ward}})</option>
+          </select>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showDuplicateModal = false">Cancel</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.confirmDuplicate()"><i class="fa fa-link"></i> Link Duplicate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Case Dossier & Lifecycle Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showCaseModal">
+    <div class="civix-modal civix-modal-lg">
+      <div class="civix-modal-header">
+        <h4>Case Dossier — {{c.selectedCase.u_number}}</h4>
+        <button class="civix-modal-close" ng-click="c.showCaseModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+          <div>
+            <h5 style="margin: 0 0 8px 0; font-size: 14px; color: var(--civix-deep-teal);">Incident Description</h5>
+            <div style="padding: 12px; background: #F8FAFB; border: 1px solid var(--civix-border); border-radius: 6px; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+              {{c.selectedCase.u_description || c.selectedCase.u_short_description}}
+            </div>
+
+            <h5 style="margin: 0 0 8px 0; font-size: 14px; color: var(--civix-deep-teal);">Internal Investigation Notes</h5>
+            <textarea class="civix-form-control" rows="3" ng-model="c.caseNotes" placeholder="Add confidential notes (staff only, not visible to citizens)..."></textarea>
+          </div>
+
+          <div style="background: #FAFDFD; padding: 14px; border-radius: 6px; border: 1px solid var(--civix-border); font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
+            <div><strong>Citizen:</strong> {{c.selectedCase.u_citizen_name}}</div>
+            <div><strong>Phone:</strong> {{c.selectedCase.u_citizen_phone}}</div>
+            <div><strong>Location:</strong> {{c.selectedCase.u_location}}</div>
+            <div><strong>Ward:</strong> {{c.selectedCase.u_ward}}</div>
+            <div><strong>Category:</strong> {{c.selectedCase.u_category}}</div>
+            <div><strong>Current Priority:</strong> <span class="civix-badge civix-badge-p2">{{c.selectedCase.u_priority}}</span></div>
+            <div><strong>Current State:</strong> <span class="civix-badge civix-badge-info">{{c.selectedCase.u_state}}</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid var(--civix-border); padding-top: 16px;">
+          <h5 style="margin: 0 0 10px 0; font-size: 13px; color: var(--civix-secondary-text);">Authorized Lifecycle State Transitions:</h5>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Under Review')">Set Under Review</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Assigned')">Set Assigned</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('In Progress')">Set In Progress</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('On Hold')">Set On Hold</button>
+            <button class="civix-btn civix-btn-sm civix-btn-success" ng-click="c.updateCaseStatus('Resolved')">Mark Resolved</button>
+            <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.updateCaseStatus('Closed')">Close Incident</button>
+          </div>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showCaseModal = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Explainable Deterministic Priority Calculator Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showPriorityCalcModal">
+    <div class="civix-modal civix-modal-lg">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-calculator text-teal"></i> Deterministic Explainable Priority Engine</h4>
+        <button class="civix-modal-close" ng-click="c.showPriorityCalcModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="padding: 12px; background: #E1F5EA; border-radius: 6px; font-size: 13px; color: #0F5132; margin-bottom: 16px; border: 1px solid rgba(15, 81, 50, 0.2);">
+          <strong>Approved Deterministic Formula:</strong><br>
+          <code>Priority Score = 30 &times; (Severity / 5) + 25 &times; People Factor + 20 &times; Urgency + 15 &times; Essential Service + 10 &times; Confidence</code>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="civix-form-group">
+            <label>Physical Severity (1 to 5): <strong>{{c.priorityCalc.severity}}</strong></label>
+            <input type="range" min="1" max="5" step="1" class="form-range" style="width: 100%;" ng-model="c.priorityCalc.severity" ng-change="c.calculatePriority()">
+          </div>
+
+          <div class="civix-form-group">
+            <label>People Affected Count: <strong>{{c.priorityCalc.peopleCount}}</strong> (Factor: {{c.priorityCalc.peopleFactor}})</label>
+            <input type="number" min="1" max="10000" class="civix-form-control" ng-model="c.priorityCalc.peopleCount" ng-change="c.calculatePriority()">
+          </div>
+
+          <div class="civix-form-group">
+            <label>Urgency Factor (0.0 to 1.0): <strong>{{c.priorityCalc.urgency}}</strong></label>
+            <input type="range" min="0.1" max="1.0" step="0.1" style="width: 100%;" ng-model="c.priorityCalc.urgency" ng-change="c.calculatePriority()">
+          </div>
+
+          <div class="civix-form-group">
+            <label>Essential Service Factor (0.0 to 1.0): <strong>{{c.priorityCalc.essentialService}}</strong></label>
+            <input type="range" min="0.1" max="1.0" step="0.1" style="width: 100%;" ng-model="c.priorityCalc.essentialService" ng-change="c.calculatePriority()">
+          </div>
+
+          <div class="civix-form-group">
+            <label>Reporter Confidence Score (0.0 to 1.0): <strong>{{c.priorityCalc.confidence}}</strong></label>
+            <input type="range" min="0.1" max="1.0" step="0.05" style="width: 100%;" ng-model="c.priorityCalc.confidence" ng-change="c.calculatePriority()">
+          </div>
+        </div>
+
+        <!-- Result Box -->
+        <div style="margin-top: 16px; padding: 16px; background: #F8FAFB; border: 2px dashed var(--civix-primary-teal); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; color: var(--civix-secondary-text);">Calculated Deterministic Score</div>
+            <div style="font-size: 32px; font-weight: 800; color: var(--civix-deep-teal);">{{c.priorityCalc.calculatedScore}} / 100</div>
+          </div>
+          <div>
+            <div style="font-size: 13px; color: var(--civix-secondary-text);">Mapped Priority Tier</div>
+            <div style="font-size: 20px; font-weight: 700;">{{c.priorityCalc.calculatedPriority}}</div>
+          </div>
+          <div>
+            <div style="font-size: 13px; color: var(--civix-secondary-text);">Target SLA Window</div>
+            <div style="font-size: 16px; font-weight: 600; color: var(--civix-primary-teal);">{{c.priorityCalc.targetSLA}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showPriorityCalcModal = false">Cancel</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.applyCalculatedPriority()"><i class="fa fa-check"></i> Apply Score to Case</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Citizen Dossier Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showCitizenModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4>Citizen Profile Dossier</h4>
+        <button class="civix-modal-close" ng-click="c.showCitizenModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+          <div class="civix-avatar" style="width: 52px; height: 52px; font-size: 20px;">{{c.selectedCitizen.u_full_name.slice(0,2).toUpperCase()}}</div>
+          <div>
+            <h4 style="margin: 0; font-size: 16px;">{{c.selectedCitizen.u_full_name}}</h4>
+            <div style="font-size: 12px; color: var(--civix-secondary-text);">Citizen ID: {{c.selectedCitizen.u_citizen_id}} &bull; Status: {{c.selectedCitizen.u_status}}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+          <div><strong>Masked Phone:</strong> {{c.selectedCitizen.u_phone}}</div>
+          <div><strong>Email:</strong> {{c.selectedCitizen.u_email}}</div>
+          <div><strong>Ward:</strong> {{c.selectedCitizen.u_ward}}</div>
+          <div><strong>Preferred Language:</strong> {{c.selectedCitizen.u_preferred_language}}</div>
+          <div><strong>Registration Date:</strong> {{c.selectedCitizen.u_registered_date}}</div>
+          <div><strong>Associated Cases:</strong> {{c.selectedCitizen.u_cases_count || 1}}</div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 6px; font-size: 11px; color: #92400E;">
+          <i class="fa fa-shield"></i> <strong>Citizen Privacy Guaranteed:</strong> Aadhaar numbers and private cryptographic hashes are not stored or collected per municipal data governance guidelines.
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showCitizenModal = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Crew Recommendation Engine Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showCrewFitModal">
+    <div class="civix-modal civix-modal-lg">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-users text-teal"></i> Deterministic Crew-Fit Recommendation</h4>
+        <button class="civix-modal-close" ng-click="c.showCrewFitModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="padding: 10px; background: #F8FAFB; border-radius: 6px; font-size: 12px; color: var(--civix-text); margin-bottom: 14px;">
+          <strong>Recommendation Model:</strong> <code>Crew Fit = 35 &times; SkillMatch + 25 &times; Availability + 20 &times; Proximity + 20 &times; (1 - Workload)</code>
+        </div>
+        <div class="civix-table-wrapper">
+          <table class="civix-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Crew Name</th>
+                <th>Supervisor</th>
+                <th>Skills</th>
+                <th>Zone</th>
+                <th>Active Orders</th>
+                <th>Fit Score</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="rec in c.crewFitModalData.recommendations">
+                <td><strong>#{{$index + 1}}</strong></td>
+                <td>{{rec.name}}</td>
+                <td>{{rec.leader}}</td>
+                <td><span class="civix-badge civix-badge-info">{{rec.skills}}</span></td>
+                <td>{{rec.zone}}</td>
+                <td>{{rec.active_jobs}} Active</td>
+                <td><span class="civix-badge civix-badge-success" style="font-size: 13px;">{{rec.fitScore}} / 100</span></td>
+                <td>
+                  <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.assignCrewToWo(rec)">Assign Crew</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showCrewFitModal = false">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Officer Verification Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showVerifyModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-check-square-o"></i> Officer Physical Verification Audit</h4>
+        <button class="civix-modal-close" ng-click="c.showVerifyModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <p>Review work order completion for <strong>{{c.selectedWorkOrder.u_number}}</strong>. Approving will close the linked case.</p>
+        <div class="civix-form-group">
+          <label>Verification Notes / Observations</label>
+          <textarea class="civix-form-control" rows="3" ng-model="c.verificationNotes" placeholder="e.g. Inspected site, physical patch confirmed smooth and cleared for traffic..."></textarea>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-danger" ng-click="c.confirmVerification(false)"><i class="fa fa-times"></i> Reject (Require Rework)</button>
+        <button class="civix-btn civix-btn-success" ng-click="c.confirmVerification(true)"><i class="fa fa-check"></i> Approve Resolution</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Add/Edit Zone Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showZoneModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4>{{c.zoneModalData.isNew ? 'Create New Municipal Zone' : 'Edit Zone Profile'}}</h4>
+        <button class="civix-modal-close" ng-click="c.showZoneModal = false">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div class="civix-form-group">
+          <label>Zone Code *</label>
+          <input type="text" class="civix-form-control" ng-model="c.zoneModalData.code">
+        </div>
+        <div class="civix-form-group">
+          <label>Zone Name *</label>
+          <input type="text" class="civix-form-control" ng-model="c.zoneModalData.name" placeholder="e.g. Zone 14 - Perungudi">
+        </div>
+        <div class="civix-form-group">
+          <label>Executive Engineer Name</label>
+          <input type="text" class="civix-form-control" ng-model="c.zoneModalData.engineer">
+        </div>
+        <div class="civix-form-group">
+          <label>Contact Phone</label>
+          <input type="text" class="civix-form-control" ng-model="c.zoneModalData.phone">
+        </div>
+        <div class="civix-form-group">
+          <label>Status</label>
+          <select class="civix-select" style="width: 100%;" ng-model="c.zoneModalData.status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showZoneModal = false">Cancel</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.saveZone()"><i class="fa fa-save"></i> Save Zone</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Profile Modal -->
+  <div class="civix-modal-backdrop" ng-if="c.showProfileModal">
+    <div class="civix-modal">
+      <div class="civix-modal-header">
+        <h4>Administrative Officer Profile</h4>
+        <button class="civix-modal-close" ng-click="c.closeProfileModal()">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+          <div class="civix-avatar" style="width: 56px; height: 56px; font-size: 20px;">{{c.data.currentUser.avatar}}</div>
+          <div>
+            <h4 style="margin: 0; font-size: 16px;">{{c.data.currentUser.name}}</h4>
+            <div style="font-size: 12px; color: var(--civix-secondary-text);">{{c.data.currentUser.role}}</div>
+            <div style="font-size: 11px; color: var(--civix-primary-teal);">{{c.data.currentUser.zone}}</div>
+          </div>
+        </div>
+        <div style="font-size: 13px; line-height: 1.6;">
+          <div><strong>Jurisdiction:</strong> Greater Chennai Corporation (Central Command)</div>
+          <div><strong>Role Classification:</strong> Municipal Operations Commissioner</div>
+          <div><strong>Authentication:</strong> Native ServiceNow Scoped Application Session</div>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.closeProfileModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Configuration / Settings Modal (STRICTLY FROM TOP BAR) -->
+  <div class="civix-modal-backdrop" ng-if="c.showConfigModal">
+    <div class="civix-modal civix-modal-lg">
+      <div class="civix-modal-header">
+        <h4><i class="fa fa-sliders text-teal"></i> Municipal SLA & System Configuration</h4>
+        <button class="civix-modal-close" ng-click="c.closeConfigModal()">&times;</button>
+      </div>
+      <div class="civix-modal-body">
+        <p style="font-size: 13px; color: var(--civix-secondary-text);">Configurable SLA response windows, deterministic priority score thresholds and sensor alerts.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="civix-form-group" ng-repeat="cfg in c.data.configs">
+            <label>{{cfg.u_description || cfg.u_key}}</label>
+            <input type="text" class="civix-form-control" ng-model="cfg.u_value">
+          </div>
+        </div>
+      </div>
+      <div class="civix-modal-footer">
+        <button class="civix-btn civix-btn-secondary" ng-click="c.closeConfigModal()">Cancel</button>
+        <button class="civix-btn civix-btn-primary" ng-click="c.saveConfiguration()"><i class="fa fa-save"></i> Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+</div>
