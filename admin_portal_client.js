@@ -324,11 +324,81 @@ api.controller = function($scope, $http, $window, spUtil) {
     });
   };
 
-  // --- CASE MANAGEMENT ACTIONS ---
-  c.openCaseDetails = function(kase) {
+  // --- CASE MANAGEMENT ACTIONS & WORKSPACE ---
+  c.caseWorkspaceTab = 'overview';
+  c.selectedCaseLinkedWo = null;
+  c.selectedCaseAiBrief = null;
+  c.isGeneratingCaseAi = false;
+
+  c.openCaseWorkspace = function(kase) {
+    if (!kase) return;
     c.selectedCase = kase;
     c.caseNotes = kase.u_resolution_notes || '';
+    c.caseWorkspaceTab = 'overview';
+    c.selectedCaseAiBrief = kase._aiBrief || null;
+
+    // Resolve linked work order
+    c.selectedCaseLinkedWo = null;
+    if (kase.u_work_order_number && c.data.workOrders) {
+      c.selectedCaseLinkedWo = c.data.workOrders.find(function(wo) {
+        return wo.u_number === kase.u_work_order_number;
+      });
+    }
+
     c.showCaseModal = true;
+  };
+
+  c.openCaseDetails = c.openCaseWorkspace;
+
+  c.openCaseByNumber = function(caseNum) {
+    if (!caseNum || !c.data.cases) return;
+    var found = c.data.cases.find(function(cs) {
+      return cs.u_number === caseNum;
+    });
+    if (found) {
+      c.openCaseWorkspace(found);
+    } else {
+      showToast('Case reference ' + caseNum + ' not found in active records.', 'warning');
+    }
+  };
+
+  c.generateCaseAiBrief = function(kase) {
+    if (!kase) kase = c.selectedCase;
+    if (!kase) return;
+    c.isGeneratingCaseAi = true;
+
+    $window.setTimeout(function() {
+      var cat = kase.u_category || 'General Civic Incident';
+      var prio = kase.u_priority || 'Standard Priority';
+      var ward = kase.u_ward || 'Ward Central';
+      var desc = kase.u_description || kase.u_short_description || 'Citizen reported public infrastructure issue.';
+      var loc = kase.u_location || 'Municipal Area';
+      var citizen = kase.u_citizen_name || 'Citizen';
+
+      var brief = {
+        generatedAt: new Date().toLocaleTimeString() + ', ' + new Date().toLocaleDateString(),
+        caseNumber: kase.u_number,
+        synopsis: 'Diagnostic investigation for Case ' + kase.u_number + ' (' + cat + ') reported at ' + loc + ' in ' + ward + '. Reported incident: ' + desc,
+        hazardLevel: (prio.indexOf('1') !== -1 || prio.indexOf('Critical') !== -1) ? 'Severe Public Safety Hazard (P1) — Immediate barrier isolation required' : 'Moderate Neighborhood Operational Hazard (' + prio + ')',
+        recommendedAction: 'Verify field work order assignment and coordinate with local ward supervisor. Dispatch emergency crew with standard safety barricades and specialized category tools.',
+        citizenDraft: 'Dear ' + citizen + ', your complaint ' + kase.u_number + ' regarding ' + cat + ' has been prioritized. Field crew has been dispatched to ' + loc + '. Expected resolution within standard SLA charter.'
+      };
+
+      kase._aiBrief = brief;
+      c.selectedCaseAiBrief = brief;
+      c.isGeneratingCaseAi = false;
+      $scope.$apply();
+      showToast('✨ Case Investigation Intelligence Brief compiled for ' + kase.u_number, 'success');
+    }, 400);
+  };
+
+  c.jumpToWorkOrderFromCase = function(woNumber) {
+    c.showCaseModal = false;
+    c.currentTab = 'workorders';
+    var foundWo = (c.data.workOrders || []).find(function(wo) { return wo.u_number === woNumber; });
+    if (foundWo) {
+      c.openWorkOrderDetails(foundWo);
+    }
   };
 
   c.updateCaseStatus = function(newState) {
@@ -338,11 +408,24 @@ api.controller = function($scope, $http, $window, spUtil) {
       sys_id: c.selectedCase.sys_id,
       newState: newState,
       notes: c.caseNotes,
-      reason: 'Administrative case review action'
+      reason: 'Administrative case investigation action'
     }).then(function(r) {
       c.selectedCase.u_state = newState;
-      c.showCaseModal = false;
       showToast('Case ' + c.selectedCase.u_number + ' updated to ' + newState, 'success');
+    });
+  };
+
+  c.saveCaseNotes = function() {
+    if (!c.selectedCase) return;
+    c.server.get({
+      action: 'update_case_status',
+      sys_id: c.selectedCase.sys_id,
+      newState: c.selectedCase.u_state,
+      notes: c.caseNotes,
+      reason: 'Updated investigation ledger notes'
+    }).then(function(r) {
+      c.selectedCase.u_resolution_notes = c.caseNotes;
+      showToast('Investigation notes saved for Case ' + c.selectedCase.u_number, 'success');
     });
   };
 

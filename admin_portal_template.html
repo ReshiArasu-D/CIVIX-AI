@@ -574,8 +574,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="cs in c.data.cases | filter:c.search.case | filter:{u_state: c.search.caseStatus} | filter:c.filterCasesByGeo">
-                <td><strong>{{cs.u_number}}</strong></td>
+              <tr ng-repeat="cs in c.data.cases | filter:c.search.case | filter:{u_state: c.search.caseStatus} | filter:c.filterCasesByGeo" class="civix-wo-row-clickable" ng-click="c.openCaseWorkspace(cs)">
+                <td>
+                  <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.openCaseWorkspace(cs); $event.stopPropagation();">
+                    <i class="fa fa-ticket text-primary"></i> <strong>{{cs.u_number}}</strong>
+                  </a>
+                </td>
                 <td>{{cs.u_category}}</td>
                 <td>
                   <strong>{{cs.u_ward}}</strong>
@@ -596,13 +600,15 @@
                   </span>
                 </td>
                 <td>
-                  <span ng-if="cs.u_work_order_number" class="civix-badge civix-badge-neutral">{{cs.u_work_order_number}}</span>
+                  <a href="javascript:void(0)" class="civix-wo-link" ng-if="cs.u_work_order_number" ng-click="c.jumpToWorkOrderFromCase(cs.u_work_order_number); $event.stopPropagation();">
+                    <span class="civix-badge civix-badge-neutral"><i class="fa fa-wrench"></i> {{cs.u_work_order_number}}</span>
+                  </a>
                   <span ng-if="!cs.u_work_order_number" style="color: var(--sn-text-muted); font-size: 11px;">None</span>
                 </td>
                 <td>
-                  <div style="display: flex; gap: 4px;">
-                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openCaseDetails(cs)">Dossier</button>
-                    <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openPriorityCalculator(cs)" title="Calculate Priority Score"><i class="fa fa-calculator"></i> Score</button>
+                  <div style="display: flex; gap: 4px;" ng-click="$event.stopPropagation();">
+                    <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.openCaseWorkspace(cs)" title="Enter Case Management Workspace"><i class="fa fa-folder-open-o"></i> Workspace</button>
+                    <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.openPriorityCalculator(cs)" title="Calculate Priority Score"><i class="fa fa-calculator"></i> Score</button>
                   </div>
                 </td>
               </tr>
@@ -830,7 +836,11 @@
                       <i class="fa fa-file-text-o text-primary"></i> <strong>{{wo.u_number}}</strong>
                     </a>
                   </td>
-                  <td>{{wo.u_case_number}}</td>
+                  <td>
+                    <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.openCaseByNumber(wo.u_case_number); $event.stopPropagation();" title="Open Case Management Workspace">
+                      <i class="fa fa-ticket text-primary"></i> <strong>{{wo.u_case_number}}</strong>
+                    </a>
+                  </td>
                   <td>{{wo.u_category}}</td>
                   <td>{{wo.u_ward}}</td>
                   <td><strong>{{wo.u_assigned_name || wo.u_worker_name || 'Unassigned'}}</strong></td>
@@ -1939,50 +1949,321 @@
     </div>
   </div>
 
-  <!-- 4. Case Dossier & Lifecycle Modal -->
+  <!-- 4. Authoritative Case Management Investigation & Resolution Workspace -->
   <div class="civix-modal-backdrop" ng-if="c.showCaseModal">
-    <div class="civix-modal civix-modal-lg">
-      <div class="civix-modal-header">
-        <h4>Case Dossier — {{c.selectedCase.u_number}}</h4>
-        <button class="civix-modal-close" ng-click="c.showCaseModal = false">&times;</button>
+    <div class="civix-modal civix-modal-lg" style="max-width: 980px; width: 94%; max-height: 92vh; display: flex; flex-direction: column;">
+      <!-- Workspace Top Bar -->
+      <div class="civix-modal-header" style="flex-shrink: 0; border-bottom: 2px solid #0072CE;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <h4 style="margin: 0;"><i class="fa fa-folder-open text-primary"></i> Case Workspace: {{c.selectedCase.u_number}}</h4>
+          <span class="civix-badge" ng-class="{'civix-badge-success': c.selectedCase.u_state === 'Closed' || c.selectedCase.u_state === 'Resolved', 'civix-badge-info': c.selectedCase.u_state === 'Assigned' || c.selectedCase.u_state === 'In Progress', 'civix-badge-warning': c.selectedCase.u_state === 'Under Review' || c.selectedCase.u_state === 'On Hold'}">
+            {{c.selectedCase.u_state}}
+          </span>
+          <span class="civix-badge" ng-class="{'civix-badge-p1': c.selectedCase.u_priority.indexOf('1')!==-1, 'civix-badge-p2': c.selectedCase.u_priority.indexOf('2')!==-1, 'civix-badge-p3': c.selectedCase.u_priority.indexOf('3')!==-1, 'civix-badge-p4': c.selectedCase.u_priority.indexOf('4')!==-1}">
+            {{c.selectedCase.u_priority}}
+          </span>
+          <span class="civix-badge civix-badge-secondary">{{c.selectedCase.u_category}}</span>
+          <span class="civix-badge civix-badge-zone2">{{c.selectedCase.u_op_zone || 'South Zone'}}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="civix-btn civix-btn-sm civix-btn-ai civix-btn-ai-glow" ng-click="c.generateCaseAiBrief(c.selectedCase)" ng-disabled="c.isGeneratingCaseAi">
+            <i class="fa fa-magic" ng-class="{'fa-spin': c.isGeneratingCaseAi}"></i>
+            {{c.isGeneratingCaseAi ? 'Synthesizing...' : (c.selectedCaseAiBrief ? 'Re-generate Brief' : '✨ GenAI Investigation Brief')}}
+          </button>
+          <button class="civix-modal-close" ng-click="c.showCaseModal = false">&times;</button>
+        </div>
       </div>
-      <div class="civix-modal-body">
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
-          <div>
-            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--sn-primary-navy);">Incident Description</h5>
-            <div style="padding: 10px; background: #F8FAFC; border: 1px solid var(--sn-border); border-radius: 3px; font-size: 12px; line-height: 1.5; margin-bottom: 14px;">
-              {{c.selectedCase.u_description || c.selectedCase.u_short_description}}
+
+      <!-- Workspace Body (Scrollable) -->
+      <div class="civix-modal-body" style="overflow-y: auto; flex: 1 1 auto; padding: 20px;">
+        <!-- 1. Lifecycle Progression Stepper Bar -->
+        <div class="civix-case-stepper">
+          <div class="civix-case-step completed">
+            <div class="civix-case-step-num"><i class="fa fa-check"></i></div>
+            <div class="civix-case-step-label">Intake & Triage</div>
+          </div>
+          <div class="civix-case-step" ng-class="{'completed': c.selectedCase.u_priority, 'active': c.selectedCase.u_state === 'Under Review'}">
+            <div class="civix-case-step-num">{{c.selectedCase.u_priority ? '✓' : '2'}}</div>
+            <div class="civix-case-step-label">Explainable Scoring</div>
+          </div>
+          <div class="civix-case-step" ng-class="{'completed': c.selectedCase.u_state === 'In Progress' || c.selectedCase.u_state === 'Resolved' || c.selectedCase.u_state === 'Closed', 'active': c.selectedCase.u_state === 'Assigned'}">
+            <div class="civix-case-step-num">{{(c.selectedCase.u_state === 'In Progress' || c.selectedCase.u_state === 'Resolved' || c.selectedCase.u_state === 'Closed') ? '✓' : '3'}}</div>
+            <div class="civix-case-step-label">Dept Assignment</div>
+          </div>
+          <div class="civix-case-step" ng-class="{'completed': c.selectedCase.u_state === 'Resolved' || c.selectedCase.u_state === 'Closed', 'active': c.selectedCase.u_state === 'In Progress' || c.selectedCase.u_state === 'On Hold'}">
+            <div class="civix-case-step-num">{{(c.selectedCase.u_state === 'Resolved' || c.selectedCase.u_state === 'Closed') ? '✓' : '4'}}</div>
+            <div class="civix-case-step-label">Field Execution</div>
+          </div>
+          <div class="civix-case-step" ng-class="{'completed': c.selectedCase.u_state === 'Closed', 'active': c.selectedCase.u_state === 'Resolved'}">
+            <div class="civix-case-step-num">{{c.selectedCase.u_state === 'Closed' ? '✓' : '5'}}</div>
+            <div class="civix-case-step-label">Resolution Verified</div>
+          </div>
+          <div class="civix-case-step" ng-class="{'completed': c.selectedCase.u_state === 'Closed', 'active': c.selectedCase.u_state === 'Closed'}">
+            <div class="civix-case-step-num">6</div>
+            <div class="civix-case-step-label">Incident Closed</div>
+          </div>
+        </div>
+
+        <!-- 2. Generative AI Investigation Brief Card -->
+        <div class="civix-ai-card" ng-if="c.selectedCaseAiBrief || c.isGeneratingCaseAi">
+          <div class="civix-ai-header">
+            <div class="civix-ai-header-title">
+              <i class="fa fa-magic text-primary" style="font-size: 16px;"></i>
+              <span>CIVIX AI &bull; Case Investigation & Operational Intelligence Brief</span>
+              <span class="civix-ai-badge"><i class="fa fa-bolt"></i> Case GenAI</span>
+            </div>
+            <span style="font-size: 11px; color: #64748B;">Generated: {{c.selectedCaseAiBrief.generatedAt}}</span>
+          </div>
+
+          <div class="civix-ai-shimmer" ng-if="c.isGeneratingCaseAi">
+            <i class="fa fa-spinner fa-spin fa-2x" style="color: #6366F1; margin-bottom: 8px; display: block;"></i>
+            <strong>CIVIX AI synthesizing case history, citizen complaint context, hazard liability & work order interlocks...</strong>
+          </div>
+
+          <div class="civix-ai-grid" ng-if="c.selectedCaseAiBrief && !c.isGeneratingCaseAi">
+            <div class="civix-ai-box civix-ai-box-full" style="border-left: 3px solid #4F46E5;">
+              <div class="civix-ai-box-title"><i class="fa fa-align-left"></i> Executive Incident Synopsis</div>
+              <div class="civix-ai-box-body"><strong>{{c.selectedCaseAiBrief.synopsis}}</strong></div>
+            </div>
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-exclamation-triangle text-warning"></i> Hazard & Public Risk Assessment</div>
+              <div class="civix-ai-box-body">{{c.selectedCaseAiBrief.hazardLevel}}</div>
+            </div>
+            <div class="civix-ai-box">
+              <div class="civix-ai-box-title"><i class="fa fa-wrench text-primary"></i> Recommended Engineering Action</div>
+              <div class="civix-ai-box-body">{{c.selectedCaseAiBrief.recommendedAction}}</div>
+            </div>
+            <div class="civix-ai-box civix-ai-box-full" style="background: #F0FDF4; border-color: #BBF7D0;">
+              <div class="civix-ai-box-title" style="color: #166534;"><i class="fa fa-commenting-o"></i> Citizen Communication Draft</div>
+              <div class="civix-ai-box-body" style="color: #15803D; font-style: italic;">"{{c.selectedCaseAiBrief.citizenDraft}}"</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Workspace Sub-Navigation Pills -->
+        <div class="civix-subnav-pills" style="margin-bottom: 16px;">
+          <button class="civix-subnav-pill" ng-class="{'active': c.caseWorkspaceTab === 'overview'}" ng-click="c.caseWorkspaceTab = 'overview'">
+            <i class="fa fa-file-text-o"></i> Overview & Incident Dossier
+          </button>
+          <button class="civix-subnav-pill" ng-class="{'active': c.caseWorkspaceTab === 'workorder'}" ng-click="c.caseWorkspaceTab = 'workorder'">
+            <i class="fa fa-wrench"></i> Field Work Order Interlock ({{c.selectedCase.u_work_order_number || 'None'}})
+          </button>
+          <button class="civix-subnav-pill" ng-class="{'active': c.caseWorkspaceTab === 'notes'}" ng-click="c.caseWorkspaceTab = 'notes'">
+            <i class="fa fa-pencil-square-o"></i> Investigation Ledger & Notes
+          </button>
+        </div>
+
+        <!-- Tab 1: Overview & Incident Dossier -->
+        <div ng-if="c.caseWorkspaceTab === 'overview'">
+          <div class="civix-wo-details-grid">
+            <!-- Card 1: Incident Description & Reported Facts -->
+            <div class="civix-wo-card">
+              <div class="civix-wo-card-title"><i class="fa fa-file-text-o text-primary"></i> Incident Reported Facts</div>
+              <div class="civix-wo-field-list">
+                <div style="grid-column: 1 / -1;">
+                  <div class="civix-wo-field-label">Issue Summary</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_short_description || c.selectedCase.u_description}}</div>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                  <div class="civix-wo-field-label">Citizen Complaint Details</div>
+                  <div style="padding: 8px 10px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; font-size: 12px; line-height: 1.5; color: #334155;">
+                    {{c.selectedCase.u_description || c.selectedCase.u_short_description}}
+                  </div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Category</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_category}}</div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Reported Timestamp</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_created_date || '2026-10-09 11:00:00'}}</div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Calculated Priority</div>
+                  <div class="civix-wo-field-value">
+                    <span class="civix-badge" ng-class="{'civix-badge-p1': c.selectedCase.u_priority.indexOf('1')!==-1, 'civix-badge-p2': c.selectedCase.u_priority.indexOf('2')!==-1, 'civix-badge-p3': c.selectedCase.u_priority.indexOf('3')!==-1}">
+                      {{c.selectedCase.u_priority}}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Assigned Department</div>
+                  <div class="civix-wo-field-value">Greater Chennai Corp. (Zone 13)</div>
+                </div>
+              </div>
             </div>
 
-            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--sn-primary-navy);">Internal Investigation Notes</h5>
-            <textarea class="civix-form-control" rows="3" ng-model="c.caseNotes" placeholder="Add confidential notes (staff only, not visible to citizens)..."></textarea>
-          </div>
+            <!-- Card 2: Geographic Context & Ward -->
+            <div class="civix-wo-card">
+              <div class="civix-wo-card-title"><i class="fa fa-map-marker text-danger"></i> Geographic Context & Ward</div>
+              <div class="civix-wo-field-list">
+                <div>
+                  <div class="civix-wo-field-label">Operational Zone</div>
+                  <div class="civix-wo-field-value"><span class="civix-badge civix-badge-zone2">{{c.selectedCase.u_op_zone || 'Zone 2 — South Zone'}}</span></div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">State / UT</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_state_name || 'Tamil Nadu'}}</div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">District & Local Body</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_district_name || 'Chennai'}} &bull; {{c.selectedCase.u_local_body_name || 'Greater Chennai Corporation'}}</div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Municipal Zone & Ward</div>
+                  <div class="civix-wo-field-value"><strong>{{c.selectedCase.u_zone}} &bull; {{c.selectedCase.u_ward}}</strong></div>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                  <div class="civix-wo-field-label">Physical Incident Location</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_location}}</div>
+                </div>
+              </div>
+            </div>
 
-          <div style="background: #F8FAFC; padding: 12px; border-radius: 3px; border: 1px solid var(--sn-border); font-size: 12px; display: flex; flex-direction: column; gap: 7px;">
-            <div><strong>Citizen:</strong> {{c.selectedCase.u_citizen_name}}</div>
-            <div><strong>Phone:</strong> {{c.selectedCase.u_citizen_phone}}</div>
-            <div><strong>Location:</strong> {{c.selectedCase.u_location}}</div>
-            <div><strong>Ward:</strong> {{c.selectedCase.u_ward}}</div>
-            <div><strong>Category:</strong> {{c.selectedCase.u_category}}</div>
-            <div><strong>Current Priority:</strong> <span class="civix-badge civix-badge-p2">{{c.selectedCase.u_priority}}</span></div>
-            <div><strong>Current State:</strong> <span class="civix-badge civix-badge-info">{{c.selectedCase.u_state}}</span></div>
+            <!-- Card 3: Citizen Reporter Profile -->
+            <div class="civix-wo-card">
+              <div class="civix-wo-card-title"><i class="fa fa-user text-primary"></i> Citizen Reporter Profile</div>
+              <div class="civix-wo-field-list">
+                <div>
+                  <div class="civix-wo-field-label">Citizen Name</div>
+                  <div class="civix-wo-field-value"><strong>{{c.selectedCase.u_citizen_name || 'Anonymous Citizen'}}</strong></div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Contact Phone</div>
+                  <div class="civix-wo-field-value">{{c.selectedCase.u_citizen_phone || 'Masked'}}</div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Verification Status</div>
+                  <div class="civix-wo-field-value"><span class="civix-badge civix-badge-success">OTP Verified Citizen</span></div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Communication Channel</div>
+                  <div class="civix-wo-field-value">CIVIX Citizen Portal (SMS & App)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Interlocked Work Order Snapshot -->
+            <div class="civix-wo-card">
+              <div class="civix-wo-card-title"><i class="fa fa-wrench text-primary"></i> Interlocked Work Order</div>
+              <div ng-if="c.selectedCase.u_work_order_number">
+                <div class="civix-wo-field-list">
+                  <div>
+                    <div class="civix-wo-field-label">Work Order Number</div>
+                    <div class="civix-wo-field-value">
+                      <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.jumpToWorkOrderFromCase(c.selectedCase.u_work_order_number)">
+                        <i class="fa fa-wrench text-primary"></i> <strong>{{c.selectedCase.u_work_order_number}}</strong>
+                      </a>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="civix-wo-field-label">Assigned Technician</div>
+                    <div class="civix-wo-field-value"><strong>{{c.selectedCase.u_worker_name || 'Karthik Selvam'}}</strong></div>
+                  </div>
+                  <div>
+                    <div class="civix-wo-field-label">Technician ID</div>
+                    <div class="civix-wo-field-value"><code>{{c.selectedCase.u_worker_id || 'EMP-9021'}}</code></div>
+                  </div>
+                  <div>
+                    <div class="civix-wo-field-label">Field Execution State</div>
+                    <div class="civix-wo-field-value"><span class="civix-badge civix-badge-info">{{c.selectedCase.u_state}}</span></div>
+                  </div>
+                </div>
+                <div style="margin-top: 12px;">
+                  <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.jumpToWorkOrderFromCase(c.selectedCase.u_work_order_number)">
+                    <i class="fa fa-external-link"></i> Open Full Work Order & Evidence
+                  </button>
+                </div>
+              </div>
+              <div ng-if="!c.selectedCase.u_work_order_number" style="padding: 12px 0; color: #64748B; font-size: 12px;">
+                <i class="fa fa-info-circle"></i> No field work order currently dispatched for this case.
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style="margin-top: 16px; border-top: 1px solid var(--sn-border); padding-top: 14px;">
-          <h5 style="margin: 0 0 8px 0; font-size: 12px; color: var(--sn-text-muted);">Authorized Lifecycle State Transitions:</h5>
+        <!-- Tab 2: Interlocked Work Order Detail View -->
+        <div ng-if="c.caseWorkspaceTab === 'workorder'">
+          <div ng-if="c.selectedCaseLinkedWo" class="civix-panel">
+            <div class="civix-panel-header">
+              <h4 class="civix-panel-title"><i class="fa fa-wrench text-primary"></i> Field Dispatch Order: {{c.selectedCaseLinkedWo.u_number}}</h4>
+              <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.jumpToWorkOrderFromCase(c.selectedCaseLinkedWo.u_number)">
+                <i class="fa fa-external-link"></i> Open Work Order Workspace
+              </button>
+            </div>
+            <div style="padding: 16px;">
+              <div class="civix-wo-field-list" style="margin-bottom: 14px;">
+                <div>
+                  <div class="civix-wo-field-label">Category</div>
+                  <div class="civix-wo-field-value">{{c.selectedCaseLinkedWo.u_category}}</div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Assigned Worker / Crew</div>
+                  <div class="civix-wo-field-value"><strong>{{c.selectedCaseLinkedWo.u_assigned_name || c.selectedCaseLinkedWo.u_worker_name || 'Unassigned'}}</strong></div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Work Order Status</div>
+                  <div class="civix-wo-field-value"><span class="civix-badge civix-badge-info">{{c.selectedCaseLinkedWo.u_state}}</span></div>
+                </div>
+                <div>
+                  <div class="civix-wo-field-label">Target SLA Window</div>
+                  <div class="civix-wo-field-value text-primary"><strong>{{c.selectedCaseLinkedWo.u_target_sla || 'Standard Municipal Charter'}}</strong></div>
+                </div>
+              </div>
+              <div ng-if="c.selectedCaseLinkedWo.u_hold_reason" style="margin-top: 10px; padding: 10px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 4px; color: #B91C1C; font-size: 12px;">
+                <strong><i class="fa fa-pause-circle"></i> Hold Reason:</strong> {{c.selectedCaseLinkedWo.u_hold_reason}}
+              </div>
+            </div>
+          </div>
+          <div ng-if="!c.selectedCaseLinkedWo" style="padding: 24px; text-align: center; color: #64748B;">
+            <i class="fa fa-info-circle fa-2x" style="margin-bottom: 8px; display: block;"></i>
+            No active work order found for reference {{c.selectedCase.u_work_order_number || 'N/A'}}.
+          </div>
+        </div>
+
+        <!-- Tab 3: Investigation Ledger & Notes -->
+        <div ng-if="c.caseWorkspaceTab === 'notes'">
+          <div class="civix-panel">
+            <div class="civix-panel-header">
+              <h4 class="civix-panel-title"><i class="fa fa-pencil-square-o text-primary"></i> Confidential Investigation Ledger</h4>
+            </div>
+            <div style="padding: 16px;">
+              <div class="civix-form-group">
+                <label>Resolution Notes & Field Observations (Auditable Staff Ledger)</label>
+                <textarea class="civix-form-control" rows="4" ng-model="c.caseNotes" placeholder="Enter findings, physical inspection observations, and contractor notes..."></textarea>
+              </div>
+              <button class="civix-btn civix-btn-primary" ng-click="c.saveCaseNotes()"><i class="fa fa-save"></i> Save Investigation Notes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Authorized Lifecycle State Transitions Bar -->
+        <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--sn-border-light);">
+          <div style="font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+            Authorized Lifecycle State Transitions:
+          </div>
           <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Under Review')">Set Under Review</button>
-            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Assigned')">Set Assigned</button>
-            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('In Progress')">Set In Progress</button>
-            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('On Hold')">Set On Hold</button>
-            <button class="civix-btn civix-btn-sm civix-btn-success" ng-click="c.updateCaseStatus('Resolved')">Mark Resolved</button>
-            <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.updateCaseStatus('Closed')">Close Incident</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Under Review')"><i class="fa fa-search"></i> Set Under Review</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('Assigned')"><i class="fa fa-user-plus"></i> Set Assigned</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('In Progress')"><i class="fa fa-cogs"></i> Set In Progress</button>
+            <button class="civix-btn civix-btn-sm civix-btn-secondary" ng-click="c.updateCaseStatus('On Hold')"><i class="fa fa-pause"></i> Place On Hold</button>
+            <button class="civix-btn civix-btn-sm civix-btn-success" ng-click="c.updateCaseStatus('Resolved')"><i class="fa fa-check"></i> Mark Resolved</button>
+            <button class="civix-btn civix-btn-sm civix-btn-primary" ng-click="c.updateCaseStatus('Closed')"><i class="fa fa-lock"></i> Close Incident</button>
           </div>
         </div>
       </div>
-      <div class="civix-modal-footer">
-        <button class="civix-btn civix-btn-secondary" ng-click="c.showCaseModal = false">Close</button>
+
+      <!-- Workspace Footer -->
+      <div class="civix-modal-footer" style="flex-shrink: 0; justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <button class="civix-btn civix-btn-primary" ng-click="c.openPriorityCalculator(c.selectedCase)">
+            <i class="fa fa-calculator"></i> Deterministic Priority Engine
+          </button>
+          <button class="civix-btn civix-btn-secondary" ng-if="c.selectedCase.u_work_order_number" ng-click="c.jumpToWorkOrderFromCase(c.selectedCase.u_work_order_number)">
+            <i class="fa fa-wrench"></i> Jump to Work Order {{c.selectedCase.u_work_order_number}}
+          </button>
+        </div>
+        <button class="civix-btn civix-btn-secondary" ng-click="c.showCaseModal = false">Close Workspace</button>
       </div>
     </div>
   </div>
@@ -2459,7 +2740,11 @@
             <div class="civix-wo-field-list">
               <div>
                 <div class="civix-wo-field-label">Linked Civic Case</div>
-                <div class="civix-wo-field-value text-primary"><strong>{{c.selectedWorkOrder.u_case_number}}</strong></div>
+                <div class="civix-wo-field-value">
+                  <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.showWorkOrderDetailsModal = false; c.openCaseByNumber(c.selectedWorkOrder.u_case_number)" title="Enter Case Management Workspace">
+                    <i class="fa fa-ticket text-primary"></i> <strong>{{c.selectedWorkOrder.u_case_number}}</strong>
+                  </a>
+                </div>
               </div>
               <div>
                 <div class="civix-wo-field-label">Category</div>
@@ -2756,7 +3041,11 @@
               </thead>
               <tbody>
                 <tr ng-repeat="cs in c.selectedWardLinkedCases">
-                  <td><strong>{{cs.u_number}}</strong></td>
+                  <td>
+                    <a href="javascript:void(0)" class="civix-wo-link" ng-click="c.showWardDetailsModal = false; c.openCaseWorkspace(cs)" title="Enter Case Management Workspace">
+                      <i class="fa fa-ticket text-primary"></i> <strong>{{cs.u_number}}</strong>
+                    </a>
+                  </td>
                   <td>{{cs.u_category}}</td>
                   <td>{{cs.u_short_description || cs.u_description}}</td>
                   <td><span class="civix-badge civix-badge-danger">{{cs.u_priority}}</span></td>
